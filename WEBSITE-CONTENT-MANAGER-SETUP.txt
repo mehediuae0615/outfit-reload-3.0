@@ -1,0 +1,18 @@
+OUTFIT RELOAD 3.0 — WEBSITE CONTENT MANAGER
+
+1. Replace the repository files with this ZIP and publish GitHub Pages.
+2. In Supabase Dashboard > SQL Editor, run CMS-DATABASE-UPGRADE.sql once.
+3. Open Admin Panel, sign in with the existing admin account, then open Website Content.
+4. Edit Contact, Shipping & Returns settings and page text fields. Tap SAVE ALL WEBSITE CONTENT.
+5. The existing Homepage Announcement editor and its `announcement` key are preserved.
+
+SECURITY NOTES
+- Uses the existing public publishable key only.
+- Uses the existing admin_users authorization check and existing store_settings RLS policies.
+- Does not request or contain a Service Role key or admin password.
+- Public pages only read store_settings; only authorized authenticated admins can write if the existing RLS policy is configured as in SETUP-STORE-SETTINGS.sql.
+
+IMPORTANT
+- Run the SQL migration before testing checkout with edited delivery charges. The COD RPC then reads the delivery amounts from store_settings while preserving product/variant stock checks and order insertion logic.
+- Existing order delivery fees remain unchanged; new orders use the configured fee.
+- Test with a low-value order before going live.

@@ -93,8 +93,10 @@
    <h3>How Can We Help?</h3>
    <p>For faster assistance, please include your order number when contacting us about an existing order. For product enquiries, mention the product name and the size or colour you are interested in.</p>
    <p><b>Brand:</b> Outfit Reload 3.0</p>
-   <p><b>Location:</b> Bangladesh</p>
-   <p><b>WhatsApp:</b> +880 1404-609229</p>
+   <p><b>Location:</b> <span data-cms-contact="address">Bangladesh</span></p>
+   <p><b>WhatsApp:</b> <span data-cms-contact="whatsapp">+880 1404-609229</span></p>
+   <p><b>Phone:</b> <span data-cms-contact="phone">+880 1404-609229</span></p>
+   <p><b>Email:</b> <span data-cms-contact="email">Not set</span></p>
   </div>
  </section>
 </main>
@@ -118,5 +120,6 @@ const menu=document.getElementById('menuToggle');
 const nav=document.getElementById('mainNav');
 if(menu&&nav)menu.addEventListener('click',()=>nav.classList.toggle('open'));
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="cms.js"></script>
 </body>
 </html>

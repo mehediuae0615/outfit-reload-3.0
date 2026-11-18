@@ -76,12 +76,12 @@
    <div class="shipping-grid">
     <div class="shipping-card">
      <span>INSIDE DHAKA</span>
-     <strong>৳80</strong>
+     <strong data-cms-setting="delivery_inside">৳80</strong>
      <p>Standard delivery charge per order.</p>
     </div>
     <div class="shipping-card">
      <span>OUTSIDE DHAKA</span>
-     <strong>৳130</strong>
+     <strong data-cms-setting="delivery_outside">৳130</strong>
      <p>Standard delivery charge per order.</p>
     </div>
    </div>
@@ -93,12 +93,12 @@
    <div class="shipping-grid">
     <div class="shipping-card">
      <span>INSIDE DHAKA</span>
-     <strong>1–2 Days</strong>
+     <strong data-cms-setting="delivery_time_inside">1–2 Days</strong>
      <p>Estimated delivery after order confirmation.</p>
     </div>
     <div class="shipping-card">
      <span>OUTSIDE DHAKA</span>
-     <strong>2–5 Days</strong>
+     <strong data-cms-setting="delivery_time_outside">2–5 Days</strong>
      <p>Estimated delivery after order confirmation.</p>
     </div>
    </div>
@@ -162,5 +162,6 @@ const menu=document.getElementById('menuToggle');
 const nav=document.getElementById('mainNav');
 if(menu&&nav)menu.addEventListener('click',()=>nav.classList.toggle('open'));
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="cms.js"></script>
 </body>
 </html>

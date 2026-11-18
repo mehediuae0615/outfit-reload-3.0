@@ -1,5 +1,9 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#3b2b22"><title>Admin | Outfit Reload 3.0</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#3b2b22"><title>Admin | Outfit Reload 3.0</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css">
+<style>
+.cms-global-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0}.cms-group{border:1px solid #e8e0d8;padding:16px;background:#fff}.cms-group summary{font-weight:700;cursor:pointer;padding:4px 0 12px}.cms-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.cms-fields label,.cms-field{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600}.cms-fields input,.cms-field textarea{width:100%;border:1px solid #ddd3c9;padding:11px;font:inherit;font-weight:400;background:#fff;color:#2b211b}.cms-page-editors{display:grid;gap:12px;margin:18px 0}.cms-page-group{border:1px solid #e8e0d8;padding:14px;background:#fff}.cms-page-group summary{font-weight:700;cursor:pointer}.cms-text-list{display:grid;gap:10px;margin-top:14px}.cms-field textarea{min-height:62px;resize:vertical;line-height:1.5}.cms-field small{color:#81756b;font-weight:400}.cms-empty{padding:14px;background:#f8f5f1;color:#75685e}@media(max-width:700px){.cms-global-grid,.cms-fields{grid-template-columns:1fr}}
+</style>
+</head>
 <body class="admin-body">
 <div id="adminLogin" class="login-screen"><form id="loginForm" class="login-card"><span class="brand-mark">OR</span><p class="eyebrow">OUTFIT RELOAD 3.0</p><h1>Owner sign in</h1><label>Email<input id="loginEmail" type="email" value="mh7112650@gmail.com" required></label><label>Password<input id="loginPassword" type="password" required autocomplete="current-password"></label><button class="btn btn-dark" type="submit">SIGN IN</button><p id="loginMessage" class="helper"></p></form></div>
 <div class="admin-shell" id="adminApp" hidden>
@@ -20,15 +24,30 @@
 
   <div class="content-manager-intro">
     <h3>Manage your entire website</h3>
-    <p>Edit your store information, homepage, About Us, Contact, Shipping, Returns, Privacy and Terms pages from one place.</p>
-    <p id="contentManagerStatus" class="helper">Content manager setup pending.</p>
+    <p>Edit page headings, paragraphs and lists, contact details, social links and delivery settings. Saved changes are loaded by the live website.</p>
+    <p id="contentManagerStatus" class="helper" role="status">Loading website content…</p>
   </div>
-
-  <div id="websiteContentEditor"></div>
-
-  <button class="btn btn-dark" id="saveWebsiteContent" type="button">
-    SAVE ALL WEBSITE CONTENT
-  </button>
+  <div class="cms-global-grid">
+    <details open class="cms-group"><summary>Contact information</summary><div class="cms-fields">
+      <label>WhatsApp number (international format)<input id="cmsWhatsapp" placeholder="8801XXXXXXXXX"></label>
+      <label>Phone number<input id="cmsPhone" placeholder="+880…"></label>
+      <label>Email address<input id="cmsEmail" type="email"></label>
+      <label>Address<input id="cmsAddress"></label>
+      <label>Facebook URL<input id="cmsFacebook" type="url"></label>
+      <label>Instagram URL<input id="cmsInstagram" type="url"></label>
+      <label>TikTok URL<input id="cmsTiktok" type="url"></label>
+      <label>Other social link URL<input id="cmsOtherSocial" type="url"></label>
+    </div></details>
+    <details open class="cms-group"><summary>Shipping & returns settings</summary><div class="cms-fields">
+      <label>Inside Dhaka delivery charge (৳)<input id="cmsFeeInside" type="number" min="0" step="1"></label>
+      <label>Outside Dhaka delivery charge (৳)<input id="cmsFeeOutside" type="number" min="0" step="1"></label>
+      <label>Inside Dhaka delivery time<input id="cmsTimeInside" placeholder="1–2 Days"></label>
+      <label>Outside Dhaka delivery time<input id="cmsTimeOutside" placeholder="2–5 Days"></label>
+      <label>Return window (days)<input id="cmsReturnDays" type="number" min="0" step="1"></label>
+    </div></details>
+  </div>
+  <div id="websiteContentEditor" class="cms-page-editors"></div>
+  <button class="btn btn-dark" id="saveWebsiteContent" type="button">SAVE ALL WEBSITE CONTENT</button>
 </section><section class="admin-panel" id="inventory"><div class="panel-heading"><div><p class="eyebrow">STOCK CONTROL</p><h2>Inventory snapshot</h2></div></div><p class="helper">Size-wise and colour-wise stock control will be enabled when the database is connected.</p></section>
 <section class="admin-panel" id="customers"><div class="panel-heading"><div><p class="eyebrow">CUSTOMER DIRECTORY</p><h2>Customers</h2></div></div><div class="empty-state"><span>♙</span><b>Customer accounts not enabled yet</b><p>Customer login and registration are planned for phase three.</p></div></section>
 <section class="admin-panel" id="settings"><div class="panel-heading"><div><p class="eyebrow">STORE CONFIGURATION</p><h2>Settings preview</h2></div></div><div class="settings-grid"><div><span>Currency</span><b>BDT (৳)</b></div><div><span>Shipping · Inside Dhaka</span><b>৳80</b></div><div><span>Shipping · Outside Dhaka</span><b>৳130</b></div><div><span>Admin email</span><b>mh7112650@gmail.com</b></div></div></section>

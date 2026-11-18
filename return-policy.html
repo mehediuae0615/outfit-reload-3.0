@@ -88,7 +88,7 @@
    <ul>
     <li>Items used, washed or altered after delivery.</li>
     <li>Items damaged due to improper handling by the customer.</li>
-    <li>Requests made after the 7-day return period.</li>
+    <li>Requests made after the <span data-cms-setting="return_days">7</span>-day return period.</li>
    </ul>
   </section>
 
@@ -113,7 +113,7 @@
    <h2>8. How to Request a Return</h2>
    <p>To submit a return or exchange request:</p>
    <ul>
-    <li>Contact us through WhatsApp within 7 days of receiving the product.</li>
+    <li>Contact us through WhatsApp within <span data-cms-setting="return_days">7</span> days of receiving the product.</li>
     <li>Provide your order number and contact phone number.</li>
     <li>Explain the reason for your request.</li>
     <li>Share clear photographs or videos if the item is damaged or incorrect.</li>
@@ -154,5 +154,6 @@ const menu=document.getElementById('menuToggle');
 const nav=document.getElementById('mainNav');
 if(menu&&nav)menu.addEventListener('click',()=>nav.classList.toggle('open'));
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="cms.js"></script>
 </body>
 </html>

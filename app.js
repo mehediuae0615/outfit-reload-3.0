@@ -40,7 +40,7 @@ function closeCheckout(){
 }
 function updateCheckoutTotals(){
  const subtotal=cart.reduce((n,x)=>n+Number(x.price)*Number(x.qty),0);
- const fee=$('deliveryArea').value==='inside_dhaka'?80:130;
+ const settings=window.OUTFIT_RELOAD_SETTINGS||{};const fee=$('deliveryArea').value==='inside_dhaka'?Number(settings.deliveryInside??80):Number(settings.deliveryOutside??130);
  $('checkoutSubtotal').textContent=money(subtotal);
  $('checkoutDelivery').textContent=money(fee);
  $('checkoutTotal').textContent=money(subtotal+fee);
@@ -87,6 +87,7 @@ $('checkoutForm').addEventListener('submit',async e=>{
 renderProducts();updateCart();renderBag();
 const nav=$('mainNav');$('menuToggle')?.addEventListener('click',()=>nav.classList.toggle('open'));
 $('newsletterForm')?.addEventListener('submit',e=>{e.preventDefault();alert('Thank you for subscribing!')});
+document.addEventListener('outfit:content-loaded',()=>{if($('deliveryArea'))updateCheckoutTotals()});
 (async()=>{const {data}=await supabaseClient.from('store_settings').select('value').eq('key','announcement').maybeSingle();if(data?.value)$('announcement').textContent=data.value;})();
 
 

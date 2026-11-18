@@ -28,3 +28,7 @@ The existing Supabase tables and RLS policies must be present. The admin user mu
 4. Test with a real order number and the same phone number used at checkout.
 
 The lookup is performed by a SECURITY DEFINER RPC that returns order information only after both the order number and phone number match. Do not expose service-role keys in the browser.
+
+
+## Website Content Manager
+See `WEBSITE-CONTENT-MANAGER-SETUP.txt`. Run `CMS-DATABASE-UPGRADE.sql` once in Supabase after replacing the website files.

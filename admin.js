@@ -9,7 +9,7 @@ async function checkSession(){
  if(!session){login.hidden=false;app.hidden=true;return}
  const {data:owner,error}=await sb.from('admin_users').select('role,email').eq('user_id',session.user.id).maybeSingle();
  if(error||!owner){await sb.auth.signOut();login.hidden=false;app.hidden=true;msg.textContent='This account is not authorized as an admin.';return}
- login.hidden=true;app.hidden=false;$('adminEmail').textContent=owner.email||session.user.email;await loadProducts();await loadAnnouncement();await loadOrders();
+ login.hidden=true;app.hidden=false;$('adminEmail').textContent=owner.email||session.user.email;await loadProducts();await loadAnnouncement();await loadOrders();await loadWebsiteContent();
 }
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();msg.textContent='Signing in…';const {error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error){msg.textContent=error.message;return}msg.textContent='';await checkSession()});
 $('logoutBtn').addEventListener('click',async()=>{await sb.auth.signOut();await checkSession()});
@@ -64,6 +64,42 @@ $('productForm').addEventListener('submit',async e=>{
 });
 async function loadAnnouncement(){const {data}=await sb.from('store_settings').select('value').eq('key','announcement').maybeSingle();if(data?.value)$('announcementInput').value=data.value}
 $('saveAnnouncement').addEventListener('click',async()=>{const value=$('announcementInput').value.trim();const {error}=await sb.from('store_settings').upsert({key:'announcement',value},{onConflict:'key'});if(error){alert('Could not save announcement: '+error.message);return}alert('Announcement updated.')});
+
+// CENTRAL WEBSITE CONTENT MANAGER
+const cmsPages=[['index','Homepage','index.html'],['about','About Us','about.html'],['contact','Contact','contact.html'],['shipping-policy','Shipping Policy','shipping-policy.html'],['return-policy','Return & Refund Policy','return-policy.html'],['privacy-policy','Privacy Policy','privacy-policy.html'],['terms','Terms & Conditions','terms.html']];
+const cmsSelector='main h1,main h2,main h3,main p,main li';
+function cmsNodes(doc){return Array.from(doc.querySelectorAll(cmsSelector)).filter(el=>!el.closest('a,button,label,script,style,.product-grid,.helper,[hidden]')&&!el.querySelector('a')&&!el.querySelector('button')&&el.textContent.trim())}
+let cmsPageValues={};
+async function loadWebsiteContent(){
+ const status=$('contentManagerStatus');status.textContent='Loading saved settings and page content…';
+ const {data,error}=await sb.from('store_settings').select('key,value');if(error){status.textContent='Could not load content: '+error.message;return}
+ const settings=Object.fromEntries((data||[]).map(x=>[x.key,x.value]));
+ try{const g=JSON.parse(settings.cms_global||'{}');$('cmsWhatsapp').value=g.whatsapp||'8801404609229';$('cmsPhone').value=g.phone||'+8801404609229';$('cmsEmail').value=g.email||'';$('cmsAddress').value=g.address||'Bangladesh';$('cmsFacebook').value=g.facebook||'https://www.facebook.com/share/1EJTjHfKdm/?mibextid=wwXIfr';$('cmsInstagram').value=g.instagram||'';$('cmsTiktok').value=g.tiktok||'';$('cmsOtherSocial').value=g.otherSocial||'';$('cmsFeeInside').value=g.deliveryInside??80;$('cmsFeeOutside').value=g.deliveryOutside??130;$('cmsTimeInside').value=g.deliveryTimeInside||'1–2 Days';$('cmsTimeOutside').value=g.deliveryTimeOutside||'2–5 Days';$('cmsReturnDays').value=g.returnDays??7}catch(e){status.textContent='Saved settings could not be parsed.';return}
+ const host=$('websiteContentEditor');host.innerHTML='';
+ for(const [slug,title,file] of cmsPages){
+  const response=await fetch(file);if(!response.ok)continue;const html=await response.text();const doc=new DOMParser().parseFromString(html,'text/html');const nodes=cmsNodes(doc);
+  let values=nodes.map(n=>n.textContent.trim());try{if(settings['cms_page_'+slug])values=JSON.parse(settings['cms_page_'+slug])}catch{}
+  cmsPageValues[slug]=values;
+  const group=document.createElement('details');group.className='cms-page-group';group.open=slug==='index';
+  const summary=document.createElement('summary');summary.textContent=title+' · '+nodes.length+' editable text fields';group.appendChild(summary);
+  const list=document.createElement('div');list.className='cms-text-list';
+  nodes.forEach((node,i)=>{const wrap=document.createElement('label');wrap.className='cms-field';const tag=node.tagName.toLowerCase();const label=document.createElement('span');label.textContent=(i+1)+'. '+tag.toUpperCase()+' — '+(node.textContent.trim().slice(0,65)||'Text');const area=document.createElement('textarea');area.value=values[i]??node.textContent.trim();area.dataset.cmsPage=slug;area.dataset.cmsIndex=i;area.rows=Math.min(5,Math.max(2,Math.ceil(area.value.length/85)));wrap.append(label,area);list.appendChild(wrap)});
+  group.appendChild(list);host.appendChild(group);
+ }
+ status.textContent='Loaded. Edit any field, then tap SAVE ALL WEBSITE CONTENT.';
+}
+$('saveWebsiteContent')?.addEventListener('click',async()=>{
+ const btn=$('saveWebsiteContent'),status=$('contentManagerStatus');btn.disabled=true;btn.textContent='SAVING…';status.textContent='Saving website content…';
+ try{
+  const globals={whatsapp:$('cmsWhatsapp').value.trim(),phone:$('cmsPhone').value.trim(),email:$('cmsEmail').value.trim(),address:$('cmsAddress').value.trim(),facebook:$('cmsFacebook').value.trim(),instagram:$('cmsInstagram').value.trim(),tiktok:$('cmsTiktok').value.trim(),otherSocial:$('cmsOtherSocial').value.trim(),deliveryInside:Number($('cmsFeeInside').value),deliveryOutside:Number($('cmsFeeOutside').value),deliveryTimeInside:$('cmsTimeInside').value.trim(),deliveryTimeOutside:$('cmsTimeOutside').value.trim(),returnDays:Number($('cmsReturnDays').value)};
+  if(!Number.isFinite(globals.deliveryInside)||globals.deliveryInside<0||!Number.isFinite(globals.deliveryOutside)||globals.deliveryOutside<0||!Number.isFinite(globals.returnDays)||globals.returnDays<0)throw new Error('Delivery charges and return days must be zero or greater.');
+  const rows=[{key:'cms_global',value:JSON.stringify(globals)},{key:'delivery_inside',value:String(globals.deliveryInside)},{key:'delivery_outside',value:String(globals.deliveryOutside)}];
+  for(const [slug] of cmsPages){const fields=[...document.querySelectorAll(`[data-cms-page="${slug}"]`)];rows.push({key:'cms_page_'+slug,value:JSON.stringify(fields.map(x=>x.value))})}
+  const {error}=await sb.from('store_settings').upsert(rows,{onConflict:'key'});if(error)throw error;
+  status.textContent='Saved successfully. Refresh the live website to see your changes.';alert('Website content saved successfully.');
+ }catch(err){status.textContent='Save failed: '+(err.message||err);alert('Could not save website content: '+(err.message||err))}finally{btn.disabled=false;btn.textContent='SAVE ALL WEBSITE CONTENT'}
+});
+
 $('adminMenu').addEventListener('click',()=>$('sidebar').classList.toggle('open'));
 checkSession();
 
