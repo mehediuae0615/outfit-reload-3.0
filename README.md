@@ -1,19 +1,13 @@
-# Outfit Reload 3.0 — Stage 1
-
-This is the first visual prototype for the storefront and admin dashboard.
+# Outfit Reload 3.0 — Supabase connected frontend
 
 ## Files
-- `index.html` — customer-facing storefront preview
-- `admin.html` — admin dashboard preview
-- `style.css` — responsive Cream & Brown design
-- `app.js` — storefront demo catalogue
-- `admin.js` — demo product management and announcement editor
+- `index.html`: public storefront
+- `admin.html`: owner sign-in and product management
+- `config.js`: Supabase Project URL and publishable key
+- `SETUP-STORE-SETTINGS.sql`: optional announcement bar settings table/policies
 
-## Important limitations
-This stage is a frontend prototype only. There is no real authentication, database, online checkout, email, WhatsApp integration, or secure staff permissions yet. Demo products and announcement text are saved only in the current browser using localStorage. Do not use this prototype to accept real orders or store customer information.
+## Deploy
+Upload all files to the root of the existing GitHub repository and commit. GitHub Pages serves the updated storefront.
 
-## Next stage
-Connect Supabase database and storage, then implement secure owner/staff authentication and role-based access with Row Level Security. Customer login will be added after the storefront and admin data workflow.
-
-## Preview
-Open `index.html` for the storefront and `admin.html` for the admin panel.
+## Important
+The existing Supabase tables and RLS policies must be present. The admin user must exist in `auth.users` and `public.admin_users`. Storage bucket `product-images` must be public for public product image URLs; upload/update/delete policies should restrict writes to admins. Never put a Supabase secret/service-role key in frontend files.
