@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#3b2b22">
+<title>Contact Us | Outfit Reload 3.0</title>
+<meta name="description" content="Contact Outfit Reload 3.0 for product enquiries, orders and customer support.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.contact-page{background:#faf9f6;color:#30251f}
+.contact-hero{background:#eee9e1;text-align:center;padding:75px 6%}
+.contact-hero .eyebrow,.contact-content .eyebrow{font-size:10px;letter-spacing:3px;color:#8b7463}
+.contact-hero h1{font:500 clamp(40px,6vw,65px) "Playfair Display";margin:15px 0}
+.contact-hero p{font-size:13px;color:#75685e;line-height:1.9}
+.contact-content{max-width:1050px;margin:auto;padding:70px 6%}
+.contact-content h2{font:500 34px "Playfair Display";margin:12px 0}
+.contact-content>p{font-size:13px;color:#75685e;line-height:1.9}
+.contact-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:35px}
+.contact-card{background:#fff;border:1px solid #eee7df;padding:30px}
+.contact-icon{font-size:26px;color:#8b7463}
+.contact-card h3{font:500 22px "Playfair Display";margin:14px 0 9px}
+.contact-card p{font-size:12px;line-height:1.9;color:#75685e}
+.contact-card a{display:inline-block;margin-top:14px;background:#3b2b22;color:white;padding:12px 18px;font-size:10px;letter-spacing:1px}
+.contact-note{margin-top:35px;background:#eee9e1;padding:28px}
+.contact-note h3{font:500 22px "Playfair Display"}
+.contact-note p{font-size:12px;line-height:1.9;color:#75685e}
+.contact-footer{background:#241b16;color:white;text-align:center;padding:35px 15px}
+.contact-footer a{color:#e6d7c9;font-size:11px;margin:0 10px}
+.contact-footer p{font-size:10px;color:#b6a79a;margin-top:25px}
+@media(max-width:650px){
+ .contact-hero{padding:60px 6%}
+ .contact-content{padding:50px 6%}
+ .contact-grid{grid-template-columns:1fr}
+ .contact-card{padding:25px}
+}
+</style>
+</head>
+<body class="contact-page">
+
+<div class="announcement">WE FOCUS QUALITY, NOT QUANTITY.</div>
+
+<header class="site-header">
+ <a class="brand" href="index.html">
+  <span class="brand-mark">OR</span>
+  <span>OUTFIT RELOAD<small>3.0 · MEN'S FASHION</small></span>
+ </a>
+ <button class="menu-toggle" id="menuToggle" aria-label="Open menu">☰</button>
+ <nav id="mainNav">
+  <a href="index.html">Home</a>
+  <a href="index.html#new">New Arrivals</a>
+  <a href="about.html">About Us</a>
+  <a href="contact.html">Contact</a>
+ </nav>
+ <div class="header-actions">
+  <a class="icon-btn" href="index.html">Shop</a>
+ </div>
+</header>
+
+<main>
+ <section class="contact-hero">
+  <p class="eyebrow">WE ARE HERE TO HELP</p>
+  <h1>Get in Touch.</h1>
+  <p>Have a question about a product, an order or our service?<br>We would love to hear from you.</p>
+ </section>
+
+ <section class="contact-content">
+  <p class="eyebrow">CUSTOMER SUPPORT</p>
+  <h2>Let's Talk.</h2>
+  <p>Choose your preferred way to contact Outfit Reload 3.0. Our team is here to help with your shopping enquiries.</p>
+
+  <div class="contact-grid">
+   <article class="contact-card">
+    <span class="contact-icon">◉</span>
+    <h3>WhatsApp Support</h3>
+    <p>Contact us directly on WhatsApp for product questions, order enquiries and assistance.</p>
+    <a href="https://wa.me/8801404609229" target="_blank" rel="noopener">MESSAGE ON WHATSAPP ↗</a>
+   </article>
+
+   <article class="contact-card">
+    <span class="contact-icon">f</span>
+    <h3>Facebook</h3>
+    <p>Visit our Facebook page to connect with Outfit Reload 3.0 and follow our updates.</p>
+    <a href="https://www.facebook.com/share/1EJTjHfKdm/?mibextid=wwXIfr" target="_blank" rel="noopener">VISIT FACEBOOK ↗</a>
+   </article>
+  </div>
+
+  <div class="contact-note">
+   <h3>How Can We Help?</h3>
+   <p>For faster assistance, please include your order number when contacting us about an existing order. For product enquiries, mention the product name and the size or colour you are interested in.</p>
+   <p><b>Brand:</b> Outfit Reload 3.0</p>
+   <p><b>Location:</b> Bangladesh</p>
+   <p><b>WhatsApp:</b> +880 1404-609229</p>
+  </div>
+ </section>
+</main>
+
+<footer class="contact-footer">
+ <div class="brand-mark">OR</div>
+ <p>OUTFIT RELOAD 3.0</p>
+ <div>
+  <a href="about.html">About Us</a>
+  <a href="contact.html">Contact Us</a>
+  <a href="shipping-policy.html">Shipping Policy</a>
+  <a href="return-policy.html">Return Policy</a>
+  <a href="privacy-policy.html">Privacy Policy</a>
+  <a href="terms.html">Terms</a>
+ </div>
+ <p>© 2026 OUTFIT RELOAD 3.0. ALL RIGHTS RESERVED.</p>
+</footer>
+
+<script>
+const menu=document.getElementById('menuToggle');
+const nav=document.getElementById('mainNav');
+if(menu&&nav)menu.addEventListener('click',()=>nav.classList.toggle('open'));
+</script>
+</body>
+</html>
