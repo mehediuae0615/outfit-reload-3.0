@@ -83,6 +83,48 @@
       <div class="bag-summary"><div><span>Subtotal</span><strong id="bagSubtotal">৳ 0</strong></div><p>Delivery charge will be confirmed at checkout.</p><button class="btn btn-dark bag-checkout" id="bagCheckout" disabled>CHECKOUT · COMING SOON</button></div>
     </aside>
   </div>
+
+  <div class="checkout-backdrop" id="checkoutModal" aria-hidden="true">
+    <section class="checkout-panel" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
+      <button class="detail-close" id="closeCheckout" aria-label="Close">×</button>
+      <div id="checkoutFormWrap">
+        <p class="eyebrow">OUTFIT RELOAD 3.0 · SECURE ORDER</p>
+        <h2 id="checkoutTitle">Checkout</h2>
+        <p class="checkout-intro">Complete your details. Pay cash when your order arrives.</p>
+        <form id="checkoutForm" class="checkout-form">
+          <label>Full name <input name="customer_name" autocomplete="name" required minlength="2" placeholder="Your full name"></label>
+          <label>Phone number <input name="customer_phone" autocomplete="tel" required inputmode="tel" placeholder="01XXXXXXXXX"></label>
+          <label>Email address <input name="customer_email" type="email" autocomplete="email" placeholder="Optional"></label>
+          <label>Delivery area
+            <select name="delivery_area" id="deliveryArea" required>
+              <option value="inside_dhaka">Inside Dhaka · ৳80</option>
+              <option value="outside_dhaka">Outside Dhaka · ৳130</option>
+            </select>
+          </label>
+          <label class="full-field">Full delivery address <textarea name="delivery_address" required minlength="8" rows="3" placeholder="House, road, area, district"></textarea></label>
+          <label class="full-field">Order note <textarea name="customer_note" rows="2" placeholder="Optional instructions"></textarea></label>
+          <div class="checkout-review full-field">
+            <div><span>Subtotal</span><strong id="checkoutSubtotal">৳ 0</strong></div>
+            <div><span>Delivery</span><strong id="checkoutDelivery">৳ 80</strong></div>
+            <div class="checkout-total"><span>Total to pay</span><strong id="checkoutTotal">৳ 0</strong></div>
+            <p>Payment method: <b>Cash on Delivery</b></p>
+          </div>
+          <p id="checkoutError" class="checkout-error full-field" role="alert"></p>
+          <button type="submit" class="btn btn-dark full-field" id="placeOrderButton">PLACE ORDER · CASH ON DELIVERY ↗</button>
+        </form>
+      </div>
+      <div id="orderSuccess" class="order-success" hidden>
+        <div class="success-mark">✓</div>
+        <p class="eyebrow">ORDER RECEIVED</p>
+        <h2>Thank you for your order.</h2>
+        <p>Your order has been submitted successfully.</p>
+        <div class="order-number-box"><span>YOUR ORDER NUMBER</span><strong id="successOrderNumber"></strong></div>
+        <p id="successOrderTotal"></p>
+        <button class="btn btn-dark" id="continueShopping">CONTINUE SHOPPING ↗</button>
+      </div>
+    </section>
+  </div>
+
   <footer><a class="brand footer-brand" href="#"><span class="brand-mark">OR</span><span>OUTFIT RELOAD <small>3.0 · MEN'S COLLECTION</small></span></a><div class="footer-links"><a href="#about">About Us</a><a href="#contact">Contact</a><a href="#">Shipping Policy</a><a href="#">Returns</a><a href="#">Privacy</a></div><p>© 2026 OUTFIT RELOAD 3.0 · BANGLADESH</p></footer>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="app.js"></script>
 </body></html>

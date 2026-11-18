@@ -1,0 +1,23 @@
+OUTFIT RELOAD 3.0 — CHECKOUT UPDATE
+
+Included:
+- Checkout form from the shopping bag
+- Customer name, phone, optional email, delivery address and note
+- Dhaka delivery ৳80 / outside Dhaka ৳130
+- Cash on Delivery order submission using the existing Supabase RPC:
+  public.place_cod_order
+- Order confirmation with order number and total
+- Database-controlled product pricing and stock validation remain on the server
+
+INSTALL:
+1. Download and extract this ZIP.
+2. Upload/replace all files in the repository root on GitHub.
+3. Commit the changes and wait for GitHub Pages to publish.
+4. Test with a low-value test product and verify the order in Supabase > Table Editor > orders and order_items.
+
+IMPORTANT:
+- The Supabase checkout SQL was supplied and reported successful by the user.
+- This update does not yet add an Orders screen to the admin panel.
+- Email and WhatsApp notifications are not configured.
+- Only Cash on Delivery is enabled.
+- Test a real submission carefully before announcing the store as live.
