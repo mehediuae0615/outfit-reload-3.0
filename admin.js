@@ -9,7 +9,7 @@ async function checkSession(){
  if(!session){login.hidden=false;app.hidden=true;return}
  const {data:owner,error}=await sb.from('admin_users').select('role,email').eq('user_id',session.user.id).maybeSingle();
  if(error||!owner){await sb.auth.signOut();login.hidden=false;app.hidden=true;msg.textContent='This account is not authorized as an admin.';return}
- login.hidden=true;app.hidden=false;$('adminEmail').textContent=owner.email||session.user.email;await loadProducts();await loadAnnouncement();
+ login.hidden=true;app.hidden=false;$('adminEmail').textContent=owner.email||session.user.email;await loadProducts();await loadAnnouncement();await loadOrders();
 }
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();msg.textContent='Signing in…';const {error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error){msg.textContent=error.message;return}msg.textContent='';await checkSession()});
 $('logoutBtn').addEventListener('click',async()=>{await sb.auth.signOut();await checkSession()});
@@ -66,3 +66,47 @@ async function loadAnnouncement(){const {data}=await sb.from('store_settings').s
 $('saveAnnouncement').addEventListener('click',async()=>{const value=$('announcementInput').value.trim();const {error}=await sb.from('store_settings').upsert({key:'announcement',value},{onConflict:'key'});if(error){alert('Could not save announcement: '+error.message);return}alert('Announcement updated.')});
 $('adminMenu').addEventListener('click',()=>$('sidebar').classList.toggle('open'));
 checkSession();
+
+
+// LIVE ORDER MANAGEMENT
+const orderStatuses=['pending','confirmed','processing','shipped','delivered','cancelled'];
+const statusLabels={pending:'Pending',confirmed:'Confirmed',processing:'Processing',shipped:'Shipped',delivered:'Delivered',cancelled:'Cancelled'};
+let cachedOrders=[];
+function money(v){return '৳ '+Number(v||0).toLocaleString('en-BD',{maximumFractionDigits:2})}
+function dateLabel(v){try{return new Date(v).toLocaleString('en-BD',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}catch{return '—'}}
+function renderOrders(){
+ const filter=$('orderStatusFilter')?.value||'all';
+ const rows=cachedOrders.filter(o=>filter==='all'||o.status===filter);
+ $('orderCount').textContent=`${rows.length} order${rows.length===1?'':'s'}`;
+ $('adminOrderRows').innerHTML=rows.map(o=>{
+  const items=(o.order_items||[]).map(i=>`<li>${safe(i.product_name)} · ${safe(i.size||'—')} / ${safe(i.color||'—')} × ${Number(i.quantity)} — ${money(i.line_total)}</li>`).join('');
+  const area=o.delivery_area==='inside_dhaka'?'Inside Dhaka':'Outside Dhaka';
+  const options=orderStatuses.map(st=>`<option value="${st}" ${o.status===st?'selected':''}>${statusLabels[st]}</option>`).join('');
+  return `<tr class="order-main-row"><td><strong>${safe(o.order_number)}</strong><br><small>${safe(o.payment_method||'cod').toUpperCase()}</small><details class="order-details"><summary>View details</summary><div class="order-detail-box"><b>Delivery:</b> ${area}<br><b>Address:</b> ${safe(o.delivery_address)}<br><b>Phone:</b> ${safe(o.customer_phone)}<br><b>Email:</b> ${safe(o.customer_email||'Not provided')}<br><b>Note:</b> ${safe(o.customer_note||'—')}<br><b>Items:</b><ul>${items||'<li>No item details</li>'}</ul><div>Subtotal ${money(o.subtotal)} · Delivery ${money(o.delivery_fee)} · <b>Total ${money(o.total)}</b></div></div></details></td><td><b>${safe(o.customer_name)}</b><br><small>${safe(o.customer_phone)}</small></td><td>${dateLabel(o.created_at)}</td><td><b>${money(o.total)}</b></td><td><span class="pill status-${safe(o.status)}">${statusLabels[o.status]||safe(o.status)}</span></td><td><div class="order-action"><select data-status-select="${o.id}" aria-label="New status for ${safe(o.order_number)}">${options}</select><button class="table-action" data-save-status="${o.id}" ${o.status==='cancelled'?'disabled':''}>Save</button></div></td></tr>`;
+ }).join('')||`<tr><td colspan="6">${filter==='all'?'No orders found yet.':'No '+safe(filter)+' orders.'}</td></tr>`;
+ document.querySelectorAll('[data-save-status]').forEach(btn=>btn.addEventListener('click',()=>saveOrderStatus(btn.dataset.saveStatus,btn)));
+}
+async function loadOrders(){
+ const target=$('adminOrderRows');if(!target)return;
+ $('ordersMessage').textContent='Loading orders…';
+ const {data,error}=await sb.from('orders').select('id,order_number,customer_name,customer_phone,customer_email,delivery_area,delivery_address,customer_note,payment_method,status,subtotal,delivery_fee,total,created_at,order_items(id,product_name,unit_price,size,color,quantity,line_total)').order('created_at',{ascending:false});
+ if(error){target.innerHTML=`<tr><td colspan="6">Could not load orders: ${safe(error.message)}</td></tr>`;$('ordersMessage').textContent='Check that the checkout database setup has been run and admin policies are active.';return}
+ cachedOrders=data||[];renderOrders();
+ const totalSales=cachedOrders.filter(o=>o.status!=='cancelled').reduce((sum,o)=>sum+Number(o.total||0),0);
+ const statCards=document.querySelectorAll('#overview .stat-card');
+ if(statCards[0])statCards[0].querySelector('strong').textContent=money(totalSales);
+ if(statCards[1])statCards[1].querySelector('strong').textContent=String(cachedOrders.length);
+ if(statCards[1])statCards[1].querySelector('small').textContent=`${cachedOrders.filter(o=>o.status==='pending').length} pending`;
+ $('ordersMessage').textContent=cachedOrders.length?`Showing ${cachedOrders.length} live order(s).`:'No customer orders yet.';
+}
+async function saveOrderStatus(id,btn){
+ const select=document.querySelector(`[data-status-select="${id}"]`);const status=select?.value;
+ if(!orderStatuses.includes(status))return;
+ if(status==='cancelled'&&!confirm('Cancel this order? Its reserved stock will be returned to inventory.'))return;
+ btn.disabled=true;btn.textContent='Saving…';
+ const {error}=await sb.rpc('admin_update_order_status',{p_order_id:id,p_new_status:status});
+ if(error){alert('Could not update order: '+error.message);btn.disabled=false;btn.textContent='Save';return}
+ $('ordersMessage').textContent='Order status updated successfully.';await loadOrders();
+}
+$('refreshOrders')?.addEventListener('click',loadOrders);
+$('orderStatusFilter')?.addEventListener('change',renderOrders);
