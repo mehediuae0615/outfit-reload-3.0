@@ -49,3 +49,58 @@ textarea{font:inherit;resize:vertical}.login-screen{min-height:100vh;display:gri
 
 /* Admin order management */
 .order-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:16px 0}.order-toolbar select,.order-action select{border:1px solid var(--line,#ded7cf);background:#fff;color:var(--ink,#2d211b);padding:10px 12px;border-radius:4px;font:inherit}.orders-table{min-width:850px}.order-action{display:flex;gap:7px;align-items:center}.order-action select{max-width:145px;padding:8px;font-size:12px}.order-details{margin-top:8px;font-size:12px}.order-details summary{cursor:pointer;color:var(--muted,#82776f);text-decoration:underline}.order-detail-box{margin-top:8px;padding:12px;background:#f7f4ef;min-width:230px;line-height:1.8;white-space:normal}.order-detail-box ul{padding-left:18px;margin:5px 0}.status-pending{background:#fff2d8}.status-confirmed{background:#e6f0ff}.status-processing{background:#eee8ff}.status-shipped{background:#e3f3f0}.status-delivered{background:#e5f1df}.status-cancelled{background:#f9e5e3}.order-action button:disabled{opacity:.45;cursor:not-allowed}
+
+
+/* OUTFIT RELOAD — editorial collection refresh */
+.collection-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:34px 0 18px;padding:0 2px;color:#5e5e62}
+.collection-toolbar label{display:flex;align-items:center;gap:12px;font-size:15px;letter-spacing:.4px}
+.collection-toolbar select{margin-right:auto;border:0;background:transparent;color:#34343a;font:inherit;font-size:13px;outline:none;cursor:pointer}
+.collection-toolbar>span{font-size:13px;color:#77777d}
+.collection-heading h2{font:600 clamp(38px,5vw,58px)/1.1 "DM Sans",sans-serif;letter-spacing:-1.7px;color:#17171a}
+.collection-heading .eyebrow{display:none}
+.product-card{cursor:pointer}
+.product-photo{background:#f0efed}
+.product-info h3{font-size:13px;line-height:1.45}
+.product-info p{font-size:14px;color:#24242a;font-weight:500}
+.product-tag{background:#fff;color:#292930}
+@media(max-width:800px){
+  body{background:#fff;color:#17171a}
+  .announcement{background:#e9e3dc;color:#161619;padding:12px 15px;font-size:12px;line-height:1.35;letter-spacing:1.2px;font-weight:600}
+  .site-header{height:116px;padding:0 25px;display:flex;justify-content:space-between;position:relative;background:#fff;border-bottom:1px solid #ececec}
+  .menu-toggle{display:block;order:0;font-size:27px;font-weight:300;padding:8px 0}
+  .brand{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;gap:2px;text-align:center;font-size:13px;letter-spacing:1.4px;white-space:nowrap}
+  .brand-mark{width:auto;height:auto;border:0;font:700 27px/1 "Playfair Display",serif;letter-spacing:-2px}
+  .brand small{font-size:7px;letter-spacing:3px;margin-top:4px}
+  .header-actions{order:2;gap:17px;align-items:center}
+  .icon-btn{font-size:25px;line-height:1;padding:5px;position:relative}
+  .bag-icon{font-size:26px}
+  #bagCount{font-size:10px;position:absolute;right:-3px;top:-3px;background:#17171a;color:#fff;border-radius:50%;min-width:16px;height:16px;display:grid;place-items:center}
+  .site-header nav{top:116px;z-index:20;background:#fff}
+  .hero,.trust-strip,.curated-section,.feature-band,.categories,.quote-section,.newsletter{display:none!important}
+  .section#new{padding:48px 4% 70px;background:#fff}
+  .collection-heading{margin:0 0 48px;align-items:flex-start}
+  .collection-heading h2{font:600 43px/1.08 "DM Sans",sans-serif;letter-spacing:-1.6px}
+  .collection-heading .text-link{display:none}
+  .collection-toolbar{margin:0 0 20px;min-height:38px;gap:10px}
+  .collection-toolbar label{font-size:14px;gap:9px}
+  .collection-toolbar select{font-size:13px;max-width:105px;margin:0}
+  .collection-toolbar>span{font-size:13px;white-space:nowrap}
+  .product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:27px 8px}
+  .product-photo{height:auto;aspect-ratio: .76;overflow:hidden;background:#242630}
+  .product-photo img{width:100%;height:100%;object-fit:cover}
+  .product-tag{top:9px;left:8px;padding:6px 7px;font-size:7px;letter-spacing:.7px}
+  .quick-view{display:none}
+  .product-info{padding:12px 2px 0}
+  .product-info h3{font-size:12px;line-height:1.45;font-weight:500;margin:0 0 6px;color:#24242a}
+  .product-info p{font-size:14px;margin:0;color:#161619}
+  footer{padding:38px 5%;background:#f7f5f2}
+}
+@media(max-width:390px){
+  .site-header{padding:0 18px}
+  .header-actions{gap:12px}
+  .brand{font-size:11px}
+  .brand-mark{font-size:24px}
+  .collection-heading h2{font-size:39px}
+  .product-grid{gap:23px 7px}
+  .product-info h3{font-size:11px}
+}
