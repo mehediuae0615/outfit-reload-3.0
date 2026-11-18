@@ -19,3 +19,12 @@ The existing Supabase tables and RLS policies must be present. The admin user mu
 - Add-to-bag validates selected variant stock; bag is temporary for the current browser session.
 - Homepage includes New Arrivals, Best Sellers, Featured Collection and Trending sections.
 - Checkout/payment/order submission is not yet implemented; do not accept live payments yet.
+
+
+## Customer Order Tracking
+1. Open Supabase SQL Editor and run `CUSTOMER-ORDER-TRACKING.sql`.
+2. Replace the website files in the GitHub repository with the files in this ZIP.
+3. Commit changes, then open the storefront and use the Track Order link in the header or footer.
+4. Test with a real order number and the same phone number used at checkout.
+
+The lookup is performed by a SECURITY DEFINER RPC that returns order information only after both the order number and phone number match. Do not expose service-role keys in the browser.

@@ -10,12 +10,12 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="announcement" id="announcement">10% OFF YOUR FIRST ORDER · USE CODE WELCOME10</div>
+  <div class="announcement" id="announcement">WE FOCUS QUALITY, NOT QUANTITY.</div>
   <header class="site-header">
     <a class="brand" href="index.html"><span class="brand-mark">OR</span><span>OUTFIT RELOAD <small>3.0 · MEN'S COLLECTION</small></span></a>
     <button class="menu-toggle" id="menuToggle" aria-label="Open menu">☰</button>
-    <nav id="mainNav"><a href="#new">New Arrivals</a><a href="#bestSellers">Best Sellers</a><a href="#featuredCollection">Featured</a><a href="#about">Our Story</a><a href="#contact">Contact</a></nav>
-    <div class="header-actions"><button class="icon-btn search-btn" aria-label="Search">⌕</button><button class="icon-btn bag-icon" id="bagButton" aria-label="Shopping bag">♧ <span id="bagCount">0</span></button></div>
+    <nav id="mainNav"><a href="#new">New Arrivals</a><a href="#bestSellers">Best Sellers</a><a href="#featuredCollection">Featured</a><a href="#about">Our Story</a><a href="#contact">Contact</a><a href="#track-order">Track Order</a></nav>
+    <div class="header-actions"><button class="icon-btn" aria-label="Search">⌕</button><button class="icon-btn" id="bagButton" aria-label="Shopping bag">Bag <span id="bagCount">0</span></button></div>
   </header>
   <main>
     <section class="hero">
@@ -34,8 +34,7 @@
     </section>
     <section class="trust-strip"><span>✦ PREMIUM PICKS</span><span>✦ QUALITY FIRST</span><span>✦ DELIVERY ACROSS BANGLADESH</span><span>✦ EASY 7-DAY RETURNS</span></section>
     <section class="section" id="new">
-      <div class="section-heading collection-heading"><div><p class="eyebrow">OUTFIT RELOAD 3.0</p><h2>Products</h2></div><a class="text-link" href="#collections">VIEW ALL ↗</a></div>
-      <div class="collection-toolbar"><label for="productSort">☷ <span>Sort</span></label><select id="productSort" aria-label="Sort products"><option value="newest">Featured</option><option value="price-low">Price: Low to high</option><option value="price-high">Price: High to low</option><option value="name">Name: A to Z</option></select><span id="productCount">0 products</span></div>
+      <div class="section-heading"><div><p class="eyebrow">FRESHLY SELECTED</p><h2>New arrivals<span>.</span></h2></div><a class="text-link" href="#collections">VIEW ALL ↗</a></div>
       <div class="product-grid" id="productGrid"></div>
     </section>
     <section class="section curated-section" id="bestSellers">
@@ -126,6 +125,21 @@
     </section>
   </div>
 
-  <footer><a class="brand footer-brand" href="#"><span class="brand-mark">OR</span><span>OUTFIT RELOAD <small>3.0 · MEN'S COLLECTION</small></span></a><div class="footer-links"><a href="#about">About Us</a><a href="#contact">Contact</a><a href="#">Shipping Policy</a><a href="#">Returns</a><a href="#">Privacy</a></div><p>© 2026 OUTFIT RELOAD 3.0 · BANGLADESH</p></footer>
+  <section class="track-order-section" id="track-order">
+    <div class="track-order-inner">
+      <p class="eyebrow">ORDER UPDATES · OUTFIT RELOAD 3.0</p>
+      <h2>Track your order<span>.</span></h2>
+      <p>Enter your order number and the phone number used at checkout to see the latest update.</p>
+      <form id="trackingForm" class="tracking-form">
+        <label>Order number<input name="order_number" required placeholder="e.g. OR-EE65479C" autocomplete="off"></label>
+        <label>Phone number<input name="phone" required inputmode="tel" placeholder="Phone number used at checkout" autocomplete="tel"></label>
+        <button class="btn btn-dark" type="submit" id="trackOrderButton">TRACK ORDER ↗</button>
+      </form>
+      <p id="trackingError" class="checkout-error" role="alert"></p>
+      <div id="trackingResult" class="tracking-result" hidden aria-live="polite"></div>
+    </div>
+  </section>
+
+  <footer><a class="brand footer-brand" href="#"><span class="brand-mark">OR</span><span>OUTFIT RELOAD <small>3.0 · MEN'S COLLECTION</small></span></a><div class="footer-links"><a href="#about">About Us</a><a href="#contact">Contact</a><a href="#track-order">Track Order</a><a href="#">Shipping Policy</a><a href="#">Returns</a><a href="#">Privacy</a></div><p>© 2026 OUTFIT RELOAD 3.0 · BANGLADESH</p></footer>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="app.js"></script>
 </body></html>
