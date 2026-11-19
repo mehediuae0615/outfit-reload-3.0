@@ -75,6 +75,7 @@ footer{background:#171717}
 
 .site-header{display:grid;grid-template-columns:40px 1fr auto;gap:15px;align-items:center}.brand{justify-self:start}.menu-toggle{display:flex;flex-direction:column;gap:6px;border:0;background:none;padding:5px;cursor:pointer}.menu-toggle span{width:23px;height:2px;background:#111;display:block}.site-header nav{justify-self:center}.header-actions{display:flex;align-items:center;gap:14px}.header-actions a{font-size:23px;color:#111}.announcement{background:linear-gradient(90deg,#2b1d16,#60432e,#2b1d16);text-align:left;font-weight:700;letter-spacing:1.8px}.announcement-text{display:inline-block;width:max-content;min-width:100%;padding-left:0;will-change:transform;animation:collectionMarquee 18s linear infinite}@keyframes collectionMarquee{from{transform:translateX(-100%)}to{transform:translateX(100vw)}}.announcement:hover .announcement-text{animation-play-state:paused}
 @media(max-width:700px){.site-header{height:70px;grid-template-columns:34px 1fr auto;padding:0 16px}.brand{justify-self:center}.site-header nav{display:none;position:fixed;top:70px;left:0;bottom:0;width:min(82vw,420px);height:calc(100dvh - 70px);background:#fff;z-index:100;padding:24px 22px;flex-direction:column;align-items:stretch;gap:0;box-shadow:12px 0 30px #0002;overflow:auto}.site-header nav.open{display:flex}.site-header nav a{font-size:19px;padding:19px 0;border-bottom:1px solid #eee}.collection-intro{text-align:left;padding:30px 5% 20px}.collection-intro h1{font:700 35px "DM Sans",sans-serif;letter-spacing:-1px}.header-actions{gap:8px}}
+@media(max-width:700px){body:not(.admin-body) .site-header nav.open{display:flex!important;position:fixed!important;top:70px!important;left:0!important;right:auto!important;bottom:0!important;width:min(82vw,420px)!important;height:calc(100dvh - 70px)!important;z-index:9999!important;background:#fff!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;overflow:auto!important;box-shadow:12px 0 30px #0002!important}}
 </style>
 </head>
 <body>
@@ -250,14 +251,16 @@ footer{background:#171717}
 <script>document.write('<script src=\"config.js?v='+Date.now()+'\"><\/script>');</script>
 <script>document.write('<script src=\"app.js?v='+Date.now()+'\"><\/script>');</script>
 <script>
-/* Collections page: reliable category filtering, sorting and product-card binding. */
+/* Collections page: robust filters, sorting and mobile navigation. */
 (function(){
  const grid=document.getElementById('productGrid');
  const count=document.querySelector('.collection-count');
  const sort=document.getElementById('sortProducts');
+ const menu=document.getElementById('menuToggle');
+ const nav=document.getElementById('mainNav');
  let selectedCategory='';
  const normalize=value=>String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'');
- const categoryAliases={
+ const aliases={
   shirts:['shirt','shirts','formalshirt','casualshirt'],
   tshirts:['tshirt','tshirts','tee','tees'],
   pants:['pant','pants','trouser','trousers'],
@@ -266,68 +269,54 @@ footer{background:#171717}
   watches:['watch','watches'],
   accessories:['accessory','accessories','belt','wallet','sunglasses','perfume']
  };
- function productCategory(product){
-  const value=product.category;
-  return normalize(Array.isArray(value)?value[0]?.name:value?.name||value);
- }
- function matches(product,category){
-  if(!category)return true;
-  const wanted=categoryAliases[normalize(category)]||[normalize(category)];
-  const actual=productCategory(product);
-  return wanted.some(term=>actual===term||actual.startsWith(term)||actual.endsWith(term));
- }
+ function getProducts(){return Array.isArray(window.productsCache)?window.productsCache:[];}
+ function productCategory(p){const c=p?.category;return normalize(Array.isArray(c)?c[0]?.name:c?.name||c);}
+ function matches(p,cat){if(!cat)return true;const wanted=aliases[normalize(cat)]||[normalize(cat)];const actual=productCategory(p);return wanted.some(term=>actual===term||actual.includes(term));}
  function bindCards(){
-  grid.querySelectorAll('[data-product]').forEach(element=>{
-   if(element.dataset.collectionBound==='1')return;
-   element.dataset.collectionBound='1';
-   const open=()=>{if(typeof window.openProduct==='function')window.openProduct(element.dataset.product);};
-   element.addEventListener('click',event=>{
-    if(event.target.closest('[data-wishlist]'))return;
-    open();
-   });
-   element.addEventListener('keydown',event=>{
-    if(event.key==='Enter'||event.key===' '){event.preventDefault();open();}
-   });
+  if(!grid)return;
+  grid.querySelectorAll('[data-product]').forEach(el=>{
+   if(el.dataset.collectionBound)return;el.dataset.collectionBound='1';
+   el.addEventListener('click',e=>{if(e.target.closest('[data-wishlist]'))return;if(typeof window.openProduct==='function')window.openProduct(el.dataset.product);});
+   el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(typeof window.openProduct==='function')window.openProduct(el.dataset.product);}});
   });
-  grid.querySelectorAll('[data-wishlist]').forEach(button=>{
-   if(button.dataset.collectionWishBound==='1')return;
-   button.dataset.collectionWishBound='1';
-   button.addEventListener('click',event=>{
-    event.stopPropagation();
-    if(typeof window.toggleWishlist==='function')window.toggleWishlist(button.dataset.wishlist);
-   });
+  grid.querySelectorAll('[data-wishlist]').forEach(btn=>{
+   if(btn.dataset.collectionWishBound)return;btn.dataset.collectionWishBound='1';
+   btn.addEventListener('click',e=>{e.stopPropagation();if(typeof window.toggleWishlist==='function')window.toggleWishlist(btn.dataset.wishlist);});
   });
  }
  function render(){
   if(!grid)return;
-  const all=Array.isArray(window.productsCache)?window.productsCache:[];
-  let items=all.filter(product=>matches(product,selectedCategory));
+  const all=getProducts();
+  if(!all.length){return;}
+  let items=all.filter(p=>matches(p,selectedCategory));
   if(sort?.value==='low')items.sort((a,b)=>Number(a.sale_price||a.price)-Number(b.sale_price||b.price));
-  else if(sort?.value==='high')items.sort((a,b)=>Number(b.sale_price||b.price)-Number(a.sale_price||a.price));
-  grid.innerHTML=items.length?items.map(product=>window.card(product)).join(''):'<p class="helper">No products found in this category yet.</p>';
+  if(sort?.value==='high')items.sort((a,b)=>Number(b.sale_price||b.price)-Number(a.sale_price||a.price));
+  if(typeof window.card!=='function'){grid.innerHTML='<p class="helper">Products loaded, but the product display script did not initialise. Please refresh.</p>';return;}
+  grid.innerHTML=items.length?items.map(p=>window.card(p)).join(''):'<p class="helper">No products found in this category yet.</p>';
   if(count)count.textContent=selectedCategory?selectedCategory.toUpperCase():'OUR COLLECTION';
   bindCards();
  }
  window.renderCollectionProducts=render;
  window.addEventListener('outfit:products-loaded',render);
- document.querySelectorAll('.category-links a').forEach(link=>link.addEventListener('click',event=>{
-  event.preventDefault();
-  selectedCategory=link.dataset.cat||'';
-  render();
+ document.querySelectorAll('.category-links a').forEach(link=>link.addEventListener('click',e=>{
+  e.preventDefault();selectedCategory=link.dataset.cat||'';render();
   document.getElementById('all-products')?.scrollIntoView({behavior:'smooth',block:'start'});
  }));
  sort?.addEventListener('change',render);
- // app.js fetches the product list asynchronously; render again when it finishes.
- const waitForProducts=()=>{
-  if(Array.isArray(window.productsCache)&&window.productsCache.length){render();return;}
-  if(grid && grid.textContent.includes('Loading collection')) {
-   setTimeout(()=>{
-    if(Array.isArray(window.productsCache)&&window.productsCache.length)render();
-    else if(grid.textContent.includes('Loading collection'))grid.innerHTML='<p class="helper">Products are taking longer than expected. Refresh the page or try again shortly.</p>';
-   },8000);
-  }
- };
- window.addEventListener('load',()=>setTimeout(waitForProducts,250));
+ // Ensure the mobile menu opens even if another stylesheet overrides its display rule.
+ if(menu&&nav&&!menu.dataset.collectionMenuBound){
+  menu.dataset.collectionMenuBound='1';
+  menu.addEventListener('click',()=>{const open=nav.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Close menu':'Open menu');});
+  nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded','false');}));
+ }
+ // Render immediately if app.js already fetched products; otherwise wait for its event.
+ render();
+ window.addEventListener('load',()=>{
+  setTimeout(()=>{
+   if(getProducts().length){render();return;}
+   if(grid&&grid.textContent.includes('Loading collection'))grid.innerHTML='<p class="helper">Products are not loading. Please refresh once; if this continues, check the Supabase product query.</p>';
+  },12000);
+ });
 })();
 </script>
 </body>
