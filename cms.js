@@ -29,6 +29,10 @@
     document.querySelectorAll('[data-cms-setting="return_days"]').forEach(el=>el.textContent=String(Number(cfg.returnDays??7)));
     document.querySelectorAll('footer').forEach(footer=>{let box=footer.querySelector('.cms-social-links');if(!box){box=document.createElement('div');box.className='cms-social-links';box.style.cssText='display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:14px auto';footer.appendChild(box)}box.innerHTML='';[['Facebook',cfg.facebook],['Instagram',cfg.instagram],['TikTok',cfg.tiktok],['Other',cfg.otherSocial]].filter(x=>x[1]).forEach(([label,url])=>{const a=document.createElement('a');a.textContent=label;a.href=url;a.target='_blank';a.rel='noopener noreferrer';box.appendChild(a)})});
     const fees={inside:Number(cfg.deliveryInside??80),outside:Number(cfg.deliveryOutside??130)};
+    const insideOption=document.querySelector('#deliveryArea option[value="inside_dhaka"]');
+    const outsideOption=document.querySelector('#deliveryArea option[value="outside_dhaka"]');
+    if(insideOption)insideOption.textContent='Inside Dhaka · ৳'+fees.inside.toLocaleString('en-BD');
+    if(outsideOption)outsideOption.textContent='Outside Dhaka · ৳'+fees.outside.toLocaleString('en-BD');
     document.querySelectorAll('[data-cms-setting="delivery_inside"]').forEach(el=>el.textContent='৳'+fees.inside.toLocaleString('en-BD'));
     document.querySelectorAll('[data-cms-setting="delivery_outside"]').forEach(el=>el.textContent='৳'+fees.outside.toLocaleString('en-BD'));
     if(cfg.deliveryTimeInside)document.querySelectorAll('[data-cms-setting="delivery_time_inside"]').forEach(el=>el.textContent=cfg.deliveryTimeInside);
