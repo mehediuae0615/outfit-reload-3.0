@@ -24,42 +24,58 @@ async function renderProducts(){
  const grid=$('productGrid');
  if(!grid)return;
  grid.innerHTML='<p class="helper">Loading collection…</p>';
+ const withTimeout=(promise,label,ms=10000)=>Promise.race([
+  promise,
+  new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+' timed out after '+(ms/1000)+' seconds')),ms))
+ ]);
  try{
-  // Fetch products independently so a missing/ambiguous PostgREST category
-  // relationship cannot prevent the entire collection from loading.
-  const {data,error}=await supabaseClient.from('products').select('*').eq('is_active',true);
-  if(error)throw error;
-  productsCache=Array.isArray(data)?data:[];
+  // Load products first. Do not make the storefront wait for category metadata.
+  const result=await withTimeout(
+   supabaseClient.from('products').select('*').eq('is_active',true),
+   'Supabase products query'
+  );
+  if(result.error)throw result.error;
+  productsCache=Array.isArray(result.data)?result.data:[];
   productsCache.sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+
+  const paint=()=>{
+   grid.innerHTML=productsCache.length?productsCache.map(card).join(''):'<p class="helper">Our new collection is being prepared. Check back soon.</p>';
+   [['bestSellerGrid',p=>p.best_seller],['featuredGrid',p=>p.featured],['trendingGrid',p=>p.trending]].forEach(([id,test])=>{
+    const el=$(id);if(el){const items=productsCache.filter(test);el.innerHTML=items.length?items.map(card).join(''):'<p class="helper">New selections coming soon.</p>';}
+   });
+   document.querySelectorAll('.product-grid [data-product]').forEach(el=>{
+    const open=()=>openProduct(el.dataset.product);
+    if(!el.dataset.productBound){el.dataset.productBound='1';el.addEventListener('click',open);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});}
+   });
+   document.querySelectorAll('[data-wishlist]').forEach(b=>{
+    if(!b.dataset.wishlistBound){b.dataset.wishlistBound='1';b.addEventListener('click',e=>{e.stopPropagation();toggleWishlist(b.dataset.wishlist);});}
+   });
+   if(activeCategoryFilter)applyCategoryFilter(activeCategoryFilter);
+   window.dispatchEvent(new CustomEvent('outfit:products-loaded'));
+  };
+  // Render immediately with product data; category enrichment happens afterwards.
+  paint();
 
   const categoryIds=[...new Set(productsCache.map(p=>p.category_id).filter(Boolean))];
   if(categoryIds.length){
-   const {data:categories,error:categoryError}=await supabaseClient.from('categories').select('id,name').in('id',categoryIds);
-   if(categoryError){
-    console.warn('Category lookup failed; products will still be displayed:',categoryError);
-   }else{
-    const categoryMap=new Map((categories||[]).map(c=>[String(c.id),c.name]));
+   try{
+    const categoryResult=await withTimeout(
+     supabaseClient.from('categories').select('id,name').in('id',categoryIds),
+     'Supabase categories query',7000
+    );
+    if(categoryResult.error)throw categoryResult.error;
+    const categoryMap=new Map((categoryResult.data||[]).map(c=>[String(c.id),c.name]));
     productsCache=productsCache.map(p=>({...p,category:{name:categoryMap.get(String(p.category_id))||''}}));
+    paint();
+    window.dispatchEvent(new CustomEvent('outfit:categories-loaded'));
+   }catch(categoryError){
+    console.warn('Category lookup failed; product cards remain available:',categoryError);
    }
   }
-
-  grid.innerHTML=productsCache.length?productsCache.map(card).join(''):'<p class="helper">Our new collection is being prepared. Check back soon.</p>';
-  [['bestSellerGrid',p=>p.best_seller],['featuredGrid',p=>p.featured],['trendingGrid',p=>p.trending]].forEach(([id,test])=>{
-   const el=$(id);
-   if(el){const items=productsCache.filter(test);el.innerHTML=items.length?items.map(card).join(''):'<p class="helper">New selections coming soon.</p>';}
-  });
-  document.querySelectorAll('.product-grid [data-product]').forEach(el=>{
-   const open=()=>openProduct(el.dataset.product);
-   el.addEventListener('click',open);
-   el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
-  });
-  document.querySelectorAll('[data-wishlist]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();toggleWishlist(b.dataset.wishlist);}));
-  if(activeCategoryFilter)applyCategoryFilter(activeCategoryFilter);
-  window.dispatchEvent(new CustomEvent('outfit:products-loaded'));
  }catch(err){
   console.error('Supabase product query failed:',err);
   const message=String(err?.message||err||'Unknown error');
-  grid.innerHTML='<p class="helper">Products could not be loaded: '+escapeHtml(message)+'. Please check the Supabase products table and public SELECT policy.</p>';
+  grid.innerHTML='<p class="helper">Products could not be loaded: '+escapeHtml(message)+'. Please check the Supabase products query and network connection.</p>';
   window.dispatchEvent(new CustomEvent('outfit:products-error',{detail:{message}}));
  }
 }
