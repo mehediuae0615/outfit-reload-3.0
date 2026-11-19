@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<script>document.write('<link rel=\"stylesheet\" href=\"style.css?v='+Date.now()+'\">');</script>
 <style>
 .policy-page{background:#faf9f6;color:#30251f}
 .policy-hero{background:#eee9e1;text-align:center;padding:70px 6%}
@@ -162,6 +162,6 @@ const menu=document.getElementById('menuToggle');
 const nav=document.getElementById('mainNav');
 if(menu&&nav)menu.addEventListener('click',()=>nav.classList.toggle('open'));
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="cms.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>document.write('<script src=\"config.js?v='+Date.now()+'\"><\/script>');</script><script>document.write('<script src=\"cms.js?v='+Date.now()+'\"><\/script>');</script>
 </body>
 </html>
