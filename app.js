@@ -188,28 +188,8 @@ function saveMyOrder(orderNumber,phone){
  try{localStorage.setItem(MY_ORDERS_KEY,JSON.stringify(all.slice(0,10)))}catch(err){console.warn('Could not save this order on this device:',err)}
  renderMyOrders();
 }
-function ensureMyOrdersUI(){
- const host=document.querySelector('#track-order .track-order-inner');
- if(!host||$('myOrdersPanel'))return;
- const panel=document.createElement('div');panel.id='myOrdersPanel';panel.className='my-orders-panel';
- panel.innerHTML=`<div class="my-orders-heading"><div><p class="eyebrow">SAVED ON THIS DEVICE</p><h3>My Orders</h3><p class="my-orders-note">Your recent orders appear here automatically on this device. Select an order to refresh its latest status.</p></div><button type="button" class="my-orders-refresh" id="refreshMyOrders">REFRESH ALL ↻</button></div><div id="myOrdersList" aria-live="polite"></div>`;
- const form=$('trackingForm');if(form)host.insertBefore(panel,form);else host.appendChild(panel);
- const style=document.createElement('style');style.id='myOrdersStyles';style.textContent=`
- #myOrdersPanel{margin:28px 0 34px;padding:22px;background:#fff;border:1px solid #e4dbd2;border-radius:3px}
- .my-orders-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
- .my-orders-heading h3{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:500;margin:3px 0 6px;color:#30241e}
- .my-orders-note{font-size:.88rem;line-height:1.6;color:#766b63;margin:0;max-width:560px}
- .my-orders-refresh,.my-order-action{border:1px solid #d8ccc1;background:#f8f5f1;color:#4a3b32;padding:10px 12px;font:700 .7rem inherit;letter-spacing:.05em;cursor:pointer;white-space:nowrap}
- .my-order-card{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 0;border-top:1px solid #eee6df}
- .my-order-main{min-width:0}.my-order-main strong{display:block;color:#352920;font-size:.95rem;overflow-wrap:anywhere}.my-order-main small{display:block;color:#85796f;margin-top:5px;font-size:.78rem}
- .my-order-state{display:inline-block;margin-top:8px;padding:5px 9px;background:#eee7df;color:#5a402e;font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
- .my-order-actions{display:flex;gap:7px;flex-shrink:0}.my-order-action.remove{background:#fff;color:#8b5146}
- .my-orders-empty{padding:18px 0;color:#766b63;font-size:.9rem;line-height:1.6}
- @media(max-width:600px){#myOrdersPanel{padding:16px}.my-orders-heading{display:block}.my-orders-refresh{margin-top:12px}.my-order-card{align-items:flex-start;flex-direction:column}.my-order-actions{width:100%}.my-order-action{flex:1}}
- `;
- document.head.appendChild(style);
- $('refreshMyOrders').addEventListener('click',()=>renderMyOrders(true));
-}
+function ensureMyOrdersUI(){ return; }
+
 async function getSavedOrderStatus(order){
  const args={p_order_number:order.order_number,p_phone:order.phone};
  const [{data,error},{data:paymentInfo,error:paymentError}]=await Promise.all([
