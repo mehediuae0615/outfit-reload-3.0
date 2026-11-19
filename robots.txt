@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://mehediuae0615.github.io/outfit-reload-3.0/sitemap.xml

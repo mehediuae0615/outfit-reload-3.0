@@ -5,35 +5,52 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#3b2b22">
-<title>Terms & Conditions | Outfit Reload 3.0</title>
-<meta name="description" content="Read the terms and conditions for shopping at Outfit Reload 3.0.">
+<title>About Us | Outfit Reload 3.0</title>
+<meta name="robots" content="noindex,follow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
 <script>document.write('<link rel=\"stylesheet\" href=\"style.css?v='+Date.now()+'\">');</script>
 <style>
-.policy-page{background:#faf9f6;color:#30251f}
-.policy-hero{background:#eee9e1;text-align:center;padding:70px 6%}
-.policy-hero .eyebrow{font-size:10px;letter-spacing:3px;color:#8b7463}
-.policy-hero h1{font:500 clamp(36px,6vw,60px) "Playfair Display";margin:15px 0}
-.policy-hero p{font-size:13px;color:#75685e;line-height:1.8}
-.policy-wrap{max-width:850px;margin:auto;padding:65px 6% 85px}
-.policy-section{margin-bottom:38px}
-.policy-section h2{font:500 25px "Playfair Display";margin:0 0 13px}
-.policy-section p,.policy-section li{font-size:13px;line-height:2;color:#75685e}
-.policy-section ul{padding-left:20px}
-.policy-highlight{background:#eee9e1;padding:24px;margin:25px 0}
-.policy-highlight p{font-size:12px;line-height:1.9;color:#75685e}
-.policy-footer{background:#241b16;color:white;text-align:center;padding:35px 15px}
-.policy-footer a{color:#e6d7c9;font-size:11px;margin:0 10px}
-.policy-footer p{font-size:10px;color:#b6a79a;margin-top:25px}
-@media(max-width:600px){
-.policy-hero{padding:55px 6%}
-.policy-wrap{padding:45px 6% 65px}
+.about-page{background:#faf9f6;color:#30251f}
+.about-hero{padding:85px 7%;text-align:center;background:#eee9e1}
+.about-hero .eyebrow,.about-section .eyebrow{font-size:10px;letter-spacing:3px;color:#8b7463}
+.about-hero h1{font:500 clamp(42px,7vw,76px)/1.1 "Playfair Display",serif;margin:18px 0}
+.about-hero p{max-width:570px;margin:auto;color:#75685e;font-size:14px;line-height:1.9}
+.about-wrap{max-width:1100px;margin:auto;padding:75px 6%}
+.about-section{margin-bottom:75px}
+.about-section h2{font:500 clamp(30px,4vw,43px)/1.2 "Playfair Display",serif;margin:12px 0 20px}
+.about-section p{font-size:14px;line-height:2;color:#71665d}
+.about-story{display:grid;grid-template-columns:1fr 1fr;gap:55px;align-items:center}
+.about-visual{min-height:390px;background:#e8e0d6;display:flex;align-items:center;justify-content:center;text-align:center;padding:35px}
+.about-visual span{font:500 45px "Playfair Display";color:#725d4c;letter-spacing:2px}
+.about-visual small{display:block;font:10px "DM Sans";letter-spacing:4px;margin-top:12px}
+.about-quote{background:#3b2b22;color:#fff;text-align:center;padding:65px 8%;margin:0}
+.about-quote h2{font:500 clamp(29px,4vw,45px) "Playfair Display";margin:0 0 15px}
+.about-quote p{font-size:10px;letter-spacing:3px;color:#d8c7b7}
+.about-values{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:30px}
+.value-card{background:#fff;padding:28px 23px;border:1px solid #eee7df}
+.value-card span{font:30px "Playfair Display";color:#a18a76}
+.value-card h3{font:500 21px "Playfair Display";margin:15px 0 10px}
+.value-card p{font-size:12px;line-height:1.9;color:#776d64}
+.about-cta{text-align:center;background:#eee9e1;padding:55px 20px}
+.about-cta h2{font:500 35px "Playfair Display";margin:0 0 12px}
+.about-cta p{font-size:13px;color:#75685e;margin-bottom:25px}
+.about-cta a{display:inline-block;background:#3b2b22;color:white;padding:15px 28px;font-size:10px;letter-spacing:1.5px}
+.about-footer{background:#241b16;color:white;text-align:center;padding:35px 15px}
+.about-footer a{color:#e6d7c9;font-size:11px;margin:0 10px}
+.about-footer p{font-size:10px;color:#b6a79a;margin-top:25px}
+@media(max-width:700px){
+ .about-hero{padding:65px 7%}
+ .about-wrap{padding:55px 6%}
+ .about-story{grid-template-columns:1fr;gap:28px}
+ .about-visual{min-height:240px}
+ .about-values{grid-template-columns:1fr;gap:12px}
+ .about-section{margin-bottom:55px}
 }
 </style>
 </head>
-<body class="policy-page">
+<body class="about-page">
 <header class="site-header">
  <a class="brand" href="index.html">
   <span class="brand-mark">OR</span>
@@ -42,156 +59,110 @@
  <button class="menu-toggle" id="menuToggle" aria-label="Open menu">☰</button>
  <nav id="mainNav">
   <a href="index.html">Home</a>
+  <a href="index.html#new">New Arrivals</a>
+  <a href="index.html#featured">Collections</a>
   <a href="about.html">About Us</a>
-  <a href="contact.html">Contact</a>
  </nav>
- <div class="header-actions"><a class="icon-btn" href="index.html">Shop</a></div>
+ <div class="header-actions">
+  <a class="icon-btn" href="index.html">Shop</a>
+ </div>
 </header>
 <div class="announcement">WE FOCUS QUALITY, NOT QUANTITY.</div>
 
 <main>
-<section class="policy-hero">
- <p class="eyebrow">PLEASE READ BEFORE SHOPPING</p>
- <h1>Terms & Conditions.</h1>
- <p>These terms explain the rules for using the Outfit Reload 3.0 website and services.</p>
-</section>
+ <section class="about-hero">
+  <p class="eyebrow">THE STORY BEHIND THE BRAND</p>
+  <h1>More Than Just Fashion.</h1>
+  <p>We believe great style is not about having more. It's about choosing better. Welcome to Outfit Reload 3.0.</p>
+ </section>
 
-<article class="policy-wrap">
+ <div class="about-wrap">
+  <section class="about-section about-story">
+   <div>
+    <p class="eyebrow">WHO WE ARE</p>
+    <h2>Welcome to Outfit Reload 3.0.</h2>
+    <p>Outfit Reload 3.0 is a men's fashion brand built around a simple idea: quality should always come first.</p>
+    <p>We believe clothing is more than something you wear. It is a reflection of your personality, confidence and everyday lifestyle.</p>
+    <p>Our goal is to bring together carefully selected fashion essentials that make everyday dressing feel simple, comfortable and confident.</p>
+   </div>
+   <div class="about-visual">
+    <div>
+     <span>OUTFIT RELOAD</span>
+     <small>QUALITY · STYLE · CONFIDENCE</small>
+    </div>
+   </div>
+  </section>
 
-<section class="policy-section">
-<h2>1. Introduction</h2>
-<p>Welcome to Outfit Reload 3.0. By accessing or using our website, you agree to these Terms & Conditions. If you do not agree with these terms, please do not use our website.</p>
-</section>
+  <section class="about-quote">
+   <h2>“We focus quality, not quantity.”</h2>
+   <p>OUR PHILOSOPHY</p>
+  </section>
 
-<section class="policy-section">
-<h2>2. About Our Store</h2>
-<p>Outfit Reload 3.0 is an online men's fashion store offering clothing, footwear, accessories and other fashion products.</p>
-<p>Our brand philosophy is simple: We focus quality, not quantity.</p>
-</section>
+  <section class="about-section" style="margin-top:75px">
+   <p class="eyebrow">WHAT WE BELIEVE</p>
+   <h2>Our Philosophy.</h2>
+   <p>We believe in thoughtful choices, timeless style and value that goes beyond appearance. We aim to make shopping for men's fashion straightforward, enjoyable and reliable.</p>
+   <div class="about-values">
+    <article class="value-card">
+     <span>01</span>
+     <h3>Quality First</h3>
+     <p>We put quality and product value at the heart of our selection.</p>
+    </article>
+    <article class="value-card">
+     <span>02</span>
+     <h3>Everyday Style</h3>
+     <p>Fashion essentials that help you feel comfortable and confident every day.</p>
+    </article>
+    <article class="value-card">
+     <span>03</span>
+     <h3>Customer Care</h3>
+     <p>We aim to make every shopping experience clear, helpful and dependable.</p>
+    </article>
+   </div>
+  </section>
 
-<section class="policy-section">
-<h2>3. Product Information</h2>
-<ul>
-<li>We make reasonable efforts to display accurate product descriptions, images, colours, sizes and prices.</li>
-<li>Actual product colours may vary slightly due to screen settings, lighting or photography.</li>
-<li>Product availability and stock quantities may change without prior notice.</li>
-<li>We reserve the right to correct genuine product description, pricing or listing errors.</li>
-</ul>
-</section>
+  <section class="about-section">
+   <p class="eyebrow">OUR MISSION</p>
+   <h2>Better Choices. Better Style.</h2>
+   <p>Our mission is to make quality-focused men's fashion accessible through a carefully selected collection, clear product information and customer-focused service.</p>
+  </section>
 
-<section class="policy-section">
-<h2>4. Prices and Payments</h2>
-<p>All product prices are displayed in Bangladeshi Taka (BDT), unless stated otherwise.</p>
-<p>Delivery charges are calculated according to the applicable delivery location and displayed during checkout.</p>
-<p>Cash on Delivery (COD) is currently offered as the store's payment method. Any additional payment method will be subject to its displayed terms.</p>
-</section>
+  <section class="about-section">
+   <p class="eyebrow">OUR COMMITMENT</p>
+   <h2>We Want You to Shop with Confidence.</h2>
+   <p>From exploring our collections to receiving your order, we want your experience with Outfit Reload 3.0 to be simple and transparent. We continue working to improve our products, service and shopping experience.</p>
+  </section>
+ </div>
 
-<section class="policy-section">
-<h2>5. Orders and Confirmation</h2>
-<ul>
-<li>Submitting an order is a request to purchase the selected products.</li>
-<li>Orders are subject to product availability and confirmation by our store.</li>
-<li>We may contact customers to verify order details or delivery information.</li>
-<li>An order may be declined or cancelled if an item is unavailable, information is incorrect or there is a genuine pricing or technical error.</li>
-<li>Customers should provide accurate contact and delivery details.</li>
-</ul>
-</section>
-
-<section class="policy-section">
-<h2>6. Delivery</h2>
-<p>We aim to deliver orders within the estimated delivery periods shown on our Shipping Policy page. Delivery times are estimates and may be affected by courier operations, weather, public holidays or other circumstances beyond our control.</p>
-<p>Please ensure someone is available to receive the order at the provided delivery address.</p>
-<p>For full details, please read our <a href="shipping-policy.html">Shipping Policy</a>.</p>
-</section>
-
-<section class="policy-section">
-<h2>7. Returns and Exchanges</h2>
-<p>Return and exchange requests are handled according to our Return & Refund Policy.</p>
-<p>Customers should review the eligibility requirements and contact our support team before sending any product back.</p>
-<p><a href="return-policy.html">Read our Return & Refund Policy</a>.</p>
-</section>
-
-<section class="policy-section">
-<h2>8. Customer Responsibilities</h2>
-<p>When using our website, you agree to:</p>
-<ul>
-<li>Provide accurate and complete order information.</li>
-<li>Use the website for lawful purposes only.</li>
-<li>Not attempt to disrupt, damage or gain unauthorized access to our website or systems.</li>
-<li>Not submit fraudulent orders or misleading information.</li>
-<li>Respect the intellectual property and rights of others.</li>
-</ul>
-</section>
-
-<section class="policy-section">
-<h2>9. Intellectual Property</h2>
-<p>Website content, including brand elements, text, graphics, design and original images, may be protected by intellectual property laws.</p>
-<p>You may not reproduce, distribute or commercially use our original content without prior written permission, except where permitted by law.</p>
-</section>
-
-<section class="policy-section">
-<h2>10. Website Availability</h2>
-<p>We aim to keep our website available and functioning properly. However, temporary interruptions may occur due to maintenance, technical issues or circumstances beyond our control.</p>
-<p>We do not guarantee uninterrupted or error-free access to the website.</p>
-</section>
-
-<section class="policy-section">
-<h2>11. Limitation of Liability</h2>
-<p>To the extent permitted by applicable law, Outfit Reload 3.0 will not be responsible for indirect or consequential losses arising from the use of our website or delays caused by third-party services.</p>
-<p>Nothing in these terms excludes or limits any liability or consumer rights that cannot legally be excluded or limited under applicable law.</p>
-</section>
-
-<section class="policy-section">
-<h2>12. Privacy</h2>
-<p>We collect and use customer information as described in our Privacy Policy.</p>
-<p><a href="privacy-policy.html">Read our Privacy Policy</a>.</p>
-</section>
-
-<section class="policy-section">
-<h2>13. Changes to These Terms</h2>
-<p>We may update these Terms & Conditions when necessary. Changes will be published on this page. Continued use of the website after an update means you acknowledge the revised terms, subject to applicable law.</p>
-</section>
-
-<section class="policy-section">
-<h2>14. Governing Law</h2>
-<p>These terms are intended to be governed by the applicable laws of Bangladesh. Any disputes will be handled by the competent authorities or courts in accordance with applicable law.</p>
-</section>
-
-<div class="policy-highlight">
-<p><b>Need assistance?</b><br>If you have any questions about these terms, contact our customer support team.</p>
-<p><a href="https://wa.me/8801404609229">CONTACT US ON WHATSAPP ↗</a></p>
-</div>
-
-<section class="policy-section">
-<h2>15. Contact Information</h2>
-<p><b>Store:</b> Outfit Reload 3.0</p>
-<p><b>Email:</b> mh7112650@gmail.com</p>
-<p><b>WhatsApp:</b> +8801404609229</p>
-<p><b>Last updated:</b> 19 November 2026</p>
-</section>
-
-</article>
+ <section class="about-cta">
+  <h2>Find Your Everyday Style.</h2>
+  <p>Explore the collection and discover your next favourite piece.</p>
+  <a href="index.html">EXPLORE COLLECTIONS ↗</a>
+ </section>
 </main>
 
-<footer class="policy-footer">
-<div class="brand-mark">OR</div>
-<p>OUTFIT RELOAD 3.0</p>
-<div>
-<a href="about.html">About Us</a>
-<a href="contact.html">Contact Us</a>
-<a href="shipping-policy.html">Shipping Policy</a>
-<a href="return-policy.html">Return Policy</a>
-<a href="privacy-policy.html">Privacy Policy</a>
-<a href="terms.html">Terms</a>
-</div>
-<p>© 2026 OUTFIT RELOAD 3.0. ALL RIGHTS RESERVED.</p>
+<footer class="about-footer">
+ <div class="brand-mark">OR</div>
+ <p>OUTFIT RELOAD 3.0</p>
+ <div>
+  <a href="about.html">About Us</a>
+  <a href="contact.html">Contact Us</a>
+  <a href="shipping-policy.html">Shipping Policy</a>
+  <a href="return-policy.html">Return Policy</a>
+  <a href="privacy-policy.html">Privacy Policy</a>
+  <a href="terms.html">Terms</a>
+ </div>
+ <p>© 2026 OUTFIT RELOAD 3.0. ALL RIGHTS RESERVED.</p>
 </footer>
 
 <script>
 const menu=document.getElementById('menuToggle');
 const nav=document.getElementById('mainNav');
-if(menu&&nav)menu.addEventListener('click',()=>nav.classList.toggle('open'));
+if(menu&&nav){
+ menu.addEventListener('click',()=>nav.classList.toggle('open'));
+}
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>document.write('<script src=\"config.js?v='+Date.now()+'\"><\/script>');</script><script>document.write('<script src=\"cms.js?v='+Date.now()+'\"><\/script>');</script>
 </body>
 </html>
+
