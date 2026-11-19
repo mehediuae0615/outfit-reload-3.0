@@ -31,35 +31,26 @@ function saveBag(){sessionStorage.setItem('or_cart',JSON.stringify(cart));update
 function changeBagQty(i,delta){if(!cart[i])return;cart[i].qty+=delta;if(cart[i].qty<=0)cart.splice(i,1);saveBag()}
 function openBag(){$('bagDrawer').classList.add('open');$('bagDrawer').setAttribute('aria-hidden','false');document.body.classList.add('no-scroll');renderBag()}
 function closeBag(){$('bagDrawer').classList.remove('open');$('bagDrawer').setAttribute('aria-hidden','true');document.body.classList.remove('no-scroll')}
-$('bagButton').onclick=openBag;$('closeBag').onclick=closeBag;$('bagDrawer').addEventListener('click',e=>{if(e.target===$('bagDrawer'))closeBag()});function openCheckout(){
- if(!cart.length)return;
- closeBag();
- $('checkoutForm').reset();
- $('checkoutError').textContent='';
- $('checkoutFormWrap').hidden=false;
- $('orderSuccess').hidden=true;
- updateCheckoutTotals();
- $('checkoutModal').classList.add('open');
- $('checkoutModal').setAttribute('aria-hidden','false');
- document.body.classList.add('no-scroll');
+$('bagButton').onclick=openBag;$('closeBag').onclick=closeBag;$('bagDrawer').addEventListener('click',e=>{if(e.target===$('bagDrawer'))closeBag()});
+let checkoutStep=1;
+function renderCheckoutCart(){
+ const host=$('checkoutCartItems');if(!host)return;
+ host.innerHTML=cart.map(x=>{const p=productsCache.find(v=>v.id===x.id);const img=p?.image_urls?.[0]||p?.image||'https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=220&q=80';return `<article class="checkout-cart-item"><img src="${escapeHtml(img)}" alt="${escapeHtml(x.name)}"><div><b>${escapeHtml(x.name)}</b><small>${escapeHtml(x.size||'One Size')} · ${escapeHtml(x.color||'Standard')} · Qty ${Number(x.qty)}</small><strong>${money(Number(x.price)*Number(x.qty))}</strong></div></article>`}).join('');
+ $('checkoutItemCount').textContent=cart.reduce((n,x)=>n+Number(x.qty),0)+' items';$('checkoutCartSubtotal').textContent=money(cart.reduce((n,x)=>n+Number(x.price)*Number(x.qty),0));
 }
-function closeCheckout(){
- $('checkoutModal').classList.remove('open');
- $('checkoutModal').setAttribute('aria-hidden','true');
- document.body.classList.remove('no-scroll');
+function renderCheckoutReview(){
+ const host=$('checkoutReviewItems');if(host)host.innerHTML=cart.map(x=>`<div><span>${escapeHtml(x.name)} × ${Number(x.qty)}</span><b>${money(Number(x.price)*Number(x.qty))}</b></div>`).join('');
+ const subtotal=cart.reduce((n,x)=>n+Number(x.price)*Number(x.qty),0),settings=window.OUTFIT_RELOAD_SETTINGS||{},fee=$('deliveryArea').value==='inside_dhaka'?Number(settings.deliveryInside??80):Number(settings.deliveryOutside??130),discount=Number(appliedCoupon?.discount_amount||0),total=subtotal+fee-discount;
+ $('reviewSubtotal').textContent=money(subtotal);$('reviewDelivery').textContent=money(fee);$('reviewTotal').textContent=money(total);$('reviewDiscountRow').hidden=!appliedCoupon;$('reviewDiscount').textContent='−'+money(discount);
 }
-function updateCheckoutTotals(){
- const subtotal=cart.reduce((n,x)=>n+Number(x.price)*Number(x.qty),0);
- const settings=window.OUTFIT_RELOAD_SETTINGS||{};const fee=$('deliveryArea').value==='inside_dhaka'?Number(settings.deliveryInside??80):Number(settings.deliveryOutside??130);
- $('checkoutSubtotal').textContent=money(subtotal);
- $('checkoutDelivery').textContent=money(fee);
- $('checkoutTotal').textContent=money(subtotal+fee-(appliedCoupon?.discount_amount||0));if($('couponDiscountRow'))$('couponDiscountRow').hidden=!appliedCoupon;if($('checkoutDiscount'))$('checkoutDiscount').textContent='−'+money(appliedCoupon?.discount_amount||0);
-}
-$('bagCheckout').onclick=openCheckout;
-$('closeCheckout').onclick=closeCheckout;
-$('checkoutModal').addEventListener('click',e=>{if(e.target===$('checkoutModal'))closeCheckout()});
-$('deliveryArea').addEventListener('change',updateCheckoutTotals);
-$('continueShopping').onclick=()=>{closeCheckout();window.scrollTo({top:0,behavior:'smooth'})};
+function setCheckoutStep(step){checkoutStep=step;document.querySelectorAll('[data-checkout-stage]').forEach(el=>el.hidden=Number(el.dataset.checkoutStage)!==step);document.querySelectorAll('[data-progress]').forEach(el=>{const n=Number(el.dataset.progress);el.classList.toggle('active',n===step);el.classList.toggle('complete',n<step)});if(step===1)renderCheckoutCart();if(step===3)renderCheckoutReview();$('checkoutTitle').textContent=step===1?'Your cart':step===2?'Shipping details':'Payment & review';}
+function openCheckout(){if(!cart.length)return;closeBag();$('checkoutForm').reset();appliedCoupon=null;$('couponMessage').textContent='';$('checkoutError').textContent='';$('checkoutFormWrap').hidden=false;$('orderSuccess').hidden=true;updateCheckoutTotals();setCheckoutStep(1);$('checkoutModal').classList.add('open');$('checkoutModal').setAttribute('aria-hidden','false');document.body.classList.add('no-scroll')}
+function closeCheckout(){$('checkoutModal').classList.remove('open');$('checkoutModal').setAttribute('aria-hidden','true');document.body.classList.remove('no-scroll')}
+function updateCheckoutTotals(){const subtotal=cart.reduce((n,x)=>n+Number(x.price)*Number(x.qty),0),settings=window.OUTFIT_RELOAD_SETTINGS||{},fee=$('deliveryArea').value==='inside_dhaka'?Number(settings.deliveryInside??80):Number(settings.deliveryOutside??130);$('checkoutSubtotal').textContent=money(subtotal);$('checkoutDelivery').textContent=money(fee);$('checkoutTotal').textContent=money(subtotal+fee-(appliedCoupon?.discount_amount||0));$('couponDiscountRow').hidden=!appliedCoupon;$('checkoutDiscount').textContent='−'+money(appliedCoupon?.discount_amount||0);if(checkoutStep===3)renderCheckoutReview()}
+$('bagCheckout').onclick=openCheckout;$('closeCheckout').onclick=closeCheckout;$('checkoutModal').addEventListener('click',e=>{if(e.target===$('checkoutModal'))closeCheckout()});$('deliveryArea').addEventListener('change',updateCheckoutTotals);$('continueShopping').onclick=()=>{closeCheckout();window.scrollTo({top:0,behavior:'smooth'})};
+$('checkoutToShipping').onclick=()=>setCheckoutStep(2);
+$('checkoutToPayment').onclick=()=>{const form=$('checkoutForm');for(const field of form.querySelectorAll('[data-checkout-stage="2"] input,[data-checkout-stage="2"] select,[data-checkout-stage="2"] textarea')){if(!field.checkValidity()){field.reportValidity();return}}setCheckoutStep(3)};
+document.querySelectorAll('[data-checkout-back]').forEach(b=>b.addEventListener('click',()=>setCheckoutStep(Number(b.dataset.checkoutBack))));
 $('checkoutForm').addEventListener('submit',async e=>{
  e.preventDefault();
  if(!cart.length){$('checkoutError').textContent='Your bag is empty.';return}
@@ -76,8 +67,7 @@ $('checkoutForm').addEventListener('submit',async e=>{
    p_delivery_area:values.delivery_area,
    p_delivery_address:values.delivery_address,
    p_customer_note:values.customer_note||null,
-   p_items:items,
-   p_coupon_code:appliedCoupon?.code||null
+   p_items:items
   });
   if(error)throw error;
   const result=Array.isArray(data)?data[0]:data;
@@ -92,7 +82,7 @@ $('checkoutForm').addEventListener('submit',async e=>{
   console.error('Checkout error:',err);
   $('checkoutError').textContent=err.message||'Your order could not be submitted. Please check your details and try again.';
  }finally{
-  button.disabled=false;button.textContent='PLACE ORDER · CASH ON DELIVERY ↗';
+  button.disabled=false;button.textContent='PLACE ORDER · COD ↗';
  }
 });
 let lastFlashSignature='';
