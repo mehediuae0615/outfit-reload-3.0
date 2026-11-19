@@ -114,9 +114,15 @@
 
           <section class="checkout-stage" data-checkout-stage="3" hidden>
             <div class="checkout-stage-heading"><div><p class="eyebrow">STEP 03</p><h3>Payment method</h3></div><span>Choose how to pay</span></div>
-            <div class="payment-choice selected" aria-current="true"><span class="payment-radio">✓</span><span class="payment-symbol">৳</span><span class="payment-copy"><b>Cash on Delivery</b><small>Pay the order amount when your parcel arrives</small></span><span class="payment-status">AVAILABLE</span></div>
-            <div class="payment-choice payment-coming-soon" id="bkashPaymentChoice" role="button" tabindex="0" aria-label="Open bKash delivery payment test page" style="cursor:pointer"><span class="payment-radio">↗</span><span class="bkash-mark">bK</span><span class="payment-copy"><b>bKash Payment</b><small>Pay delivery charge by bKash · Test interface</small><em>Product amount will remain Cash on Delivery</em></span><span class="payment-status soon">TEST PAGE</span></div>
-            <div class="checkout-final-summary"><div class="checkout-stage-heading"><div><p class="eyebrow">ORDER REVIEW</p><h3>Order summary</h3></div></div><div id="checkoutReviewItems" class="checkout-review-items"></div><div class="checkout-review"><div><span>Subtotal</span><strong id="reviewSubtotal">৳ 0</strong></div><div><span>Delivery</span><strong id="reviewDelivery">৳ 0</strong></div><div id="reviewDiscountRow" hidden><span>Coupon discount</span><strong id="reviewDiscount">−৳ 0</strong></div><div class="checkout-total"><span>Total payable on delivery</span><strong id="reviewTotal">৳ 0</strong></div></div></div>
+            <div class="payment-choice selected" id="codPaymentChoice" aria-current="true"><span class="payment-radio">✓</span><span class="payment-symbol">৳</span><span class="payment-copy"><b>Cash on Delivery</b><small>Pay the full order amount when your parcel arrives</small></span><span class="payment-status">AVAILABLE</span></div>
+            <div class="payment-choice" id="bkashPaymentChoice" hidden><span class="payment-radio">bK</span><span class="bkash-mark">bK</span><span class="payment-copy"><b>bKash · Delivery charge</b><small>Send only the delivery charge to the number below. Product amount remains COD.</small></span><span class="payment-status">REQUIRED</span></div>
+            <div id="bkashDeliveryPanel" class="checkout-review" hidden style="margin-top:14px;padding:16px;border:1px solid #e8e0d8;border-radius:12px">
+              <p class="eyebrow">DELIVERY PAYMENT</p><p style="margin:6px 0">Send the delivery charge to this bKash personal number:</p><strong id="bkashPayNumber" style="font-size:20px;letter-spacing:1px"></strong>
+              <p class="helper" style="margin:8px 0 14px">After sending money, enter the sender number and Transaction ID (TrxID). The store will verify it manually.</p>
+              <label class="full-field">Your bKash sender number<input id="bkashSenderNumber" name="bkash_sender_number" type="tel" inputmode="numeric" placeholder="01XXXXXXXXX" autocomplete="tel" disabled></label>
+              <label class="full-field" style="margin-top:10px">bKash Transaction ID (TrxID)<input id="bkashTrxId" name="bkash_trxid" type="text" maxlength="40" placeholder="Enter TrxID" autocomplete="off" disabled></label>
+            </div>
+            <div class="checkout-final-summary"><div class="checkout-stage-heading"><div><p class="eyebrow">ORDER REVIEW</p><h3>Order summary</h3></div></div><div id="checkoutReviewItems" class="checkout-review-items"></div><div class="checkout-review"><div><span>Subtotal</span><strong id="reviewSubtotal">৳ 0</strong></div><div><span>Delivery</span><strong id="reviewDelivery">৳ 0</strong></div><div id="reviewDiscountRow" hidden><span>Coupon discount</span><strong id="reviewDiscount">−৳ 0</strong></div><div class="checkout-total"><span id="reviewTotalLabel">Total payable on delivery</span><strong id="reviewTotal">৳ 0</strong></div></div></div>
             <p id="checkoutError" class="checkout-error full-field" role="alert"></p>
             <div class="checkout-stage-actions"><button type="button" class="btn btn-light" data-checkout-back="2">← BACK</button><button type="submit" class="btn btn-dark" id="placeOrderButton">PLACE ORDER · COD ↗</button></div>
           </section>
@@ -173,20 +179,4 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>document.write('<script src=\"config.js?v='+Date.now()+'\"><\/script>');</script><script>document.write('<script src=\"app.js?v='+Date.now()+'\"><\/script>');</script><script>document.write('<script src=\"cms.js?v='+Date.now()+'\"><\/script>');</script>
 
-<script>
-(function(){
-  const choice=document.getElementById('bkashPaymentChoice');
-  if(!choice) return;
-  function openBkashPayment(){
-    const settings=window.OUTFIT_RELOAD_SETTINGS||{};
-    const area=document.getElementById('deliveryArea');
-    const fee=area && area.value==='inside_dhaka' ? Number(settings.deliveryInside??80) : Number(settings.deliveryOutside??130);
-    const url=new URL('bkash-payment-reference.html',window.location.href);
-    url.searchParams.set('amount',String(fee));
-    window.location.href=url.toString();
-  }
-  choice.addEventListener('click',openBkashPayment);
-  choice.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openBkashPayment();}});
-})();
-</script>
 </body></html>

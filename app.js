@@ -33,6 +33,18 @@ function openBag(){$('bagDrawer').classList.add('open');$('bagDrawer').setAttrib
 function closeBag(){$('bagDrawer').classList.remove('open');$('bagDrawer').setAttribute('aria-hidden','true');document.body.classList.remove('no-scroll')}
 $('bagButton').onclick=openBag;$('closeBag').onclick=closeBag;$('bagDrawer').addEventListener('click',e=>{if(e.target===$('bagDrawer'))closeBag()});
 let checkoutStep=1;
+let bkashDeliveryConfig={enabled:false,number:''};
+async function loadBkashDeliveryConfig(){
+ try{const {data,error}=await supabaseClient.from('store_settings').select('value').eq('key','bkash_delivery_payment').maybeSingle();if(error)throw error;const raw=data?.value;bkashDeliveryConfig=raw?JSON.parse(raw):{enabled:false,number:''};if(typeof bkashDeliveryConfig.enabled!=='boolean')bkashDeliveryConfig.enabled=false;if(!bkashDeliveryConfig.enabled)bkashDeliveryConfig.number='';renderBkashCheckout();}catch(error){console.error('Could not load bKash settings:',error);bkashDeliveryConfig={enabled:false,number:''};renderBkashCheckout();}
+}
+function renderBkashCheckout(){
+ const panel=$('bkashDeliveryPanel'),choice=$('bkashPaymentChoice');if(!panel||!choice)return;
+ panel.hidden=!bkashDeliveryConfig.enabled;choice.hidden=!bkashDeliveryConfig.enabled;
+ const number=$('bkashPayNumber');if(number)number.textContent=bkashDeliveryConfig.number||'Contact store';
+ const sender=$('bkashSenderNumber'),trx=$('bkashTrxId');if(sender){sender.required=!!bkashDeliveryConfig.enabled;sender.disabled=!bkashDeliveryConfig.enabled;}if(trx){trx.required=!!bkashDeliveryConfig.enabled;trx.disabled=!bkashDeliveryConfig.enabled;}
+ const cod=$('codPaymentChoice');if(cod){cod.querySelector('small').textContent=bkashDeliveryConfig.enabled?'Pay the product amount after delivery. Delivery charge is paid by bKash.':'Pay the full order amount when your parcel arrives';}
+ const button=$('placeOrderButton');if(button)button.textContent=bkashDeliveryConfig.enabled?'SUBMIT ORDER · DELIVERY PAID BY BKASH ↗':'PLACE ORDER · FULL COD ↗';
+}
 function renderCheckoutCart(){
  const host=$('checkoutCartItems');if(!host)return;
  host.innerHTML=cart.map(x=>{const p=productsCache.find(v=>v.id===x.id);const img=p?.image_urls?.[0]||p?.image||'https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=220&q=80';return `<article class="checkout-cart-item"><img src="${escapeHtml(img)}" alt="${escapeHtml(x.name)}"><div><b>${escapeHtml(x.name)}</b><small>${escapeHtml(x.size||'One Size')} · ${escapeHtml(x.color||'Standard')} · Qty ${Number(x.qty)}</small><strong>${money(Number(x.price)*Number(x.qty))}</strong></div></article>`}).join('');
@@ -41,7 +53,7 @@ function renderCheckoutCart(){
 function renderCheckoutReview(){
  const host=$('checkoutReviewItems');if(host)host.innerHTML=cart.map(x=>`<div><span>${escapeHtml(x.name)} × ${Number(x.qty)}</span><b>${money(Number(x.price)*Number(x.qty))}</b></div>`).join('');
  const subtotal=cart.reduce((n,x)=>n+Number(x.price)*Number(x.qty),0),settings=window.OUTFIT_RELOAD_SETTINGS||{},fee=$('deliveryArea').value==='inside_dhaka'?Number(settings.deliveryInside??80):Number(settings.deliveryOutside??130),discount=Number(appliedCoupon?.discount_amount||0),total=subtotal+fee-discount;
- $('reviewSubtotal').textContent=money(subtotal);$('reviewDelivery').textContent=money(fee);$('reviewTotal').textContent=money(total);$('reviewDiscountRow').hidden=!appliedCoupon;$('reviewDiscount').textContent='−'+money(discount);
+ $('reviewSubtotal').textContent=money(subtotal);$('reviewDelivery').textContent=money(fee);$('reviewTotal').textContent=money(bkashDeliveryConfig.enabled?Math.max(0,total-fee):total);$('reviewDiscountRow').hidden=!appliedCoupon;$('reviewDiscount').textContent='−'+money(discount);const totalLabel=$('reviewTotalLabel');if(totalLabel)totalLabel.textContent=bkashDeliveryConfig.enabled?'Remaining Cash on Delivery':'Total payable on delivery';const deliveryLabel=$('reviewDeliveryLabel');if(deliveryLabel)deliveryLabel.textContent=bkashDeliveryConfig.enabled?'Delivery charge · bKash':'Delivery';
 }
 function setCheckoutStep(step){checkoutStep=step;document.querySelectorAll('[data-checkout-stage]').forEach(el=>el.hidden=Number(el.dataset.checkoutStage)!==step);document.querySelectorAll('[data-progress]').forEach(el=>{const n=Number(el.dataset.progress);el.classList.toggle('active',n===step);el.classList.toggle('complete',n<step)});if(step===1)renderCheckoutCart();if(step===3)renderCheckoutReview();$('checkoutTitle').textContent=step===1?'Your cart':step===2?'Shipping details':'Payment & review';}
 function openCheckout(){if(!cart.length)return;closeBag();$('checkoutForm').reset();appliedCoupon=null;$('couponMessage').textContent='';$('checkoutError').textContent='';$('checkoutFormWrap').hidden=false;$('orderSuccess').hidden=true;updateCheckoutTotals();setCheckoutStep(1);$('checkoutModal').classList.add('open');$('checkoutModal').setAttribute('aria-hidden','false');document.body.classList.add('no-scroll')}
@@ -58,6 +70,7 @@ $('checkoutForm').addEventListener('submit',async e=>{
  const form=e.currentTarget;
  const values=Object.fromEntries(new FormData(form).entries());
  const button=$('placeOrderButton');
+ if(bkashDeliveryConfig.enabled){const sender=String(values.bkash_sender_number||'').trim(),trx=String(values.bkash_trxid||'').trim();if(sender.replace(/\D/g,'').length<10){$('checkoutError').textContent='Enter the bKash sender number used to make the payment.';return}if(trx.length<6){$('checkoutError').textContent='Enter the bKash Transaction ID (TrxID).';return}}
  button.disabled=true;button.textContent='SUBMITTING YOUR ORDER…';$('checkoutError').textContent='';
  try{
   const items=cart.map(x=>({product_id:x.id,quantity:Number(x.qty),size:x.size||'One Size',color:x.color||'Default'}));
@@ -68,7 +81,10 @@ $('checkoutForm').addEventListener('submit',async e=>{
    p_delivery_area:values.delivery_area,
    p_delivery_address:values.delivery_address,
    p_customer_note:values.customer_note||null,
-   p_items:items
+   p_items:items,
+   p_coupon_code:appliedCoupon?.code||null,
+   p_bkash_sender_number:bkashDeliveryConfig.enabled?String(values.bkash_sender_number||'').trim():null,
+   p_bkash_trxid:bkashDeliveryConfig.enabled?String(values.bkash_trxid||'').trim():null
   });
   if(error)throw error;
   const result=Array.isArray(data)?data[0]:data;
@@ -78,7 +94,8 @@ $('checkoutForm').addEventListener('submit',async e=>{
   $('checkoutFormWrap').hidden=true;
   $('orderSuccess').hidden=false;
   $('successOrderNumber').textContent=result.order_number;
-  $('successOrderTotal').textContent='Total payable on delivery: '+money(total);
+  const deliveryFee=$('deliveryArea').value==='inside_dhaka'?Number((window.OUTFIT_RELOAD_SETTINGS||{}).deliveryInside??80):Number((window.OUTFIT_RELOAD_SETTINGS||{}).deliveryOutside??130);
+  $('successOrderTotal').textContent=bkashDeliveryConfig.enabled?'Delivery charge paid by bKash: '+money(deliveryFee)+' · Remaining COD: '+money(Math.max(0,Number(total)-deliveryFee)):'Total payable on delivery: '+money(total);
  }catch(err){
   console.error('Checkout error:',err);
   $('checkoutError').textContent=err.message||'Your order could not be submitted. Please check your details and try again.';
@@ -121,6 +138,7 @@ const nav=$('mainNav');$('menuToggle')?.addEventListener('click',()=>{const open
 $('newsletterForm')?.addEventListener('submit',e=>{e.preventDefault();alert('Thank you for subscribing!')});
 document.addEventListener('outfit:content-loaded',()=>{if($('deliveryArea'))updateCheckoutTotals()});
 (async()=>{const {data}=await supabaseClient.from('store_settings').select('value').eq('key','announcement').maybeSingle();if(data?.value)$('announcement').textContent=data.value;})();
+loadBkashDeliveryConfig();
 
 
 // Privacy-preserving customer order lookup: server verifies order number + phone.
