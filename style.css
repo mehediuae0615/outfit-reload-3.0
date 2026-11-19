@@ -291,3 +291,52 @@ body:not(.admin-body) .track-order-section{background:#f1ece5}
 .success-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:390px;margin:20px auto 0}
 .success-actions .btn{width:100%;min-height:48px;margin:0;font-size:10px;letter-spacing:.7px}
 @media(max-width:600px){.checkout-wizard .order-success{padding:36px 2px 18px}.success-actions{grid-template-columns:1fr}.order-success .success-mark{width:68px;height:68px}}
+
+
+/* OUTFIT RELOAD 3.0 — announcement bar placement and motion */
+body:not(.admin-body) .announcement,
+body:not(.admin-body) #announcement {
+  position: relative !important;
+  z-index: 9 !important;
+  display: block !important;
+  width: 100% !important;
+  min-height: 38px !important;
+  margin: 0 !important;
+  padding: 11px 12px !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  text-indent: -100% !important;
+  background: linear-gradient(100deg, #2d1d15 0%, #684329 48%, #2d1d15 100%) !important;
+  color: #fff4df !important;
+  border-top: 1px solid rgba(224, 177, 105, .75) !important;
+  border-bottom: 2px solid #c99a55 !important;
+  box-shadow: 0 3px 12px rgba(49, 31, 20, .16), inset 0 1px 0 rgba(255,255,255,.10) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 14px !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+  animation: outfitAnnouncementTravel 13s linear infinite !important;
+}
+@keyframes outfitAnnouncementTravel {
+  from { text-indent: -100%; }
+  to { text-indent: 100%; }
+}
+body:not(.admin-body) .announcement:hover,
+body:not(.admin-body) #announcement:hover {
+  animation-play-state: paused !important;
+}
+@media (max-width: 600px) {
+  body:not(.admin-body) .announcement,
+  body:not(.admin-body) #announcement {
+    min-height: 36px !important;
+    padding: 10px 8px !important;
+    font-size: 9px !important;
+    letter-spacing: 1.5px !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body:not(.admin-body) .announcement,
+  body:not(.admin-body) #announcement { animation: none !important; text-indent: 0 !important; }
+}
