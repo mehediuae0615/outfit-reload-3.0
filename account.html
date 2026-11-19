@@ -61,10 +61,19 @@
         <form id="profileForm" class="ca-form ca-profile-form">
           <label>Full name<input name="full_name" required minlength="2" maxlength="100"></label>
           <label>Phone number<input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="01XXXXXXXXX"></label>
-          <label class="ca-wide">Delivery address<textarea name="address" rows="3" placeholder="Your preferred delivery address"></textarea></label>
+          <input type="hidden" name="address" value="">
           <button class="ca-primary ca-wide" type="submit" id="saveProfileButton">SAVE DETAILS</button>
         </form>
         <p class="ca-message" id="profileMessage" role="status"></p>
+        <div class="ca-member-card">
+          <div class="ca-member-copy">
+            <p class="ca-eyebrow">THE OUTFIT RELOAD EDIT</p>
+            <h3>Good style.<br>Better choices.</h3>
+            <p>Explore carefully selected essentials made to elevate your everyday look.</p>
+            <a href="index.html" class="ca-member-link">DISCOVER THE COLLECTION <span>↗</span></a>
+          </div>
+          <div class="ca-member-art" aria-hidden="true"><span>OR</span><small>QUALITY<br>OVER<br>QUANTITY</small></div>
+        </div>
       </section>
 
       <section class="ca-section">
