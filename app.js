@@ -159,7 +159,16 @@ trackingForm?.addEventListener('submit',async e=>{
   if(!data||data.found!==true)throw new Error('We could not find an order matching those details. Check the order number and phone number, then try again.');
   const statusLabels={pending:'Pending',confirmed:'Confirmed',processing:'Processing',shipped:'Shipped',delivered:'Delivered',cancelled:'Cancelled'};
   const items=Array.isArray(data.items)?data.items:[];
-  resultBox.innerHTML=`<h3>Order ${escapeHtml(data.order_number)}</h3><span class="tracking-status">${escapeHtml(statusLabels[data.status]||data.status)}</span><div class="tracking-meta"><div><span>Order date</span><strong>${escapeHtml(new Date(data.created_at).toLocaleDateString('en-GB'))}</strong></div><div><span>Order status</span><strong>${escapeHtml(statusLabels[data.status]||data.status)}</strong></div><div><span>Delivery area</span><strong>${data.delivery_area==='inside_dhaka'?'Inside Dhaka':'Outside Dhaka'}</strong></div><div><span>Total payable</span><strong>${money(data.total)}</strong></div></div><div class="tracking-items"><b>Order items</b>${items.map(item=>`<div class="tracking-item"><span>${escapeHtml(item.product_name)} · ${escapeHtml(item.size||'One Size')} / ${escapeHtml(item.color||'Default')} × ${Number(item.quantity)}</span><strong>${money(item.line_total)}</strong></div>`).join('')}</div>`;
+  const {data:paymentInfo,error:paymentError}=await supabaseClient.rpc('track_customer_bkash_payment',{
+   p_order_number:String(values.order_number||'').trim().toUpperCase(),
+   p_phone:String(values.phone||'').trim()
+  });
+  if(paymentError)throw paymentError;
+  const bkashStatus=paymentInfo?.bkash_payment_status||'not_required';
+  const bkashLabels={pending:'Pending · Payment is being reviewed',verified:'Verified · Payment confirmed',rejected:'Rejected · Payment was not accepted',not_required:'Not required · Cash on Delivery'};
+  const showBkash=paymentInfo?.payment_method==='bkash_delivery_cod';
+  const paymentPanel=showBkash?`<div class="tracking-meta"><div><span>bKash delivery payment</span><strong>${escapeHtml(bkashLabels[bkashStatus]||'Status unavailable')}</strong><small>Delivery fee: ${money(paymentInfo.delivery_fee)}</small></div></div>`:'';
+  resultBox.innerHTML=`<h3>Order ${escapeHtml(data.order_number)}</h3><span class="tracking-status">${escapeHtml(statusLabels[data.status]||data.status)}</span>${paymentPanel}<div class="tracking-meta"><div><span>Order date</span><strong>${escapeHtml(new Date(data.created_at).toLocaleDateString('en-GB'))}</strong></div><div><span>Order status</span><strong>${escapeHtml(statusLabels[data.status]||data.status)}</strong></div><div><span>Delivery area</span><strong>${data.delivery_area==='inside_dhaka'?'Inside Dhaka':'Outside Dhaka'}</strong></div><div><span>Total payable</span><strong>${money(data.total)}</strong></div></div><div class="tracking-items"><b>Order items</b>${items.map(item=>`<div class="tracking-item"><span>${escapeHtml(item.product_name)} · ${escapeHtml(item.size||'One Size')} / ${escapeHtml(item.color||'Default')} × ${Number(item.quantity)}</span><strong>${money(item.line_total)}</strong></div>`).join('')}</div>`;
   resultBox.hidden=false;
  }catch(err){console.error('Order tracking error:',err);errorBox.textContent=err.message||'Unable to look up this order right now.';}
  finally{button.disabled=false;button.textContent='TRACK ORDER ↗';}
