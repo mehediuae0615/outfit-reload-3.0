@@ -76,7 +76,8 @@ $('checkoutForm').addEventListener('submit',async e=>{
    p_delivery_area:values.delivery_area,
    p_delivery_address:values.delivery_address,
    p_customer_note:values.customer_note||null,
-   p_items:items
+   p_items:items,
+   p_coupon_code:appliedCoupon?.code||null
   });
   if(error)throw error;
   const result=Array.isArray(data)?data[0]:data;
