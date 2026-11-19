@@ -72,3 +72,143 @@ textarea{font:inherit;resize:vertical}.login-screen{min-height:100vh;display:gri
 .tracking-items{border-top:1px solid #eee6df;margin-top:16px;padding-top:12px}
 .tracking-item{display:flex;justify-content:space-between;gap:12px;padding:8px 0;color:#5f544b;font-size:.9rem}
 @media(max-width:700px){.track-order-section{padding:52px 5%}.tracking-form{grid-template-columns:1fr}.tracking-form button{width:100%}.tracking-meta{grid-template-columns:1fr 1fr}.tracking-result{padding:16px}}
+
+
+/* =========================================================
+   OUTFIT RELOAD 3.0 — HOMEPAGE LUXURY UI REFRESH
+   Scoped to the storefront; admin and backend styles untouched.
+   ========================================================= */
+body:not(.admin-body){--ink:#211b17;--brown:#654832;--cream:#eee7dc;--paper:#faf8f4;--muted:#887d72;--line:#e8e0d6;background:var(--paper);color:var(--ink)}
+body:not(.admin-body) .announcement{min-height:30px;padding:8px 5%;display:flex;justify-content:center;gap:24px;background:#3a281e;color:#f4eee6;font-size:9px;letter-spacing:1.9px}
+body:not(.admin-body) .announcement-side{opacity:.68}
+body:not(.admin-body) .site-header{height:78px;padding:0 clamp(18px,5.5vw,82px);background:rgba(250,248,244,.97);backdrop-filter:blur(12px);border-bottom:1px solid #e9e2d9;gap:22px}
+body:not(.admin-body) .brand{font-size:12px;letter-spacing:2px;white-space:nowrap;gap:10px}
+body:not(.admin-body) .brand-mark{width:40px;height:40px;border:1px solid #9a7859;color:#62452f;font-size:17px}
+body:not(.admin-body) .site-header nav{gap:clamp(13px,2.2vw,30px);font-size:10px;letter-spacing:1px;text-transform:uppercase}
+body:not(.admin-body) .site-header nav a{position:relative;padding:8px 0}
+body:not(.admin-body) .site-header nav a:after{content:"";position:absolute;left:0;right:100%;bottom:1px;height:1px;background:#8a6548;transition:right .25s}
+body:not(.admin-body) .site-header nav a:hover:after{right:0}
+body:not(.admin-body) .header-actions{align-items:center;gap:20px;white-space:nowrap}
+body:not(.admin-body) .header-search,body:not(.admin-body) .bag-trigger{font-size:9px;letter-spacing:1.3px;font-weight:700}
+body:not(.admin-body) .bag-trigger{border:1px solid #d8cbbc;padding:11px 13px}
+body:not(.admin-body) #bagCount{display:inline-grid;place-items:center;min-width:18px;height:18px;margin-left:5px;border-radius:50%;background:#5b4030;color:#fff;font-size:9px}
+body:not(.admin-body) .hero{min-height:620px;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:5%;padding:52px clamp(22px,7vw,108px) 62px;background:#eee8de;overflow:hidden}
+body:not(.admin-body) .hero-copy{padding:35px 0;max-width:530px}
+body:not(.admin-body) .eyebrow{font-size:9px;letter-spacing:2.3px;color:#967451;margin-bottom:20px}
+body:not(.admin-body) .hero h1{font-size:clamp(54px,6.3vw,88px);line-height:.99;letter-spacing:-3.5px;margin-bottom:25px;color:#292019}
+body:not(.admin-body) .hero h1 em{color:#8c6748;font-style:italic}
+body:not(.admin-body) .hero-desc{max-width:390px;font-size:13px;line-height:2;color:#74695e;margin-bottom:32px}
+body:not(.admin-body) .btn{min-height:48px;padding:16px 22px;font-size:9px;letter-spacing:1.5px;transition:background .2s,transform .2s}
+body:not(.admin-body) .btn:hover{transform:translateY(-2px)}
+body:not(.admin-body) .btn-dark{background:#302219}
+body:not(.admin-body) .btn-dark:hover{background:#76563c}
+body:not(.admin-body) .hero-note{margin-top:74px;gap:22px;font-size:8px;letter-spacing:1.6px}
+body:not(.admin-body) .hero-visual{min-height:500px;margin-right:10px}
+body:not(.admin-body) .hero-photo{min-height:500px;background-position:center 36%;box-shadow:0 22px 55px #46362920}
+body:not(.admin-body) .photo-label{left:-35px;bottom:28px;padding:18px 24px;box-shadow:0 8px 25px #35271c16}
+body:not(.admin-body) .vertical-text{right:-28px;color:#665648}
+body:not(.admin-body) .trust-strip{padding:18px 5%;gap:15px;flex-wrap:wrap;background:#39291f;color:#e9dfd3;font-size:8px;letter-spacing:1.5px}
+body:not(.admin-body) .section{padding:92px clamp(20px,6.5vw,100px)}
+body:not(.admin-body) .section-heading{margin-bottom:34px}
+body:not(.admin-body) .section-heading h2{font-size:clamp(31px,3.4vw,44px);letter-spacing:-1.1px;color:#2d241e}
+body:not(.admin-body) .section-heading h2 span{color:#9b7655}
+body:not(.admin-body) .text-link{font-size:9px;letter-spacing:1.5px;color:#644a36}
+body:not(.admin-body) .product-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}
+body:not(.admin-body) .product-card{cursor:pointer}
+body:not(.admin-body) .product-photo{height:auto;aspect-ratio: .78;background:#e8e1d8}
+body:not(.admin-body) .product-photo img{display:block;object-fit:cover;transition:transform .7s cubic-bezier(.2,.7,.2,1)}
+body:not(.admin-body) .product-card:hover .product-photo img{transform:scale(1.055)}
+body:not(.admin-body) .product-tag{top:13px;left:13px;padding:8px 10px;background:#f8f5ef;color:#403126;font-size:8px;letter-spacing:1.3px}
+body:not(.admin-body) .quick-view{position:absolute;left:12px;right:12px;bottom:12px;padding:12px;background:#302219;color:#fff;text-align:center;font-size:8px;letter-spacing:1.6px;opacity:0;transform:translateY(7px);transition:.25s}
+body:not(.admin-body) .product-card:hover .quick-view{opacity:1;transform:translateY(0)}
+body:not(.admin-body) .product-info{padding:15px 1px 4px}
+body:not(.admin-body) .product-info h3{font-size:12px;letter-spacing:.1px;color:#302720;margin-bottom:8px}
+body:not(.admin-body) .product-info p{font-size:12px;color:#74563d;font-weight:600;letter-spacing:.2px}
+body:not(.admin-body) .curated-section{background:#f2eee8}
+body:not(.admin-body) .feature-band{grid-template-columns:1.08fr .92fr;min-height:470px;background:#38271e}
+body:not(.admin-body) .feature-image{min-height:470px}
+body:not(.admin-body) .feature-copy{padding:55px clamp(30px,7vw,105px)}
+body:not(.admin-body) .feature-copy h2{font-size:clamp(42px,5vw,64px);line-height:1.04}
+body:not(.admin-body) .feature-copy p:not(.eyebrow){font-size:12px;line-height:2;color:#d1c4b7}
+body:not(.admin-body) .categories{background:#faf8f4}
+body:not(.admin-body) .category-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+body:not(.admin-body) .category-card{height:auto;aspect-ratio:.82;padding:20px;background-color:#d9cbbd;transition:transform .35s}
+body:not(.admin-body) .category-card:hover{transform:translateY(-5px)}
+body:not(.admin-body) .category-card:before{background:linear-gradient(0deg,rgba(25,18,14,.78),rgba(25,18,14,.03) 68%)}
+body:not(.admin-body) .category-card b{font-size:clamp(16px,1.7vw,23px);letter-spacing:1.4px}
+body:not(.admin-body) .quote-section{padding:100px 18px;background:#eee7dc}
+body:not(.admin-body) .quote-section h2{font-size:clamp(34px,4.5vw,57px);line-height:1.16}
+body:not(.admin-body) .newsletter{padding:72px clamp(20px,6.5vw,100px);background:#faf8f4}
+body:not(.admin-body) .newsletter h2{font-size:clamp(30px,3vw,39px)}
+body:not(.admin-body) footer{padding:48px clamp(20px,6.5vw,100px) 25px;background:#2e211a}
+body:not(.admin-body) .detail-panel,body:not(.admin-body) .bag-panel,body:not(.admin-body) .checkout-panel{border-color:#e6ddd2}
+body:not(.admin-body) .track-order-section{background:#f1ece5}
+
+@media(max-width:980px){
+ body:not(.admin-body) .site-header{padding:0 22px}
+ body:not(.admin-body) .site-header nav{gap:13px;font-size:9px}
+ body:not(.admin-body) .header-actions{gap:10px}
+ body:not(.admin-body) .hero{padding-left:5%;padding-right:5%;min-height:540px}
+ body:not(.admin-body) .hero-visual,body:not(.admin-body) .hero-photo{min-height:440px}
+ body:not(.admin-body) .product-grid{gap:15px}
+}
+@media(max-width:700px){
+ body:not(.admin-body) .announcement{min-height:27px;padding:7px 10px;font-size:7px;letter-spacing:1.2px;gap:8px}
+ body:not(.admin-body) .announcement-side{display:none}
+ body:not(.admin-body) .site-header{height:64px;padding:0 16px;display:grid;grid-template-columns:34px 1fr auto;gap:10px}
+ body:not(.admin-body) .menu-toggle{display:flex;width:30px;height:34px;flex-direction:column;justify-content:center;gap:6px;padding:4px}
+ body:not(.admin-body) .menu-toggle span{height:1.5px;width:21px;background:#302219;display:block}
+ body:not(.admin-body) .brand{justify-self:start;font-size:10px;letter-spacing:1.3px;gap:7px}
+ body:not(.admin-body) .brand-mark{width:34px;height:34px;font-size:14px}
+ body:not(.admin-body) .brand small{font-size:7px;letter-spacing:1.3px;margin-top:3px}
+ body:not(.admin-body) .site-header nav{display:none;position:absolute;left:0;right:0;top:64px;padding:18px 20px 22px;background:#faf8f4;border-top:1px solid #e9e2d9;border-bottom:1px solid #e1d7ca;box-shadow:0 18px 28px #20170f16;flex-direction:column;gap:0;z-index:20}
+ body:not(.admin-body) .site-header nav.open{display:flex}
+ body:not(.admin-body) .site-header nav a{padding:13px 2px;border-bottom:1px solid #eee8e0;font-size:10px;letter-spacing:1.4px}
+ body:not(.admin-body) .header-actions{gap:9px}
+ body:not(.admin-body) .header-search{display:none}
+ body:not(.admin-body) .bag-trigger{padding:9px 10px;font-size:8px;letter-spacing:1px}
+ body:not(.admin-body) .hero{display:flex;flex-direction:column;gap:22px;padding:34px 18px 25px;min-height:0}
+ body:not(.admin-body) .hero-copy{padding:5px 2px 0;max-width:none}
+ body:not(.admin-body) .eyebrow{font-size:8px;letter-spacing:1.8px;margin-bottom:13px}
+ body:not(.admin-body) .hero h1{font-size:clamp(48px,13vw,66px);line-height:.98;letter-spacing:-2.5px;margin-bottom:16px}
+ body:not(.admin-body) .hero-desc{font-size:11px;line-height:1.8;max-width:320px;margin-bottom:20px}
+ body:not(.admin-body) .hero .btn{min-height:44px;padding:14px 17px;font-size:8px}
+ body:not(.admin-body) .hero-note{margin-top:23px;gap:14px;font-size:7px;letter-spacing:1.1px}
+ body:not(.admin-body) .hero-visual{min-height:0;margin:0 0 0 14px;width:calc(100% - 14px)}
+ body:not(.admin-body) .hero-photo{height:auto;min-height:0;aspect-ratio:1.12;background-position:center 35%}
+ body:not(.admin-body) .photo-label{left:-14px;bottom:14px;padding:12px 15px;font-size:8px}
+ body:not(.admin-body) .vertical-text{right:-17px;top:14px;font-size:7px}
+ body:not(.admin-body) .trust-strip{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:15px 18px;font-size:7px;letter-spacing:1px;line-height:1.5}
+ body:not(.admin-body) .section{padding:54px 17px}
+ body:not(.admin-body) .section-heading{align-items:end;margin-bottom:20px;gap:10px}
+ body:not(.admin-body) .section-heading h2{font-size:30px;letter-spacing:-.7px}
+ body:not(.admin-body) .section-heading .eyebrow{font-size:7px;letter-spacing:1.4px;margin-bottom:9px}
+ body:not(.admin-body) .text-link{font-size:7px;letter-spacing:1px;white-space:nowrap;padding-bottom:5px}
+ body:not(.admin-body) .product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:21px 12px}
+ body:not(.admin-body) .product-photo{aspect-ratio:.76}
+ body:not(.admin-body) .product-tag{top:8px;left:8px;padding:6px 7px;font-size:7px;letter-spacing:.8px}
+ body:not(.admin-body) .quick-view{display:none}
+ body:not(.admin-body) .product-info{padding:10px 1px 0}
+ body:not(.admin-body) .product-info h3{font-size:11px;line-height:1.45;margin-bottom:5px}
+ body:not(.admin-body) .product-info p{font-size:11px}
+ body:not(.admin-body) .feature-band{grid-template-columns:1fr;min-height:0}
+ body:not(.admin-body) .feature-image{min-height:0;aspect-ratio:1.25}
+ body:not(.admin-body) .feature-copy{padding:36px 22px 40px}
+ body:not(.admin-body) .feature-copy h2{font-size:46px;margin-bottom:15px}
+ body:not(.admin-body) .feature-copy p:not(.eyebrow){font-size:11px;margin-bottom:20px}
+ body:not(.admin-body) .category-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+ body:not(.admin-body) .category-card{aspect-ratio:.9;padding:14px}
+ body:not(.admin-body) .category-card b{font-size:17px;letter-spacing:1px}
+ body:not(.admin-body) .quote-section{padding:65px 18px}
+ body:not(.admin-body) .quote-section h2{font-size:clamp(29px,8vw,40px);letter-spacing:-.7px}
+ body:not(.admin-body) .quote-section>p:last-child{font-size:9px;line-height:1.7}
+ body:not(.admin-body) .newsletter{padding:48px 18px;display:block}
+ body:not(.admin-body) .newsletter h2{font-size:30px}
+ body:not(.admin-body) .newsletter form{width:100%;margin-top:20px;flex-direction:column}
+ body:not(.admin-body) .newsletter input{min-height:47px}
+ body:not(.admin-body) .newsletter form .btn{width:100%}
+ body:not(.admin-body) footer{padding:35px 18px 22px;display:grid;grid-template-columns:1fr;gap:22px}
+ body:not(.admin-body) .footer-links{gap:13px 17px;line-height:1.5}
+ body:not(.admin-body) footer>p{margin:0;font-size:7px}
+}
+@media(min-width:701px) and (max-width:900px){body:not(.admin-body) .product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
