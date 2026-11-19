@@ -388,3 +388,36 @@ body:not(.admin-body) .checkout-wizard{overscroll-behavior:contain}
   .checkout-progress{gap:5px}
   .checkout-progress-step b{font-size:7px}
 }
+
+
+/* Homepage cleanup + tactile category-card interaction */
+@media (max-width: 700px) {
+  body:not(.admin-body) #new.section { padding-top: 34px; }
+  body:not(.admin-body) #new .section-heading { margin-bottom: 16px; }
+}
+body:not(.admin-body) .category-card {
+  -webkit-tap-highlight-color: transparent;
+  transform: translateZ(0);
+  transition: transform .28s cubic-bezier(.2,.75,.25,1), box-shadow .28s ease, filter .28s ease;
+}
+body:not(.admin-body) .category-card:active,
+body:not(.admin-body) .category-card.is-activating {
+  transform: scale(.965);
+  filter: brightness(1.12);
+  box-shadow: 0 10px 26px rgba(48,36,29,.2);
+}
+body:not(.admin-body) .category-card:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(255,255,255,0);
+  pointer-events: none;
+  transition: border-color .25s ease, background .25s ease;
+}
+body:not(.admin-body) .category-card.is-activating:after {
+  border-color: rgba(255,255,255,.7);
+  background: rgba(255,255,255,.07);
+}
+@media (prefers-reduced-motion: reduce) {
+  body:not(.admin-body) .category-card { transition: none; }
+}

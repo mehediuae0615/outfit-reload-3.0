@@ -133,7 +133,7 @@ function applyCategoryFilter(category){
  document.querySelectorAll('.product-grid').forEach(el=>{if(el.id!=='productGrid')el.closest('.section')?.classList.toggle('category-filter-hidden',!!activeCategoryFilter)});
  if(activeCategoryFilter){$('new').scrollIntoView({behavior:'smooth',block:'start'});}
 }
-document.querySelectorAll('.category-card[data-category]').forEach(tile=>tile.addEventListener('click',e=>{e.preventDefault();applyCategoryFilter(tile.dataset.category);}));
+document.querySelectorAll('.category-card[data-category]').forEach(tile=>tile.addEventListener('click',e=>{e.preventDefault();tile.classList.add('is-activating');window.setTimeout(()=>tile.classList.remove('is-activating'),260);applyCategoryFilter(tile.dataset.category);}));
 
 const nav=$('mainNav');$('menuToggle')?.addEventListener('click',()=>{const open=nav.classList.toggle('open');$('menuToggle').setAttribute('aria-expanded',String(open));$('menuToggle').setAttribute('aria-label',open?'Close menu':'Open menu')});nav?.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{nav.classList.remove('open');$('menuToggle')?.setAttribute('aria-expanded','false')}));
 $('newsletterForm')?.addEventListener('submit',e=>{e.preventDefault();alert('Thank you for subscribing!')});
