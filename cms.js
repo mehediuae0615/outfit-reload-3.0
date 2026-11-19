@@ -11,7 +11,7 @@
     const {data,error}=await client.from('store_settings').select('key,value');
     if(error){console.warn('Website content settings could not be loaded:',error.message);return}
     const settings=Object.fromEntries((data||[]).map(x=>[x.key,x.value]));
-    const announcementEnabled=settings.announcement_enabled!=='false';document.querySelectorAll('.announcement,#announcement').forEach(el=>{if(settings.announcement)el.textContent=settings.announcement;el.hidden=!announcementEnabled;});
+    const announcementEnabled=settings.announcement_enabled!=='false';document.querySelectorAll('.announcement,#announcement').forEach(el=>{if(settings.announcement){const span=document.createElement('span');span.className='announcement-marquee-text';span.textContent=settings.announcement;el.replaceChildren(span);}el.hidden=!announcementEnabled;});
     const raw=settings['cms_page_'+page];
     if(raw){try{const values=JSON.parse(raw),nodes=getTextNodes();values.forEach((v,i)=>{if(nodes[i]!==undefined)nodes[i].textContent=v})}catch(e){console.warn('Invalid page content for '+page,e)}}
     const cfg={};try{Object.assign(cfg,JSON.parse(settings.cms_global||'{}'))}catch{}

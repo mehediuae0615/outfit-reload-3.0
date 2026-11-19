@@ -293,20 +293,21 @@ body:not(.admin-body) .track-order-section{background:#f1ece5}
 @media(max-width:600px){.checkout-wizard .order-success{padding:36px 2px 18px}.success-actions{grid-template-columns:1fr}.order-success .success-mark{width:68px;height:68px}}
 
 
-/* OUTFIT RELOAD 3.0 — announcement bar placement and motion */
+/* OUTFIT RELOAD 3.0 — smooth announcement marquee + subtle header detail */
 body:not(.admin-body) .announcement,
 body:not(.admin-body) #announcement {
   position: relative !important;
   z-index: 9 !important;
-  display: block !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
   width: 100% !important;
   min-height: 38px !important;
   margin: 0 !important;
-  padding: 11px 12px !important;
+  padding: 0 !important;
   overflow: hidden !important;
   white-space: nowrap !important;
-  text-align: center !important;
-  text-indent: -100% !important;
+  text-align: left !important;
   background: linear-gradient(100deg, #2d1d15 0%, #684329 48%, #2d1d15 100%) !important;
   color: #fff4df !important;
   border-top: 1px solid rgba(224, 177, 105, .75) !important;
@@ -317,26 +318,48 @@ body:not(.admin-body) #announcement {
   line-height: 14px !important;
   letter-spacing: 2px !important;
   text-transform: uppercase !important;
-  animation: outfitAnnouncementTravel 13s linear infinite !important;
 }
-@keyframes outfitAnnouncementTravel {
-  from { text-indent: -100%; }
-  to { text-indent: 100%; }
+body:not(.admin-body) .announcement .announcement-marquee-text,
+body:not(.admin-body) #announcement .announcement-marquee-text {
+  display: inline-block !important;
+  flex: 0 0 auto !important;
+  width: max-content !important;
+  padding: 0 12px !important;
+  white-space: nowrap !important;
+  will-change: transform;
+  animation: outfitAnnouncementLeftToRight 16s linear infinite !important;
 }
-body:not(.admin-body) .announcement:hover,
-body:not(.admin-body) #announcement:hover {
+@keyframes outfitAnnouncementLeftToRight {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100vw); }
+}
+body:not(.admin-body) .announcement:hover .announcement-marquee-text,
+body:not(.admin-body) #announcement:hover .announcement-marquee-text {
   animation-play-state: paused !important;
+}
+/* A fine champagne line at the top of the header removes the empty-looking edge. */
+body:not(.admin-body) .site-header {
+  position: sticky;
+  top: 0;
+  border-top: 1px solid rgba(164, 125, 89, .28) !important;
 }
 @media (max-width: 600px) {
   body:not(.admin-body) .announcement,
   body:not(.admin-body) #announcement {
     min-height: 36px !important;
-    padding: 10px 8px !important;
     font-size: 9px !important;
     letter-spacing: 1.5px !important;
   }
+  body:not(.admin-body) .announcement .announcement-marquee-text,
+  body:not(.admin-body) #announcement .announcement-marquee-text {
+    animation-duration: 14s !important;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  body:not(.admin-body) .announcement,
-  body:not(.admin-body) #announcement { animation: none !important; text-indent: 0 !important; }
+  body:not(.admin-body) .announcement .announcement-marquee-text,
+  body:not(.admin-body) #announcement .announcement-marquee-text {
+    animation: none !important;
+    transform: none !important;
+    margin: 0 auto !important;
+  }
 }

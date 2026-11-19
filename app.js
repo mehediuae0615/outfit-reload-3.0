@@ -142,7 +142,7 @@ document.addEventListener('outfit:content-loaded',()=>{if($('deliveryArea'))upda
  const {data,error}=await supabaseClient.from('store_settings').select('key,value').in('key',['announcement','announcement_enabled']);
  if(error){console.warn('Announcement settings could not be loaded:',error.message);return}
  const settings=Object.fromEntries((data||[]).map(x=>[x.key,x.value]));
- document.querySelectorAll('.announcement,#announcement').forEach(el=>{if(settings.announcement)el.textContent=settings.announcement;el.hidden=settings.announcement_enabled==='false';});
+ document.querySelectorAll('.announcement,#announcement').forEach(el=>{if(settings.announcement){const span=document.createElement('span');span.className='announcement-marquee-text';span.textContent=settings.announcement;el.replaceChildren(span);}el.hidden=settings.announcement_enabled==='false';});
 })();
 loadBkashDeliveryConfig();
 
