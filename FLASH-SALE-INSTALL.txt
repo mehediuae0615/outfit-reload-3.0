@@ -1,0 +1,16 @@
+OUTFIT RELOAD 3.0 — FLASH SALE INSTALLATION
+
+1. In Supabase, open SQL Editor and run FLASH-SALE-UPGRADE.sql once.
+2. Upload/replace the website files from this ZIP in the GitHub repository root.
+3. In Admin Panel, edit a product and enter:
+   - Regular Price
+   - Sale Price
+   - Flash Sale starts (your local time)
+   - Flash Sale ends (your local time)
+4. Set both start and end times. The Sale Price will automatically activate
+   at the start time and revert to Regular Price at the end time.
+5. Leave both schedule fields empty to keep an ordinary Sale Price active
+   continuously, as before.
+
+The database order function also checks the sale window at order time, so an
+expired Flash Sale is not charged at the discounted price.

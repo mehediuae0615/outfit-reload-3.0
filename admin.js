@@ -4,6 +4,7 @@ const login=$('adminLogin'), app=$('adminApp'), msg=$('loginMessage');
 let editingId=null, existingImages=[];
 function safe(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function splitList(v){return [...new Set(String(v||'').split(',').map(x=>x.trim()).filter(Boolean))]}
+function toLocalDateTime(value){if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';const pad=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`}
 async function checkSession(){
  const {data:{session}}=await sb.auth.getSession();
  if(!session){login.hidden=false;app.hidden=true;return}
@@ -22,7 +23,7 @@ async function loadProducts(){
  document.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>openEdit(b.dataset.edit)));
 }
 const modal=$('productModal');
-function resetForm(){editingId=null;existingImages=[];$('productForm').reset();$('modalTitle').textContent='Add a product';$('saveProductBtn').textContent='SAVE PRODUCT ONLINE';$('existingImages').textContent='';$('variantRows').innerHTML='';$('pActive').checked=true}
+function resetForm(){editingId=null;existingImages=[];$('productForm').reset();$('modalTitle').textContent='Add a product';$('saveProductBtn').textContent='SAVE PRODUCT ONLINE';$('existingImages').textContent='';$('variantRows').innerHTML='';$('pSaleStarts').value='';$('pSaleEnds').value='';$('pActive').checked=true}
 $('addProductBtn').addEventListener('click',()=>{resetForm();modal.classList.add('open')});
 $('closeModal').addEventListener('click',()=>modal.classList.remove('open'));
 modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open')});
@@ -39,7 +40,7 @@ async function openEdit(id){
  if(ve){alert('Could not load variants: '+ve.message);return}
  editingId=id;existingImages=p.image_urls||[];
  $('modalTitle').textContent='Edit product';$('saveProductBtn').textContent='UPDATE PRODUCT';
- $('pName').value=p.name||'';$('pCategory').value=cat?.name||'Shirts';$('pPrice').value=p.price||'';$('pSalePrice').value=p.sale_price||'';$('pStock').value=p.stock||0;$('pDescription').value=p.description||'';$('pMaterial').value=p.material||'';$('pSizeGuide').value=p.size_guide||'';
+ $('pName').value=p.name||'';$('pCategory').value=cat?.name||'Shirts';$('pPrice').value=p.price||'';$('pSalePrice').value=p.sale_price||'';$('pSaleStarts').value=toLocalDateTime(p.sale_starts_at);$('pSaleEnds').value=toLocalDateTime(p.sale_ends_at);$('pStock').value=p.stock||0;$('pDescription').value=p.description||'';$('pMaterial').value=p.material||'';$('pSizeGuide').value=p.size_guide||'';
  $('pSizes').value=(p.sizes||[]).join(', ');$('pColors').value=(p.colors||[]).join(', ');
  $('pNewArrival').checked=!!p.new_arrival;$('pBestSeller').checked=!!p.best_seller;$('pFeatured').checked=!!p.featured;$('pTrending').checked=!!p.trending;$('pActive').checked=!!p.is_active;
  $('existingImages').textContent=existingImages.length?`Current images: ${existingImages.length}. New uploads will be added.`:'No current images.';
@@ -48,11 +49,16 @@ async function openEdit(id){
 $('productForm').addEventListener('submit',async e=>{
  e.preventDefault();const btn=$('saveProductBtn');const wasEditing=!!editingId;btn.disabled=true;btn.textContent='SAVING…';
  try{
-  const name=$('pName').value.trim(),category=$('pCategory').value,price=Number($('pPrice').value),saleRaw=$('pSalePrice').value.trim(),sale_price=saleRaw===''?null:Number(saleRaw),stock=Number($('pStock').value); if(sale_price!==null&&(sale_price<=0||sale_price>=price))throw new Error('Sale Price must be greater than 0 and lower than Regular Price.');
+  const name=$('pName').value.trim(),category=$('pCategory').value,price=Number($('pPrice').value),saleRaw=$('pSalePrice').value.trim(),sale_price=saleRaw===''?null:Number(saleRaw),stock=Number($('pStock').value),startsRaw=$('pSaleStarts').value,endsRaw=$('pSaleEnds').value;
+   if(sale_price!==null&&(sale_price<=0||sale_price>=price))throw new Error('Sale Price must be greater than 0 and lower than Regular Price.');
+   if((startsRaw&&!endsRaw)||(!startsRaw&&endsRaw))throw new Error('For a Flash Sale, set both start and end times.');
+   if((startsRaw||endsRaw)&&sale_price===null)throw new Error('Enter a Sale Price before setting Flash Sale times.');
+   const sale_starts_at=startsRaw?new Date(startsRaw).toISOString():null,sale_ends_at=endsRaw?new Date(endsRaw).toISOString():null;
+   if(sale_starts_at&&new Date(sale_ends_at)<=new Date(sale_starts_at))throw new Error('Flash Sale end time must be after its start time.');
   const {data:cat,error:ce}=await sb.from('categories').select('id').eq('name',category).single();if(ce)throw ce;
   const files=[...$('pImages').files], urls=[...existingImages];
   for(const file of files){const ext=(file.name.split('.').pop()||'jpg').toLowerCase(),filePath=`${crypto.randomUUID()}.${ext}`;const {error:ue}=await sb.storage.from('product-images').upload(filePath,file,{upsert:false,contentType:file.type});if(ue)throw ue;const {data}=sb.storage.from('product-images').getPublicUrl(filePath);urls.push(data.publicUrl)}
-  const payload={name,slug:name.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+Date.now().toString().slice(-5),category_id:cat.id,price,sale_price,stock,description:$('pDescription').value.trim(),material:$('pMaterial').value.trim(),size_guide:$('pSizeGuide').value.trim(),image_urls:urls,sizes:splitList($('pSizes').value),colors:splitList($('pColors').value),new_arrival:$('pNewArrival').checked,best_seller:$('pBestSeller').checked,featured:$('pFeatured').checked,trending:$('pTrending').checked,is_active:$('pActive').checked,updated_at:new Date().toISOString()};
+  const payload={name,slug:name.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+Date.now().toString().slice(-5),category_id:cat.id,price,sale_price,sale_starts_at,sale_ends_at,stock,description:$('pDescription').value.trim(),material:$('pMaterial').value.trim(),size_guide:$('pSizeGuide').value.trim(),image_urls:urls,sizes:splitList($('pSizes').value),colors:splitList($('pColors').value),new_arrival:$('pNewArrival').checked,best_seller:$('pBestSeller').checked,featured:$('pFeatured').checked,trending:$('pTrending').checked,is_active:$('pActive').checked,updated_at:new Date().toISOString()};
   let productId=editingId;
   if(editingId){const {error}=await sb.from('products').update(payload).eq('id',editingId);if(error)throw error;}
   else{payload.sku='OR-'+Date.now().toString().slice(-8);const {data,error}=await sb.from('products').insert(payload).select('id').single();if(error)throw error;productId=data.id;}

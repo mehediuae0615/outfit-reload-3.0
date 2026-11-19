@@ -16,3 +16,14 @@ footer{background:#111;color:#fff}footer .brand{color:#fff}footer .brand small{c
 @media(max-width:700px){.announcement{font-size:10px;letter-spacing:1.5px;padding:10px 5px}.site-header{height:70px;grid-template-columns:34px 1fr auto;padding:0 16px}.brand{justify-self:center;font-size:11px;letter-spacing:1px}.brand-mark{width:36px;height:36px}.site-header nav{display:none;position:fixed;top:70px;left:0;bottom:0;width:min(82vw,420px);height:calc(100dvh - 70px);background:#fff;z-index:100;box-shadow:12px 0 30px #0002;padding:24px 22px 40px;align-items:stretch;justify-content:flex-start;flex-direction:column;gap:0;overflow:auto}.site-header nav.open{display:flex}.site-header nav a{font-size:19px;font-weight:400;padding:19px 0;border-bottom:1px solid #eee}.site-header nav a:first-child{margin-top:0}.header-actions{gap:9px}.header-actions a,.header-actions button{font-size:20px}.header-actions .header-user,.header-actions .header-heart{display:none}.header-actions .icon-btn{font-size:18px}.collection-intro{padding:30px 5% 20px}.collection-intro .breadcrumb{margin-bottom:32px;font-size:13px}.collection-intro h1{font-size:35px}.collection-intro>p:last-child{font-size:12px}.section.categories{padding:20px 5% 36px}.category-grid{gap:18px 16px}.category-card{border-radius:16px;aspect-ratio:0.88/1;min-height:0}.category-card img{height:48%}.category-card b{font-size:13px;letter-spacing:3px;padding:12px 4px}.section{padding:40px 5%}.product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 12px}.section-heading h2{font-size:28px}}
 
 .category-filter-hidden{display:none!important}
+
+
+/* Limited-time Flash Sale */
+.flash-countdown,.flash-start-countdown{
+ display:block;flex-basis:100%;margin-top:3px;
+ color:#a12620;font-size:10px;font-weight:700;
+ letter-spacing:.08em;text-transform:uppercase;
+}
+.flash-start-countdown{color:#6b6256}
+.flash-schedule-fields{margin-top:12px}
+.flash-schedule-fields input{width:100%}
