@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <title>My Account | Outfit Reload 3.0</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="customer-account.css">
+</head>
+<body>
+  <header class="ca-header">
+    <a class="ca-brand" href="index.html"><span class="ca-mark">OR</span><span>OUTFIT RELOAD <small>3.0 · MEN'S COLLECTION</small></span></a>
+    <a class="ca-back" href="index.html">← Back to store</a>
+  </header>
+
+  <main class="ca-shell">
+    <section class="ca-card" id="authPanel">
+      <p class="ca-eyebrow">OUTFIT RELOAD 3.0 · CUSTOMER ACCOUNT</p>
+      <h1 id="authTitle">Welcome back.</h1>
+      <p class="ca-intro" id="authIntro">Sign in to view your orders and manage your details.</p>
+
+      <div class="ca-tabs" role="tablist" aria-label="Account options">
+        <button type="button" class="active" id="loginTab">Sign in</button>
+        <button type="button" id="signupTab">Create account</button>
+      </div>
+
+      <form id="loginForm" class="ca-form">
+        <label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+        <label>Password<input name="password" type="password" autocomplete="current-password" required minlength="6" placeholder="Your password"></label>
+        <button class="ca-primary" type="submit" id="loginButton">SIGN IN ↗</button>
+        <button class="ca-text-button" type="button" id="forgotButton">Forgot password?</button>
+      </form>
+
+      <form id="signupForm" class="ca-form" hidden>
+        <label>Full name<input name="full_name" autocomplete="name" required minlength="2" maxlength="100" placeholder="Your full name"></label>
+        <label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+        <label>Password<input name="password" type="password" autocomplete="new-password" required minlength="8" placeholder="At least 8 characters"></label>
+        <label>Confirm password<input name="confirm_password" type="password" autocomplete="new-password" required minlength="8" placeholder="Enter password again"></label>
+        <button class="ca-primary" type="submit" id="signupButton">CREATE ACCOUNT ↗</button>
+      </form>
+
+      <p class="ca-message" id="authMessage" role="status" aria-live="polite"></p>
+      <p class="ca-footnote">Free email and password account. No paid SMS or OTP is required.</p>
+    </section>
+
+    <section class="ca-card ca-dashboard" id="dashboardPanel" hidden>
+      <div class="ca-dashboard-head">
+        <div>
+          <p class="ca-eyebrow">YOUR ACCOUNT</p>
+          <h1 id="welcomeName">Welcome.</h1>
+          <p class="ca-intro" id="accountEmail"></p>
+        </div>
+        <button class="ca-outline" type="button" id="signOutButton">SIGN OUT</button>
+      </div>
+
+      <section class="ca-section">
+        <div class="ca-section-head"><div><p class="ca-eyebrow">PERSONAL DETAILS</p><h2>Your profile</h2></div></div>
+        <form id="profileForm" class="ca-form ca-profile-form">
+          <label>Full name<input name="full_name" required minlength="2" maxlength="100"></label>
+          <label>Phone number<input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="01XXXXXXXXX"></label>
+          <label class="ca-wide">Delivery address<textarea name="address" rows="3" placeholder="Your preferred delivery address"></textarea></label>
+          <button class="ca-primary ca-wide" type="submit" id="saveProfileButton">SAVE DETAILS</button>
+        </form>
+        <p class="ca-message" id="profileMessage" role="status"></p>
+      </section>
+
+      <section class="ca-section">
+        <div class="ca-section-head"><div><p class="ca-eyebrow">ORDER HISTORY</p><h2>My orders</h2></div><button class="ca-outline" type="button" id="refreshOrdersButton">REFRESH ↻</button></div>
+        <div id="accountOrders" class="ca-orders"><p class="ca-muted">Loading your orders…</p></div>
+        <p class="ca-muted ca-small">Orders placed while signed in appear here. Older guest orders can still be tracked using the order number and checkout phone number.</p>
+      </section>
+    </section>
+  </main>
+
+  <footer class="ca-footer">© 2026 OUTFIT RELOAD 3.0 · BANGLADESH</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="customer-account.js"></script>
+</body>
+</html>
