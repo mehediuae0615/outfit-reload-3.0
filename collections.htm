@@ -15,7 +15,7 @@
 :root{--ink:#171717;--paper:#fff;--line:#e9e9e9;--muted:#777}
 *{box-sizing:border-box}
 body{background:#fff;color:#171717;font-family:"DM Sans",sans-serif}
-.announcement{background:#171717;color:white;font-size:10px;letter-spacing:1.5px;padding:10px}
+.announcement{background:#2f2119;color:#f8f0e5;font-size:10px;letter-spacing:1.8px;padding:12px 0;overflow:hidden;white-space:nowrap;border-top:1px solid #b99a72;border-bottom:1px solid #b99a72}
 .site-header{height:76px;padding:0 5%;background:white;border-bottom:1px solid #eee}
 .brand{font-size:12px;letter-spacing:1.4px}
 .brand-mark{border:1px solid #222}
@@ -73,18 +73,20 @@ footer{background:#171717}
  .collection-intro h1{font-size:34px}
 }
 
-.site-header{display:grid;grid-template-columns:40px 1fr auto;gap:15px;align-items:center}.brand{justify-self:start}.menu-toggle{display:flex;flex-direction:column;gap:6px;border:0;background:none;padding:5px;cursor:pointer}.menu-toggle span{width:23px;height:2px;background:#111;display:block}.site-header nav{justify-self:center}.header-actions{display:flex;align-items:center;gap:14px}.header-actions a{font-size:23px;color:#111}.announcement{background:#9f3515;text-align:center;font-weight:700;letter-spacing:1.5px}
+.site-header{display:grid;grid-template-columns:40px 1fr auto;gap:15px;align-items:center}.brand{justify-self:start}.menu-toggle{display:flex;flex-direction:column;gap:6px;border:0;background:none;padding:5px;cursor:pointer}.menu-toggle span{width:23px;height:2px;background:#111;display:block}.site-header nav{justify-self:center}.header-actions{display:flex;align-items:center;gap:14px}.header-actions a{font-size:23px;color:#111}.announcement{background:linear-gradient(90deg,#2b1d16,#60432e,#2b1d16);text-align:left;font-weight:700;letter-spacing:1.8px}.announcement-text{display:inline-block;width:max-content;min-width:100%;padding-left:0;will-change:transform;animation:collectionMarquee 18s linear infinite}@keyframes collectionMarquee{from{transform:translateX(-100%)}to{transform:translateX(100vw)}}.announcement:hover .announcement-text{animation-play-state:paused}
 @media(max-width:700px){.site-header{height:70px;grid-template-columns:34px 1fr auto;padding:0 16px}.brand{justify-self:center}.site-header nav{display:none;position:fixed;top:70px;left:0;bottom:0;width:min(82vw,420px);height:calc(100dvh - 70px);background:#fff;z-index:100;padding:24px 22px;flex-direction:column;align-items:stretch;gap:0;box-shadow:12px 0 30px #0002;overflow:auto}.site-header nav.open{display:flex}.site-header nav a{font-size:19px;padding:19px 0;border-bottom:1px solid #eee}.collection-intro{text-align:left;padding:30px 5% 20px}.collection-intro h1{font:700 35px "DM Sans",sans-serif;letter-spacing:-1px}.header-actions{gap:8px}}
 </style>
 </head>
 <body>
+
+<div class="announcement" id="announcement" aria-label="Store announcement"><span class="announcement-text" id="announcementText">GRAND OPENING SPECIAL · UP TO 50% OFF</span></div>
+
 <header class="site-header">
  <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span></button>
  <a class="brand" href="index.html"><span class="brand-mark">OR</span><span>OUTFIT RELOAD<small>3.0 · MEN'S COLLECTION</small></span></a>
  <nav id="mainNav"><a href="index.html#new">New Arrival</a><a href="collections.htm">Shop All</a><a href="index.html#about">Our Story</a><a href="#track-order">Track order</a><a href="index.html#contact">Contact</a></nav>
  <div class="header-actions"><a class="header-search" href="#all-products" aria-label="Search">⌕</a><button class="icon-btn" id="bagButton" type="button" aria-label="Shopping bag">♧ <span id="bagCount">0</span></button></div>
 </header>
-<div class="announcement" id="announcement">GRAND OPENING SPECIAL · UP TO 50% OFF</div>
 
 <main>
  <section class="collection-intro">
@@ -248,33 +250,85 @@ footer{background:#171717}
 <script>document.write('<script src=\"config.js?v='+Date.now()+'\"><\/script>');</script>
 <script>document.write('<script src=\"app.js?v='+Date.now()+'\"><\/script>');</script>
 <script>
-/* Collection page sorting */
-document.getElementById('sortProducts').addEventListener('change',function(){
+/* Collections page: reliable category filtering, sorting and product-card binding. */
+(function(){
  const grid=document.getElementById('productGrid');
- const cards=[...grid.querySelectorAll('.product-card')];
- if(!cards.length)return;
- const priceOf=card=>{
-  const text=card.querySelector('.product-info p')?.textContent||'';
-  return Number(text.replace(/[^\d.]/g,''))||0;
+ const count=document.querySelector('.collection-count');
+ const sort=document.getElementById('sortProducts');
+ let selectedCategory='';
+ const normalize=value=>String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+ const categoryAliases={
+  shirts:['shirt','shirts','formalshirt','casualshirt'],
+  tshirts:['tshirt','tshirts','tee','tees'],
+  pants:['pant','pants','trouser','trousers'],
+  jeans:['jean','jeans','denim'],
+  shoes:['shoe','shoes','footwear'],
+  watches:['watch','watches'],
+  accessories:['accessory','accessories','belt','wallet','sunglasses','perfume']
  };
- if(this.value==='low')cards.sort((a,b)=>priceOf(a)-priceOf(b));
- else if(this.value==='high')cards.sort((a,b)=>priceOf(b)-priceOf(a));
- else cards.sort((a,b)=>a.dataset.originalOrder-b.dataset.originalOrder);
- cards.forEach((card,i)=>{
-  if(card.dataset.originalOrder===undefined)card.dataset.originalOrder=i;
-  grid.appendChild(card);
- });
-});
-// Filter products by the selected category using the linked category record.
-document.querySelectorAll('.category-links [data-cat]').forEach(link=>link.addEventListener('click',e=>{
- e.preventDefault();const wanted=String(link.dataset.cat).toLowerCase().replace(/[^a-z0-9]/g,'');
- const aliases={tshirts:['tshirt','tshirts'],shirts:['shirt','shirts'],pants:['pant','pants'],jeans:['jean','jeans'],shoes:['shoe','shoes'],watches:['watch','watches'],accessories:['accessory','accessories']};
- const terms=aliases[wanted]||[wanted];const grid=document.getElementById('productGrid');
- const filtered=(productsCache||[]).filter(p=>{const c=String(p.category?.name||'').toLowerCase().replace(/[^a-z0-9]/g,'');return terms.some(t=>c===t||c.includes(t));});
- grid.innerHTML=filtered.length?filtered.map(card).join(''):'<p class="helper">No products found in this category yet.</p>';
- grid.querySelectorAll('[data-product]').forEach(el=>{el.addEventListener('click',()=>openProduct(el.dataset.product));el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openProduct(el.dataset.product)}})});
- document.querySelector('.collection-count').textContent=link.dataset.cat.toUpperCase();
-}));
+ function productCategory(product){
+  const value=product.category;
+  return normalize(Array.isArray(value)?value[0]?.name:value?.name||value);
+ }
+ function matches(product,category){
+  if(!category)return true;
+  const wanted=categoryAliases[normalize(category)]||[normalize(category)];
+  const actual=productCategory(product);
+  return wanted.some(term=>actual===term||actual.startsWith(term)||actual.endsWith(term));
+ }
+ function bindCards(){
+  grid.querySelectorAll('[data-product]').forEach(element=>{
+   if(element.dataset.collectionBound==='1')return;
+   element.dataset.collectionBound='1';
+   const open=()=>{if(typeof window.openProduct==='function')window.openProduct(element.dataset.product);};
+   element.addEventListener('click',event=>{
+    if(event.target.closest('[data-wishlist]'))return;
+    open();
+   });
+   element.addEventListener('keydown',event=>{
+    if(event.key==='Enter'||event.key===' '){event.preventDefault();open();}
+   });
+  });
+  grid.querySelectorAll('[data-wishlist]').forEach(button=>{
+   if(button.dataset.collectionWishBound==='1')return;
+   button.dataset.collectionWishBound='1';
+   button.addEventListener('click',event=>{
+    event.stopPropagation();
+    if(typeof window.toggleWishlist==='function')window.toggleWishlist(button.dataset.wishlist);
+   });
+  });
+ }
+ function render(){
+  if(!grid)return;
+  const all=Array.isArray(window.productsCache)?window.productsCache:[];
+  let items=all.filter(product=>matches(product,selectedCategory));
+  if(sort?.value==='low')items.sort((a,b)=>Number(a.sale_price||a.price)-Number(b.sale_price||b.price));
+  else if(sort?.value==='high')items.sort((a,b)=>Number(b.sale_price||b.price)-Number(a.sale_price||a.price));
+  grid.innerHTML=items.length?items.map(product=>window.card(product)).join(''):'<p class="helper">No products found in this category yet.</p>';
+  if(count)count.textContent=selectedCategory?selectedCategory.toUpperCase():'OUR COLLECTION';
+  bindCards();
+ }
+ window.renderCollectionProducts=render;
+ window.addEventListener('outfit:products-loaded',render);
+ document.querySelectorAll('.category-links a').forEach(link=>link.addEventListener('click',event=>{
+  event.preventDefault();
+  selectedCategory=link.dataset.cat||'';
+  render();
+  document.getElementById('all-products')?.scrollIntoView({behavior:'smooth',block:'start'});
+ }));
+ sort?.addEventListener('change',render);
+ // app.js fetches the product list asynchronously; render again when it finishes.
+ const waitForProducts=()=>{
+  if(Array.isArray(window.productsCache)&&window.productsCache.length){render();return;}
+  if(grid && grid.textContent.includes('Loading collection')) {
+   setTimeout(()=>{
+    if(Array.isArray(window.productsCache)&&window.productsCache.length)render();
+    else if(grid.textContent.includes('Loading collection'))grid.innerHTML='<p class="helper">Products are taking longer than expected. Refresh the page or try again shortly.</p>';
+   },8000);
+  }
+ };
+ window.addEventListener('load',()=>setTimeout(waitForProducts,250));
+})();
 </script>
 </body>
 </html>
