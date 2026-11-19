@@ -137,6 +137,8 @@ checkSession();
 // LIVE ORDER MANAGEMENT
 const orderStatuses=['pending','confirmed','processing','shipped','delivered','cancelled'];
 const statusLabels={pending:'Pending',confirmed:'Confirmed',processing:'Processing',shipped:'Shipped',delivered:'Delivered',cancelled:'Cancelled'};
+const bkashPaymentStatuses=['pending','verified','rejected'];
+const bkashPaymentLabels={pending:'Pending',verified:'Verified',rejected:'Rejected'};
 let cachedOrders=[];
 function money(v){return '৳ '+Number(v||0).toLocaleString('en-BD',{maximumFractionDigits:2})}
 function dateLabel(v){try{return new Date(v).toLocaleString('en-BD',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}catch{return '—'}}
@@ -148,10 +150,12 @@ function renderOrders(){
   const items=(o.order_items||[]).map(i=>`<li>${safe(i.product_name)} · ${safe(i.size||'—')} / ${safe(i.color||'—')} × ${Number(i.quantity)} — ${money(i.line_total)}</li>`).join('');
   const area=o.delivery_area==='inside_dhaka'?'Inside Dhaka':'Outside Dhaka';
   const options=orderStatuses.map(st=>`<option value="${st}" ${o.status===st?'selected':''}>${statusLabels[st]}</option>`).join('');
-  const bkashInfo=o.payment_method==='bkash_delivery_cod'?`<br><b>bKash verification:</b> ${safe(o.bkash_payment_status||'pending').toUpperCase()}<br><b>Sender number:</b> ${safe(o.bkash_sender_number||'—')}<br><b>TrxID:</b> ${safe(o.bkash_trxid||'—')}`:'';
+  const bkashStatus=o.bkash_payment_status||'pending';
+  const bkashInfo=o.payment_method==='bkash_delivery_cod'?`<div class="bkash-review-box"><b>bKash payment: <span class="bkash-state bkash-state-${safe(bkashStatus)}">${safe(bkashPaymentLabels[bkashStatus]||bkashStatus.toUpperCase())}</span></b><br><b>Sender number:</b> ${safe(o.bkash_sender_number||'—')}<br><b>TrxID:</b> ${safe(o.bkash_trxid||'—')}<div class="bkash-review-actions"><select data-bkash-status-select="${o.id}" aria-label="bKash verification status">${bkashPaymentStatuses.map(st=>`<option value="${st}" ${bkashStatus===st?'selected':''}>${bkashPaymentLabels[st]}</option>`).join('')}</select><button type="button" class="table-action" data-save-bkash-status="${o.id}">Save payment status</button></div></div>`:'';
   return `<tr class="order-main-row"><td><strong>${safe(o.order_number)}</strong><br><small>${safe(o.payment_method||'cod').toUpperCase()}</small><details class="order-details"><summary>View details</summary><div class="order-detail-box"><b>Delivery:</b> ${area}<br><b>Address:</b> ${safe(o.delivery_address)}<br><b>Phone:</b> ${safe(o.customer_phone)}<br><b>Email:</b> ${safe(o.customer_email||'Not provided')}<br><b>Note:</b> ${safe(o.customer_note||'—')}${bkashInfo}<br><b>Items:</b><ul>${items||'<li>No item details</li>'}</ul><div>Subtotal ${money(o.subtotal)} · Delivery ${money(o.delivery_fee)} · <b>Total ${money(o.total)}</b></div></div></details></td><td><b>${safe(o.customer_name)}</b><br><small>${safe(o.customer_phone)}</small></td><td>${dateLabel(o.created_at)}</td><td><b>${money(o.total)}</b></td><td><span class="pill status-${safe(o.status)}">${statusLabels[o.status]||safe(o.status)}</span></td><td><div class="order-action"><select data-status-select="${o.id}" aria-label="New status for ${safe(o.order_number)}">${options}</select><button class="table-action" data-save-status="${o.id}" ${o.status==='cancelled'?'disabled':''}>Save</button></div></td></tr>`;
  }).join('')||`<tr><td colspan="6">${filter==='all'?'No orders found yet.':'No '+safe(filter)+' orders.'}</td></tr>`;
  document.querySelectorAll('[data-save-status]').forEach(btn=>btn.addEventListener('click',()=>saveOrderStatus(btn.dataset.saveStatus,btn)));
+ document.querySelectorAll('[data-save-bkash-status]').forEach(btn=>btn.addEventListener('click',()=>saveBkashPaymentStatus(btn.dataset.saveBkashStatus,btn)));
 }
 async function loadOrders(){
  const target=$('adminOrderRows');if(!target)return;
@@ -175,6 +179,20 @@ async function saveOrderStatus(id,btn){
  const {error}=await sb.rpc('admin_update_order_status',{p_order_id:id,p_new_status:status});
  if(error){alert('Could not update order: '+error.message);btn.disabled=false;btn.textContent='Save';return}
  $('ordersMessage').textContent='Order status updated successfully.';await loadOrders();
+}
+async function saveBkashPaymentStatus(id,btn){
+ const select=document.querySelector(`[data-bkash-status-select="${id}"]`);
+ const status=select?.value;
+ if(!bkashPaymentStatuses.includes(status))return;
+ const order=cachedOrders.find(o=>o.id===id);
+ if(!order||order.payment_method!=='bkash_delivery_cod')return;
+ if(status==='verified'&&!confirm('Confirm that you checked the bKash transaction and the delivery charge was received?'))return;
+ if(status==='rejected'&&!confirm('Mark this bKash payment as rejected?'))return;
+ btn.disabled=true;btn.textContent='Saving…';
+ const {error}=await sb.rpc('admin_update_bkash_payment_status',{p_order_id:id,p_new_status:status});
+ if(error){alert('Could not update bKash payment status: '+error.message+'\n\nRun the bKash verification SQL setup in Supabase first.');btn.disabled=false;btn.textContent='Save payment status';return}
+ $('ordersMessage').textContent=`bKash payment marked ${bkashPaymentLabels[status]}.`;
+ await loadOrders();
 }
 $('refreshOrders')?.addEventListener('click',loadOrders);
 $('orderStatusFilter')?.addEventListener('change',renderOrders);
