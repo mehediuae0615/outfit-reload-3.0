@@ -122,7 +122,17 @@
           </section>
         </form>
       </div>
-      <div id="orderSuccess" class="order-success" hidden><div class="success-mark">✓</div><p class="eyebrow">ORDER RECEIVED</p><h2>Thank you for your order.</h2><p>Your order has been submitted successfully.</p><div class="order-number-box"><span>YOUR ORDER NUMBER</span><strong id="successOrderNumber"></strong></div><p id="successOrderTotal"></p><button class="btn btn-dark" id="continueShopping">CONTINUE SHOPPING ↗</button></div>
+      <div id="orderSuccess" class="order-success" hidden>
+        <div class="success-mark" aria-hidden="true"><span>✓</span></div>
+        <p class="eyebrow success-eyebrow">ORDER CONFIRMED · OUTFIT RELOAD 3.0</p>
+        <h2>Thank you for your order!</h2>
+        <p class="success-description">Your order has been placed successfully. We’ll contact you if we need any details.</p>
+        <div class="success-confirmation-pill"><span></span> Your order is now in our system</div>
+        <div class="order-number-box"><span>YOUR ORDER NUMBER</span><strong id="successOrderNumber"></strong><small>Keep this number to track your order</small></div>
+        <div class="success-total-card"><span>PAYMENT METHOD</span><b>Cash on Delivery</b><div class="success-total-divider"></div><p id="successOrderTotal"></p></div>
+        <p class="success-tracking-hint">Want to check your order status? Use your order number and checkout phone number.</p>
+        <div class="success-actions"><button type="button" class="btn btn-dark" id="trackSuccessOrder">TRACK MY ORDER ↗</button><button type="button" class="btn btn-light" id="continueShopping">CONTINUE SHOPPING</button></div>
+      </div>
     </section>
   </div>
 
