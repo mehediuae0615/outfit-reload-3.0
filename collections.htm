@@ -72,6 +72,32 @@ footer{background:#171717}
  .collection-intro h1{font-size:34px}
 }
 </style>
+
+<style>
+body:not(.admin-body) .announcement{background:#9f3514;color:#fff}
+body:not(.admin-body) .site-header{height:76px;padding:0 5%;background:#fff}
+body:not(.admin-body) .site-header nav{gap:25px;font-size:12px;font-weight:600}
+body:not(.admin-body) .collection-intro{text-align:left;background:#f7f7f7;padding:42px 7% 28px}
+body:not(.admin-body) .collection-intro h1{font:700 clamp(34px,5vw,48px)/1.1 "DM Sans",sans-serif;letter-spacing:-1.5px}
+body:not(.admin-body) .collection-intro p:last-child{font-size:13px;color:#666}
+body:not(.admin-body) .collection-wrap{padding:25px 6% 75px}
+body:not(.admin-body) .category-links a{border-radius:30px;font-size:10px}
+body:not(.admin-body) .product-grid{gap:30px 16px}
+body:not(.admin-body) .product-info h3{font-size:13px}
+body:not(.admin-body) .product-info p{font-size:13px;font-weight:700}
+body:not(.admin-body) .product-tag{background:#fff;color:#171717}
+body:not(.admin-body) .quick-view{background:#171717;color:#fff}
+@media(max-width:800px){
+ body:not(.admin-body) .site-header{height:68px;padding:0 4%}
+ body:not(.admin-body) .site-header nav{top:68px;left:0;right:0;background:#fff;padding:22px 5%;z-index:30}
+ body:not(.admin-body) .collection-intro{padding:34px 5% 22px}
+ body:not(.admin-body) .collection-intro h1{font-size:34px}
+ body:not(.admin-body) .collection-wrap{padding:14px 4% 55px}
+ body:not(.admin-body) .product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 11px}
+ body:not(.admin-body) .product-photo{aspect-ratio:3/4;height:auto}
+}
+</style>
+
 </head>
 <body>
 
@@ -84,7 +110,7 @@ footer{background:#171717}
  </a>
  <button class="menu-toggle" id="menuToggle" aria-label="Open menu">☰</button>
  <nav id="mainNav">
-  <a href="collections.html">Shop All</a>
+  <a href="collections.htm">Shop All</a>
   <a href="index.html#new">New Arrival</a>
   <a href="index.html#about">Our Story</a>
   <a href="#track-order">Track Order</a>
@@ -97,8 +123,8 @@ footer{background:#171717}
 
 <main>
  <section class="collection-intro">
-  <p class="eyebrow">OUTFIT RELOAD 3.0 · CURATED MENSWEAR</p>
-  <h1>Collections</h1>
+  <p class="eyebrow">HOME / COLLECTIONS</p>
+  <h1>Shop all collections</h1>
   <p>Discover pieces selected for quality, comfort and everyday style.</p>
  </section>
 
