@@ -24,60 +24,56 @@ async function renderProducts(){
  const grid=$('productGrid');
  if(!grid)return;
  grid.innerHTML='<p class="helper">Loading collection…</p>';
- const withTimeout=(promise,label,ms=10000)=>Promise.race([
-  promise,
-  new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+' timed out after '+(ms/1000)+' seconds')),ms))
- ]);
  try{
-  // Load products first. Do not make the storefront wait for category metadata.
-  const result=await withTimeout(
-   supabaseClient.from('products').select('*').eq('is_active',true),
-   'Supabase products query'
-  );
-  if(result.error)throw result.error;
-  productsCache=Array.isArray(result.data)?result.data:[];
+  // Load and render products first. Category lookup must never block the product grid.
+  const productRequest=supabaseClient.from('products').select('*').eq('is_active',true);
+  const productResult=await Promise.race([
+   productRequest,
+   new Promise((_,reject)=>setTimeout(()=>reject(new Error('Products request timed out after 12 seconds.')),12000))
+  ]);
+  const {data,error}=productResult;
+  if(error)throw error;
+  productsCache=Array.isArray(data)?data:[];
   productsCache.sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+  renderProductGrids();
+  window.dispatchEvent(new CustomEvent('outfit:products-loaded'));
 
-  const paint=()=>{
-   grid.innerHTML=productsCache.length?productsCache.map(card).join(''):'<p class="helper">Our new collection is being prepared. Check back soon.</p>';
-   [['bestSellerGrid',p=>p.best_seller],['featuredGrid',p=>p.featured],['trendingGrid',p=>p.trending]].forEach(([id,test])=>{
-    const el=$(id);if(el){const items=productsCache.filter(test);el.innerHTML=items.length?items.map(card).join(''):'<p class="helper">New selections coming soon.</p>';}
-   });
-   document.querySelectorAll('.product-grid [data-product]').forEach(el=>{
-    const open=()=>openProduct(el.dataset.product);
-    if(!el.dataset.productBound){el.dataset.productBound='1';el.addEventListener('click',open);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});}
-   });
-   document.querySelectorAll('[data-wishlist]').forEach(b=>{
-    if(!b.dataset.wishlistBound){b.dataset.wishlistBound='1';b.addEventListener('click',e=>{e.stopPropagation();toggleWishlist(b.dataset.wishlist);});}
-   });
-   if(activeCategoryFilter)applyCategoryFilter(activeCategoryFilter);
-   window.dispatchEvent(new CustomEvent('outfit:products-loaded'));
-  };
-  // Render immediately with product data; category enrichment happens afterwards.
-  paint();
-
+  // Resolve category names in the background. If this fails, products stay visible.
   const categoryIds=[...new Set(productsCache.map(p=>p.category_id).filter(Boolean))];
   if(categoryIds.length){
-   try{
-    const categoryResult=await withTimeout(
-     supabaseClient.from('categories').select('id,name').in('id',categoryIds),
-     'Supabase categories query',7000
-    );
-    if(categoryResult.error)throw categoryResult.error;
-    const categoryMap=new Map((categoryResult.data||[]).map(c=>[String(c.id),c.name]));
-    productsCache=productsCache.map(p=>({...p,category:{name:categoryMap.get(String(p.category_id))||''}}));
-    paint();
-    window.dispatchEvent(new CustomEvent('outfit:categories-loaded'));
-   }catch(categoryError){
-    console.warn('Category lookup failed; product cards remain available:',categoryError);
-   }
+   supabaseClient.from('categories').select('id,name').in('id',categoryIds)
+    .then(({data:categories,error:categoryError})=>{
+     if(categoryError){console.warn('Category lookup failed; product grid remains available:',categoryError);return;}
+     const categoryMap=new Map((categories||[]).map(c=>[String(c.id),c.name]));
+     productsCache=productsCache.map(p=>({...p,category:{name:categoryMap.get(String(p.category_id))||p.category?.name||''}}));
+     renderProductGrids();
+     window.dispatchEvent(new CustomEvent('outfit:products-loaded'));
+    })
+    .catch(categoryError=>console.warn('Category lookup failed; product grid remains available:',categoryError));
   }
  }catch(err){
   console.error('Supabase product query failed:',err);
   const message=String(err?.message||err||'Unknown error');
-  grid.innerHTML='<p class="helper">Products could not be loaded: '+escapeHtml(message)+'. Please check the Supabase products query and network connection.</p>';
+  grid.innerHTML='<p class="helper">Products could not be loaded: '+escapeHtml(message)+'. Please check the Supabase products table and public SELECT policy.</p>';
   window.dispatchEvent(new CustomEvent('outfit:products-error',{detail:{message}}));
  }
+}
+function renderProductGrids(){
+ const grid=$('productGrid');
+ if(grid){
+  grid.innerHTML=productsCache.length?productsCache.map(card).join(''):'<p class="helper">Our new collection is being prepared. Check back soon.</p>';
+  grid.querySelectorAll('[data-product]').forEach(el=>{
+   if(el.dataset.productBound)return;el.dataset.productBound='1';
+   const open=()=>openProduct(el.dataset.product);
+   el.addEventListener('click',e=>{if(e.target.closest('[data-wishlist]'))return;open();});
+   el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
+  });
+  grid.querySelectorAll('[data-wishlist]').forEach(b=>{if(b.dataset.wishBound)return;b.dataset.wishBound='1';b.addEventListener('click',e=>{e.stopPropagation();toggleWishlist(b.dataset.wishlist);});});
+ }
+ [['bestSellerGrid',p=>p.best_seller],['featuredGrid',p=>p.featured],['trendingGrid',p=>p.trending]].forEach(([id,test])=>{
+  const el=$(id);if(el){const items=productsCache.filter(test);el.innerHTML=items.length?items.map(card).join(''):'<p class="helper">New selections coming soon.</p>';}
+ });
+ if(typeof activeCategoryFilter!=='undefined'&&activeCategoryFilter&&typeof applyCategoryFilter==='function')applyCategoryFilter(activeCategoryFilter);
 }
 window.renderProducts=renderProducts;
 async function openProduct(id){const p=productsCache.find(x=>x.id===id);if(!p)return;activeProduct=p;selectedSize='';selectedColor='';$('detailName').textContent=p.name;$('detailPrice').innerHTML=priceMarkup(p);$('detailDescription').textContent=p.description||'A carefully selected piece from Outfit Reload 3.0.';$('detailMaterial').textContent=p.material||'Premium quality';$('detailSizeGuide').textContent=p.size_guide||'Choose your usual size.';const imgs=p.image_urls?.length?p.image_urls:[];$('detailImage').src=imgs[0]||'https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=900&q=85';$('detailThumbs').innerHTML=imgs.map((u,i)=>`<button class="detail-thumb ${i===0?'active':''}" data-img="${escapeHtml(u)}"><img src="${escapeHtml(u)}" alt="Product image ${i+1}"></button>`).join('');$('detailThumbs').querySelectorAll('[data-img]').forEach(b=>b.onclick=()=>{$('detailImage').src=b.dataset.img;$('detailThumbs').querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active')});
