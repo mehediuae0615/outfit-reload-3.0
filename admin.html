@@ -24,7 +24,31 @@
 <section class="admin-panel" id="orders"><div class="panel-heading"><div><p class="eyebrow">FULFILMENT</p><h2>Order management</h2><p class="helper">Live customer orders · Update each order status below.</p></div><button class="btn btn-dark" id="refreshOrders" type="button">↻ REFRESH</button></div><div class="order-toolbar"><label class="field-label" for="orderStatusFilter">Filter orders</label><select id="orderStatusFilter"><option value="all">All orders</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select><span id="orderCount" class="pill">0 orders</span></div><div class="table-wrap"><table class="orders-table"><thead><tr><th>ORDER</th><th>CUSTOMER</th><th>DATE</th><th>TOTAL</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody id="adminOrderRows"><tr><td colspan="6">Loading orders…</td></tr></tbody></table></div><p id="ordersMessage" class="helper" role="status"></p></section>
 <section class="admin-panel" id="coupons"><div class="panel-heading"><div><p class="eyebrow">PROMOTIONS</p><h2>Coupon management</h2><p class="helper">Create percentage or fixed discounts. Codes are validated securely during checkout.</p></div></div><form id="couponForm" class="cms-fields"><label>Coupon code<input id="couponCodeAdmin" required maxlength="32" placeholder="WELCOME10"></label><label>Discount type<select id="couponType"><option value="percent">Percentage (%)</option><option value="fixed">Fixed amount (৳)</option></select></label><label>Discount value<input id="couponValue" type="number" min="0.01" step="0.01" required></label><label>Minimum order amount (৳)<input id="couponMinimum" type="number" min="0" value="0"></label><label>Maximum discount (৳, optional)<input id="couponMaximum" type="number" min="0" placeholder="No limit"></label><label>Usage limit (optional)<input id="couponLimit" type="number" min="1" placeholder="Unlimited"></label><label>Starts at (optional)<input id="couponStarts" type="datetime-local"></label><label>Expires at (optional)<input id="couponExpires" type="datetime-local"></label><button class="btn btn-dark" type="submit">SAVE COUPON</button></form><p id="couponAdminMessage" class="helper"></p><div class="table-wrap"><table><thead><tr><th>CODE</th><th>DISCOUNT</th><th>USAGE</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody id="couponRows"></tbody></table></div></section>
 <section class="admin-panel" id="reviewsAdmin"><div class="panel-heading"><div><p class="eyebrow">CUSTOMER VOICE</p><h2>Review moderation</h2><p class="helper">Approve reviews before they appear publicly.</p></div><button class="btn btn-light" id="refreshReviews" type="button">REFRESH</button></div><div class="table-wrap"><table><thead><tr><th>PRODUCT / CUSTOMER</th><th>RATING</th><th>REVIEW</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody id="reviewAdminRows"></tbody></table></div></section>
-<section class="admin-panel" id="homepage"><div class="panel-heading"><div><p class="eyebrow">STORE CONTENT</p><h2>Homepage announcement</h2></div></div><label class="field-label" for="announcementInput">Announcement bar text</label><div class="inline-edit"><input id="announcementInput" value="WE FOCUS QUALITY, NOT QUANTITY."><button class="btn btn-dark" id="saveAnnouncement">SAVE TEXT</button></div><p class="helper">Preview-only setting for this first stage. It will be stored in this browser.</p></section>
+<section class="admin-panel" id="homepage">
+<div class="panel-heading"><div><p class="eyebrow">STORE CONTENT</p><h2>Announcement bar</h2><p class="helper">Edit the message and control its visibility across the storefront.</p></div></div>
+<label class="field-label" for="announcementInput">Announcement text</label>
+<div class="inline-edit"><input id="announcementInput" maxlength="180" value="WE FOCUS QUALITY, NOT QUANTITY."><button class="btn btn-dark" id="saveAnnouncement" type="button">SAVE ANNOUNCEMENT</button></div>
+<label class="field-label" style="display:flex;align-items:center;gap:10px;margin-top:14px"><input id="announcementEnabled" type="checkbox" checked style="width:auto"> Show announcement bar</label>
+<p class="helper" id="announcementMessage" role="status">Loading announcement settings…</p>
+</section>
+<section class="admin-panel" id="bulkSale">
+<div class="panel-heading"><div><p class="eyebrow">PROMOTIONS</p><h2>Bulk discount / Clearance sale</h2><p class="helper">Apply one discount to all active products. Existing individual sale prices and Flash Sale schedules are backed up and restored when the campaign ends.</p></div></div>
+<div class="cms-group" style="margin:14px 0">
+<strong id="bulkSaleStatus">Checking campaign status…</strong>
+<p class="helper" id="bulkSaleMessage" role="status">Bulk sale status will appear here.</p>
+<div class="inline-edit" style="gap:10px;flex-wrap:wrap;margin-top:12px">
+<button class="btn btn-dark" type="button" data-bulk-percent="30">APPLY 30% OFF</button>
+<button class="btn btn-dark" type="button" data-bulk-percent="50">APPLY 50% OFF</button>
+</div>
+<div class="inline-edit" style="gap:10px;flex-wrap:wrap;margin-top:12px">
+<label class="field-label" for="customBulkPercent">Custom discount (%)</label>
+<input id="customBulkPercent" type="number" min="1" max="90" step="0.5" placeholder="e.g. 25" style="max-width:150px">
+<button class="btn btn-light" id="applyCustomBulk" type="button">APPLY CUSTOM</button>
+<button class="btn btn-light" id="endBulkSale" type="button">END BULK SALE</button>
+</div>
+<p class="helper">Note: While a bulk campaign is active, individual Sale Price and Flash Sale schedule fields are temporarily locked when editing existing products. Their previous values are restored after the campaign ends.</p>
+</div>
+</section>
 <section class="admin-panel" id="websiteContent">
   <div class="panel-heading">
     <div>

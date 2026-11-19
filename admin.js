@@ -1,7 +1,7 @@
 const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
 const $=id=>document.getElementById(id);
 const login=$('adminLogin'), app=$('adminApp'), msg=$('loginMessage');
-let editingId=null, existingImages=[];
+let editingId=null, existingImages=[], currentBulkPercent=0;
 function safe(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function splitList(v){return [...new Set(String(v||'').split(',').map(x=>x.trim()).filter(Boolean))]}
 function toLocalDateTime(value){if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';const pad=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`}
@@ -10,7 +10,7 @@ async function checkSession(){
  if(!session){login.hidden=false;app.hidden=true;return}
  const {data:owner,error}=await sb.from('admin_users').select('role,email').eq('user_id',session.user.id).maybeSingle();
  if(error||!owner){await sb.auth.signOut();login.hidden=false;app.hidden=true;msg.textContent='This account is not authorized as an admin.';return}
- login.hidden=true;app.hidden=false;$('adminEmail').textContent=owner.email||session.user.email;await loadProducts();await loadAnalyticsInventory();await loadAnnouncement();await loadOrders();await loadWebsiteContent();await loadBkashSettings();await loadCoupons();await loadReviews();
+ login.hidden=true;app.hidden=false;$('adminEmail').textContent=owner.email||session.user.email;await loadProducts();await loadAnalyticsInventory();await loadAnnouncement();await loadBulkSaleStatus();await loadOrders();await loadWebsiteContent();await loadBkashSettings();await loadCoupons();await loadReviews();
 }
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();msg.textContent='Signing in…';const {error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error){msg.textContent=error.message;return}msg.textContent='';await checkSession()});
 $('logoutBtn').addEventListener('click',async()=>{await sb.auth.signOut();await checkSession()});
@@ -23,7 +23,7 @@ async function loadProducts(){
  document.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>openEdit(b.dataset.edit)));
 }
 const modal=$('productModal');
-function resetForm(){editingId=null;existingImages=[];$('productForm').reset();$('modalTitle').textContent='Add a product';$('saveProductBtn').textContent='SAVE PRODUCT ONLINE';$('existingImages').textContent='';$('variantRows').innerHTML='';$('pSaleStarts').value='';$('pSaleEnds').value='';$('pActive').checked=true}
+function resetForm(){editingId=null;existingImages=[];$('productForm').reset();$('modalTitle').textContent='Add a product';$('saveProductBtn').textContent='SAVE PRODUCT ONLINE';$('existingImages').textContent='';$('variantRows').innerHTML='';$('pSaleStarts').value='';$('pSaleEnds').value='';$('pSalePrice').disabled=false;$('pSaleStarts').disabled=false;$('pSaleEnds').disabled=false;$('pActive').checked=true}
 $('addProductBtn').addEventListener('click',()=>{resetForm();modal.classList.add('open')});
 $('closeModal').addEventListener('click',()=>modal.classList.remove('open'));
 modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open')});
@@ -40,7 +40,7 @@ async function openEdit(id){
  if(ve){alert('Could not load variants: '+ve.message);return}
  editingId=id;existingImages=p.image_urls||[];
  $('modalTitle').textContent='Edit product';$('saveProductBtn').textContent='UPDATE PRODUCT';
- $('pName').value=p.name||'';$('pCategory').value=cat?.name||'Shirts';$('pPrice').value=p.price||'';$('pSalePrice').value=p.sale_price||'';$('pSaleStarts').value=toLocalDateTime(p.sale_starts_at);$('pSaleEnds').value=toLocalDateTime(p.sale_ends_at);$('pStock').value=p.stock||0;$('pDescription').value=p.description||'';$('pMaterial').value=p.material||'';$('pSizeGuide').value=p.size_guide||'';
+ $('pName').value=p.name||'';$('pCategory').value=cat?.name||'Shirts';$('pPrice').value=p.price||'';$('pSalePrice').value=p.sale_price||'';$('pSaleStarts').value=toLocalDateTime(p.sale_starts_at);$('pSaleEnds').value=toLocalDateTime(p.sale_ends_at);$('pSalePrice').disabled=currentBulkPercent>0;$('pSaleStarts').disabled=currentBulkPercent>0;$('pSaleEnds').disabled=currentBulkPercent>0;$('pStock').value=p.stock||0;$('pDescription').value=p.description||'';$('pMaterial').value=p.material||'';$('pSizeGuide').value=p.size_guide||'';
  $('pSizes').value=(p.sizes||[]).join(', ');$('pColors').value=(p.colors||[]).join(', ');
  $('pNewArrival').checked=!!p.new_arrival;$('pBestSeller').checked=!!p.best_seller;$('pFeatured').checked=!!p.featured;$('pTrending').checked=!!p.trending;$('pActive').checked=!!p.is_active;
  $('existingImages').textContent=existingImages.length?`Current images: ${existingImages.length}. New uploads will be added.`:'No current images.';
@@ -59,6 +59,7 @@ $('productForm').addEventListener('submit',async e=>{
   const files=[...$('pImages').files], urls=[...existingImages];
   for(const file of files){const ext=(file.name.split('.').pop()||'jpg').toLowerCase(),filePath=`${crypto.randomUUID()}.${ext}`;const {error:ue}=await sb.storage.from('product-images').upload(filePath,file,{upsert:false,contentType:file.type});if(ue)throw ue;const {data}=sb.storage.from('product-images').getPublicUrl(filePath);urls.push(data.publicUrl)}
   const payload={name,slug:name.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+Date.now().toString().slice(-5),category_id:cat.id,price,sale_price,sale_starts_at,sale_ends_at,stock,description:$('pDescription').value.trim(),material:$('pMaterial').value.trim(),size_guide:$('pSizeGuide').value.trim(),image_urls:urls,sizes:splitList($('pSizes').value),colors:splitList($('pColors').value),new_arrival:$('pNewArrival').checked,best_seller:$('pBestSeller').checked,featured:$('pFeatured').checked,trending:$('pTrending').checked,is_active:$('pActive').checked,updated_at:new Date().toISOString()};
+  if(editingId&&currentBulkPercent>0){payload.sale_price=Math.round(price*(1-currentBulkPercent/100)*100)/100;payload.sale_starts_at=null;payload.sale_ends_at=null;}
   let productId=editingId;
   if(editingId){const {error}=await sb.from('products').update(payload).eq('id',editingId);if(error)throw error;}
   else{payload.sku='OR-'+Date.now().toString().slice(-8);const {data,error}=await sb.from('products').insert(payload).select('id').single();if(error)throw error;productId=data.id;}
@@ -68,7 +69,65 @@ $('productForm').addEventListener('submit',async e=>{
   e.target.reset();modal.classList.remove('open');await loadProducts();alert(wasEditing?'Product updated successfully.':'Product saved to the live store.');resetForm();
  }catch(err){alert('Could not save product: '+(err.message||err))}finally{btn.disabled=false;btn.textContent=wasEditing?'UPDATE PRODUCT':'SAVE PRODUCT ONLINE'}
 });
-async function loadAnnouncement(){const {data}=await sb.from('store_settings').select('value').eq('key','announcement').maybeSingle();if(data?.value)$('announcementInput').value=data.value}
+async function loadAnnouncement(){
+ const {data,error}=await sb.from('store_settings').select('key,value').in('key',['announcement','announcement_enabled']);
+ const settings=Object.fromEntries((data||[]).map(x=>[x.key,x.value]));
+ if(error){$('announcementMessage').textContent='Could not load announcement: '+error.message;return}
+ $('announcementInput').value=settings.announcement||'WE FOCUS QUALITY, NOT QUANTITY.';
+ $('announcementEnabled').checked=settings.announcement_enabled!=='false';
+ $('announcementMessage').textContent=$('announcementEnabled').checked?'Announcement is ON.':'Announcement is OFF.';
+}
+async function saveAnnouncementSettings(){
+ const button=$('saveAnnouncement'),message=$('announcementMessage'),value=$('announcementInput').value.trim(),enabled=$('announcementEnabled').checked;
+ if(!value){message.textContent='Enter announcement text before saving.';return}
+ button.disabled=true;button.textContent='SAVING…';message.textContent='Saving announcement…';
+ try{
+  const rows=[{key:'announcement',value},{key:'announcement_enabled',value:String(enabled)}];
+  const {error}=await sb.from('store_settings').upsert(rows,{onConflict:'key'});if(error)throw error;
+  message.textContent=enabled?'Announcement saved and is ON across the storefront.':'Announcement saved and hidden across the storefront.';
+ }catch(error){message.textContent='Save failed: '+(error.message||error)}
+ finally{button.disabled=false;button.textContent='SAVE ANNOUNCEMENT'}
+}
+$('saveAnnouncement')?.addEventListener('click',saveAnnouncementSettings);
+$('announcementEnabled')?.addEventListener('change',saveAnnouncementSettings);
+
+async function loadBulkSaleStatus(){
+ const {data,error}=await sb.from('store_settings').select('value').eq('key','bulk_discount_percent').maybeSingle();
+ if(error){$('bulkSaleStatus').textContent='Status unavailable';$('bulkSaleMessage').textContent=error.message;return}
+ currentBulkPercent=Number(data?.value||0);
+ $('bulkSaleStatus').textContent=currentBulkPercent>0?`ACTIVE CAMPAIGN · ${currentBulkPercent}% OFF`:'NO ACTIVE BULK SALE';
+ $('bulkSaleMessage').textContent=currentBulkPercent>0?'Bulk discount is active on all active products. End the campaign to restore previous individual sale prices and schedules.':'No bulk discount is currently active.';
+}
+async function applyBulkDiscount(percent){
+ percent=Number(percent);
+ if(!Number.isFinite(percent)||percent<1||percent>90){$('bulkSaleMessage').textContent='Discount must be between 1% and 90%.';return}
+ const action= currentBulkPercent>0?'Update the active bulk discount to '+percent+'%?':'Apply '+percent+'% discount to all active products?';
+ if(!confirm(action+' Existing individual sale prices will be backed up and restored when the campaign ends.'))return;
+ const message=$('bulkSaleMessage');message.textContent='Applying bulk discount…';
+ document.querySelectorAll('[data-bulk-percent],#applyCustomBulk,#endBulkSale').forEach(b=>b.disabled=true);
+ try{
+  const {data,error}=await sb.rpc('admin_set_bulk_discount',{p_percent:percent});if(error)throw error;
+  const result=Array.isArray(data)?data[0]:data;
+  message.textContent=result?.message||`Bulk discount ${percent}% applied.`;
+  await loadBulkSaleStatus();await loadProducts();
+ }catch(error){message.textContent='Could not apply bulk discount: '+(error.message||error)}
+ finally{document.querySelectorAll('[data-bulk-percent],#applyCustomBulk,#endBulkSale').forEach(b=>b.disabled=false)}
+}
+document.querySelectorAll('[data-bulk-percent]').forEach(b=>b.addEventListener('click',()=>applyBulkDiscount(Number(b.dataset.bulkPercent))));
+$('applyCustomBulk')?.addEventListener('click',()=>applyBulkDiscount($('customBulkPercent').value));
+$('endBulkSale')?.addEventListener('click',async()=>{
+ if(currentBulkPercent<=0){$('bulkSaleMessage').textContent='There is no active bulk sale to end.';return}
+ if(!confirm('End the bulk sale and restore all backed-up individual Sale Prices and Flash Sale schedules?'))return;
+ const message=$('bulkSaleMessage');message.textContent='Restoring previous prices…';
+ document.querySelectorAll('[data-bulk-percent],#applyCustomBulk,#endBulkSale').forEach(b=>b.disabled=true);
+ try{
+  const {data,error}=await sb.rpc('admin_clear_bulk_discount');if(error)throw error;
+  const result=Array.isArray(data)?data[0]:data;
+  message.textContent=result?.message||'Bulk sale ended. Previous sale prices restored.';
+  await loadBulkSaleStatus();await loadProducts();
+ }catch(error){message.textContent='Could not end bulk sale: '+(error.message||error)}
+ finally{document.querySelectorAll('[data-bulk-percent],#applyCustomBulk,#endBulkSale').forEach(b=>b.disabled=false)}
+});
 
 // bKash delivery-charge settings (stored in the existing store_settings table)
 async function loadBkashSettings(){
