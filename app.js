@@ -4,28 +4,10 @@ const fallbackProducts = [
 ];
 const $=id=>document.getElementById(id);
 function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-let productsCache=[], activeProduct=null, activeVariants=[], selectedSize='', selectedColor='', cart=JSON.parse(sessionStorage.getItem('or_cart')||'[]');
+let productsCache=[], activeProduct=null, activeVariants=[], selectedSize='', selectedColor='', activeCategoryFilter='', cart=JSON.parse(sessionStorage.getItem('or_cart')||'[]');
 function updateCart(){ const count=cart.reduce((n,x)=>n+x.qty,0); $('bagCount').textContent=count; const checkout=$('bagCheckout'); if(checkout){checkout.disabled=count===0;checkout.classList.toggle('is-ready',count>0);checkout.textContent=count?'PROCEED TO CHECKOUT ↗':'YOUR BAG IS EMPTY';} }
 function card(p){const img=(p.image_urls&&p.image_urls[0])||p.image||"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=700&q=80";return `<article class="product-card" role="button" tabindex="0" data-product="${p.id||''}"><div class="product-photo"><img src="${escapeHtml(img)}" alt="${escapeHtml(p.name)}"><span class="product-tag">${p.new_arrival?"NEW ARRIVAL":p.best_seller?"BEST SELLER":p.featured?"FEATURED":p.trending?"TRENDING":"CURATED"}</span><span class="quick-view">VIEW DETAILS ↗</span></div><div class="product-info"><h3>${escapeHtml(p.name)}</h3><p>৳ ${Number(p.price).toLocaleString("en-BD")}</p></div></article>`}
-async function renderProducts(){const grid=$('productGrid');if(!grid)return;grid.innerHTML='<p class="helper">Loading collection…</p>';const {data,error}=await supabaseClient.from('products').select('id,name,price,image_urls,stock,featured,best_seller,new_arrival,trending,is_active,created_at,sizes,colors,description,material,size_guide,category_id,categories(name)').eq('is_active',true).order('created_at',{ascending:false});if(error){console.error(error);grid.innerHTML='<p class="helper">Products could not be loaded. Please refresh in a moment.</p>';return;}productsCache=data||[];
-const requestedCategory=new URLSearchParams(window.location.search).get('category')||'all';
-const categoryKey=value=>String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'');
-const categoryAliases={shirts:['shirt','shirts','formalshirt','casualshirt'], 'tshirts':['tshirt','tshirts','tee','tees'], pants:['pant','pants','trouser','trousers'], jeans:['jean','jeans','denim'], shoes:['shoe','shoes','sneaker','sneakers'], watches:['watch','watches'], accessories:['accessory','accessories'], sweatshirts:['sweatshirt','sweatshirts','hoodie','hoodies']};
-function productMatchesCategory(product,category){
- if(!category||categoryKey(category)==='all')return true;
- const wanted=categoryKey(category);
- const raw=product.categories?.name||product.category||product.category_name||'';
- const actual=categoryKey(raw);
- const aliases=categoryAliases[wanted]||[wanted];
- if(actual)return aliases.includes(actual)||aliases.some(a=>actual.includes(a));
- const name=categoryKey(product.name);
- return aliases.some(a=>name.includes(a));
-}
-const visibleProducts=productsCache.filter(p=>productMatchesCategory(p,requestedCategory));
-const countLabel=$('collectionCount');
-if(countLabel)countLabel.textContent=(requestedCategory==='all'?'OUR COLLECTION':requestedCategory.toUpperCase()+' COLLECTION')+' · '+visibleProducts.length+' ITEMS';
-document.querySelectorAll('.category-links a[data-category]').forEach(link=>link.classList.toggle('active',categoryKey(link.dataset.category)===categoryKey(requestedCategory)));
-grid.innerHTML=visibleProducts.length?visibleProducts.map(card).join(''):'<p class="helper">No products found in this category yet.</p>';[['bestSellerGrid',p=>p.best_seller],['featuredGrid',p=>p.featured],['trendingGrid',p=>p.trending]].forEach(([id,test])=>{const el=$(id);if(el){const items=productsCache.filter(test);el.innerHTML=items.length?items.map(card).join(''):'<p class="helper">New selections coming soon.</p>'}});document.querySelectorAll('.product-grid [data-product]').forEach(el=>{const open=()=>openProduct(el.dataset.product);el.addEventListener('click',open);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}})});}
+async function renderProducts(){const grid=$('productGrid');if(!grid)return;grid.innerHTML='<p class="helper">Loading collection…</p>';const {data,error}=await supabaseClient.from('products').select('id,name,category:categories(name),price,image_urls,stock,featured,best_seller,new_arrival,trending,is_active,created_at,sizes,colors,description,material,size_guide').eq('is_active',true).order('created_at',{ascending:false});if(error){console.error(error);grid.innerHTML='<p class="helper">Products could not be loaded. Please refresh in a moment.</p>';return;}productsCache=data||[];grid.innerHTML=productsCache.length?productsCache.map(card).join(''):'<p class="helper">Our new collection is being prepared. Check back soon.</p>';[['bestSellerGrid',p=>p.best_seller],['featuredGrid',p=>p.featured],['trendingGrid',p=>p.trending]].forEach(([id,test])=>{const el=$(id);if(el){const items=productsCache.filter(test);el.innerHTML=items.length?items.map(card).join(''):'<p class="helper">New selections coming soon.</p>'}});document.querySelectorAll('.product-grid [data-product]').forEach(el=>{const open=()=>openProduct(el.dataset.product);el.addEventListener('click',open);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}})});if(activeCategoryFilter)applyCategoryFilter(activeCategoryFilter);}
 async function openProduct(id){const p=productsCache.find(x=>x.id===id);if(!p)return;activeProduct=p;selectedSize='';selectedColor='';$('detailName').textContent=p.name;$('detailPrice').textContent='৳ '+Number(p.price).toLocaleString('en-BD');$('detailDescription').textContent=p.description||'A carefully selected piece from Outfit Reload 3.0.';$('detailMaterial').textContent=p.material||'Premium quality';$('detailSizeGuide').textContent=p.size_guide||'Choose your usual size.';const imgs=p.image_urls?.length?p.image_urls:[];$('detailImage').src=imgs[0]||'https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=900&q=85';$('detailThumbs').innerHTML=imgs.map((u,i)=>`<button class="detail-thumb ${i===0?'active':''}" data-img="${escapeHtml(u)}"><img src="${escapeHtml(u)}" alt="Product image ${i+1}"></button>`).join('');$('detailThumbs').querySelectorAll('[data-img]').forEach(b=>b.onclick=()=>{$('detailImage').src=b.dataset.img;$('detailThumbs').querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active')});
 const {data,error}=await supabaseClient.from('product_variants').select('size,color,stock').eq('product_id',id);activeVariants=error?[]:(data||[]);const sizes=[...new Set(activeVariants.map(v=>v.size).filter(x=>x!=='One Size'))];const colors=[...new Set(activeVariants.map(v=>v.color).filter(x=>x!=='Default'))];const finalSizes=sizes.length?sizes:(p.sizes||[]);const finalColors=colors.length?colors:(p.colors||[]);$('detailSizes').innerHTML=finalSizes.length?finalSizes.map(s=>`<button class="choice" data-size="${escapeHtml(s)}">${escapeHtml(s)}</button>`).join(''):'<span class="helper">One size</span>';$('detailColors').innerHTML=finalColors.length?finalColors.map(c=>`<button class="choice" data-color="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join(''):'<span class="helper">Standard</span>';
 $('detailSizes').querySelectorAll('[data-size]').forEach(b=>b.onclick=()=>{selectedSize=b.dataset.size;$('detailSizes').querySelectorAll('button').forEach(x=>x.classList.toggle('selected',x===b));updateAvailability()});$('detailColors').querySelectorAll('[data-color]').forEach(b=>b.onclick=()=>{selectedColor=b.dataset.color;$('detailColors').querySelectorAll('button').forEach(x=>x.classList.toggle('selected',x===b));updateAvailability()});
@@ -103,7 +85,23 @@ $('checkoutForm').addEventListener('submit',async e=>{
  }
 });
 renderProducts();updateCart();renderBag();
-const nav=$('mainNav');$('menuToggle')?.addEventListener('click',()=>nav.classList.toggle('open'));
+// Category tiles filter the live Supabase product list without changing checkout/admin flows.
+function applyCategoryFilter(category){
+ activeCategoryFilter=category||'';
+ const grid=$('productGrid');if(!grid)return;
+ const normalize=v=>String(v||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+ const aliases={shoe:['shoe','shoes','footwear'],watch:['watch','watches','accessories'],sweatshirt:['sweatshirt','sweepshirt','sweatshirts','hoodie'],tshirt:['tshirt','tshirts','tee','tees'],shirts:['shirt','shirts'],pants:['pant','pants','jeans','trousers']};
+ const wanted=aliases[normalize(category)]||[normalize(category)];
+ const filtered=productsCache.filter(p=>{const c=normalize(p.category?.name||p.category||'');return wanted.some(w=>c===w||c.includes(w)||normalize(p.name).includes(w));});
+ grid.innerHTML=filtered.length?filtered.map(card).join():'<p class="helper">No products found in this category yet.</p>';
+ document.querySelectorAll('.product-grid [data-product]').forEach(el=>{const open=()=>openProduct(el.dataset.product);el.addEventListener('click',open);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}})});
+ const heading=document.querySelector('#new .section-heading h2');if(heading)heading.innerHTML=activeCategoryFilter?escapeHtml(category)+'<span>.</span>':'New arrivals<span>.</span>';
+ document.querySelectorAll('.product-grid').forEach(el=>{if(el.id!=='productGrid')el.closest('.section')?.classList.toggle('category-filter-hidden',!!activeCategoryFilter)});
+ if(activeCategoryFilter){$('new').scrollIntoView({behavior:'smooth',block:'start'});}
+}
+document.querySelectorAll('.category-card[data-category]').forEach(tile=>tile.addEventListener('click',e=>{e.preventDefault();applyCategoryFilter(tile.dataset.category);}));
+
+const nav=$('mainNav');$('menuToggle')?.addEventListener('click',()=>{const open=nav.classList.toggle('open');$('menuToggle').setAttribute('aria-expanded',String(open));$('menuToggle').setAttribute('aria-label',open?'Close menu':'Open menu')});nav?.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{nav.classList.remove('open');$('menuToggle')?.setAttribute('aria-expanded','false')}));
 $('newsletterForm')?.addEventListener('submit',e=>{e.preventDefault();alert('Thank you for subscribing!')});
 document.addEventListener('outfit:content-loaded',()=>{if($('deliveryArea'))updateCheckoutTotals()});
 (async()=>{const {data}=await supabaseClient.from('store_settings').select('value').eq('key','announcement').maybeSingle();if(data?.value)$('announcement').textContent=data.value;})();

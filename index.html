@@ -2,32 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#3b2b22">
+  <meta name="theme-color" content="#ffffff">
   <title>Outfit Reload 3.0 | Premium Men's Fashion Bangladesh</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="storefront.css">
 </head>
 <body>
-  <div class="announcement" id="announcement"><span>COMPLIMENTARY STYLE, CONSIDERED QUALITY</span><span class="announcement-side">WE FOCUS QUALITY, NOT QUANTITY.</span></div>
+  <div class="announcement" id="announcement">GRAND OPENING SPECIAL · UP TO 50% OFF</div>
   <header class="site-header">
-    <a class="brand" href="index.html"><span class="brand-mark">OR</span><span>OUTFIT RELOAD <small>3.0 · MEN'S COLLECTION</small></span></a>
     <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span></button>
-    <nav id="mainNav"><a href="#new">New Arrivals</a><a href="collections.htm">Shop All</a><a href="#bestSellers">Best Sellers</a><a href="#featuredCollection">Featured</a><a href="#about">Our Story</a><a href="#contact">Contact</a><a href="#track-order">Track Order</a></nav>
-    <div class="header-actions"><a class="header-search" href="collections.htm" aria-label="Explore products">SEARCH</a><button class="icon-btn bag-trigger" id="bagButton" aria-label="Shopping bag">BAG <span id="bagCount">0</span></button></div>
+    <a class="brand" href="index.html"><span class="brand-mark">OR</span><span>OUTFIT RELOAD <small>3.0 · MEN'S COLLECTION</small></span></a>
+    <nav id="mainNav"><a href="#new">New Arrival</a><a href="collections.htm">Shop All</a><a href="#sale">Sale</a><a href="#reviews">Reviews</a><a href="#about">Our Story</a><a href="#track-order">Track order</a><a href="#contact">Contact</a></nav>
+    <div class="header-actions"><a class="header-search" href="#new" aria-label="Search products" title="Search">⌕</a><a class="header-user" href="admin.html" aria-label="Account">♙</a><button class="header-heart" aria-label="Wishlist" type="button">♡</button><button class="icon-btn bag-trigger" id="bagButton" aria-label="Shopping bag">♧ <span id="bagCount">0</span></button></div>
   </header>
   <main>
-    <section class="hero hero-compact">
-      <div class="hero-copy">
-        <p class="eyebrow">OUTFIT RELOAD 3.0 · MEN'S COLLECTION</p>
-        <h1>Find your<br><em>everyday style.</em></h1>
-        <p class="hero-desc">Thoughtfully selected essentials. Elevated everyday style. Quality pieces made for the way you move.</p>
-        <a class="btn btn-dark" href="collections.htm">SHOP THE COLLECTION <span>↗</span></a>
-        <div class="hero-note"><span>NEW SEASON · 2026</span><span>QUALITY OVER QUANTITY</span></div>
+    <section class="collection-intro">
+      <p class="breadcrumb"><a href="index.html">Home</a> / COLLECTIONS</p>
+      <h1>Collections</h1>
+      <p>Explore the latest styles, carefully selected for your everyday wardrobe.</p>
+    </section>
+    <section class="section categories" id="shop-categories">
+      <div class="category-grid">
+        <a class="category-card" href="#new" data-category="Shoes"><img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85" alt="Shoes"><b>SHOE</b></a>
+        <a class="category-card" href="#new" data-category="Watch"><img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=900&q=85" alt="Watch"><b>WATCH</b></a>
+        <a class="category-card" href="#new" data-category="Sweatshirt"><img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=900&q=85" alt="Sweatshirt"><b>SWEEPSHIRT</b></a>
+        <a class="category-card" href="#new" data-category="T-shirt"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85" alt="T-shirt"><b>T-SHIRT</b></a>
+        <a class="category-card" href="#new" data-category="Shirts"><img src="https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=900&q=85" alt="Shirt"><b>SHIRT</b></a>
+        <a class="category-card" href="#new" data-category="Pants"><img src="https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=900&q=85" alt="Pants"><b>PANT</b></a>
       </div>
     </section>
-    <section class="trust-strip"><span>✦ THOUGHTFULLY CURATED</span><span>✦ QUALITY OVER QUANTITY</span><span>✦ DELIVERY ACROSS BANGLADESH</span><span>✦ 7-DAY RETURN POLICY</span></section>
     <section class="section" id="new">
       <div class="section-heading"><div><p class="eyebrow">JUST LANDED · THE LATEST EDIT</p><h2>New arrivals<span>.</span></h2></div><a class="text-link" href="#collections">VIEW ALL ↗</a></div>
       <div class="product-grid" id="productGrid"></div>
@@ -36,9 +42,7 @@
       <div class="section-heading"><div><p class="eyebrow">THE PIECES THEY LOVE</p><h2>Best sellers<span>.</span></h2></div></div>
       <div class="product-grid" id="bestSellerGrid"></div>
     </section>
-    <section class="feature-band" id="collections">
-      <div class="feature-image"></div><div class="feature-copy"><p class="eyebrow">THE EVERYDAY COLLECTION</p><h2>Less, but<br><em>exceptional.</em></h2><p>Build a wardrobe around pieces that feel right, fit well and last beyond a season.</p><a class="btn btn-light" href="#new">SHOP THE EDIT ↗</a></div>
-    </section>
+
     <section class="section curated-section" id="featuredCollection">
       <div class="section-heading"><div><p class="eyebrow">HANDPICKED FOR YOU</p><h2>Featured collection<span>.</span></h2></div></div>
       <div class="product-grid" id="featuredGrid"></div>
@@ -46,15 +50,6 @@
     <section class="section curated-section" id="trendingProducts">
       <div class="section-heading"><div><p class="eyebrow">WHAT'S IN STYLE</p><h2>Trending now<span>.</span></h2></div></div>
       <div class="product-grid" id="trendingGrid"></div>
-    </section>
-    <section class="section categories">
-      <div class="section-heading"><div><p class="eyebrow">BUILD YOUR EVERYDAY ROTATION</p><h2>Shop by category<span>.</span></h2></div></div>
-      <div class="category-grid">
-        <a class="category-card cat-shoes" href="collections.htm?category=Shoes"><span>01</span><b>SHOES</b><i>↗</i></a>
-        <a class="category-card cat-accessories" href="collections.htm?category=Accessories"><span>02</span><b>WATCHES & ACCESSORIES</b><i>↗</i></a>
-        <a class="category-card cat-sweatshirts" href="collections.htm?category=Sweatshirts"><span>03</span><b>SWEATSHIRTS</b><i>↗</i></a>
-        <a class="category-card cat-shirts" href="collections.htm?category=T-Shirts"><span>04</span><b>T-SHIRTS & SHIRTS</b><i>↗</i></a>
-      </div>
     </section>
     <section class="quote-section" id="about"><p class="eyebrow">OUR PHILOSOPHY</p><h2>Style is not about having more.<br><em>It is about choosing better.</em></h2><p>Outfit Reload 3.0 — quality over quantity, always.</p></section>
     <section class="newsletter" id="contact"><div><p class="eyebrow">STAY IN THE LOOP</p><h2>Good style, delivered.</h2><p>New collections and selected offers, straight to your inbox.</p></div><form id="newsletterForm"><input type="email" placeholder="Your email address" required><button class="btn btn-dark">SUBSCRIBE ↗</button></form></section>
