@@ -10,7 +10,7 @@ async function checkSession(){
  if(!session){login.hidden=false;app.hidden=true;return}
  const {data:owner,error}=await sb.from('admin_users').select('role,email').eq('user_id',session.user.id).maybeSingle();
  if(error||!owner){await sb.auth.signOut();login.hidden=false;app.hidden=true;msg.textContent='This account is not authorized as an admin.';return}
- login.hidden=true;app.hidden=false;$('adminEmail').textContent=owner.email||session.user.email;await loadProducts();await loadAnnouncement();await loadOrders();await loadWebsiteContent();await loadCoupons();await loadReviews();
+ login.hidden=true;app.hidden=false;$('adminEmail').textContent=owner.email||session.user.email;await loadProducts();await loadAnalyticsInventory();await loadAnnouncement();await loadOrders();await loadWebsiteContent();await loadCoupons();await loadReviews();
 }
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();msg.textContent='Signing in…';const {error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error){msg.textContent=error.message;return}msg.textContent='';await checkSession()});
 $('logoutBtn').addEventListener('click',async()=>{await sb.auth.signOut();await checkSession()});
@@ -140,6 +140,7 @@ async function loadOrders(){
  if(statCards[1])statCards[1].querySelector('strong').textContent=String(cachedOrders.length);
  if(statCards[1])statCards[1].querySelector('small').textContent=`${cachedOrders.filter(o=>o.status==='pending').length} pending`;
  $('ordersMessage').textContent=cachedOrders.length?`Showing ${cachedOrders.length} live order(s).`:'No customer orders yet.';
+ renderAnalytics();
 }
 async function saveOrderStatus(id,btn){
  const select=document.querySelector(`[data-status-select="${id}"]`);const status=select?.value;
@@ -159,3 +160,25 @@ async function loadCoupons(){const host=$('couponRows');if(!host)return;const {d
 $('couponForm')?.addEventListener('submit',async e=>{e.preventDefault();const msg=$('couponAdminMessage');const code=$('couponCodeAdmin').value.trim().toUpperCase();const value=Number($('couponValue').value);if(!/^[A-Z0-9_-]{3,32}$/.test(code)){msg.textContent='Use 3–32 letters, numbers, hyphens or underscores.';return}const payload={code,discount_type:$('couponType').value,discount_value:value,min_order_amount:Number($('couponMinimum').value||0),max_discount:$('couponMaximum').value===''?null:Number($('couponMaximum').value),usage_limit:$('couponLimit').value===''?null:Number($('couponLimit').value),starts_at:$('couponStarts').value?new Date($('couponStarts').value).toISOString():null,expires_at:$('couponExpires').value?new Date($('couponExpires').value).toISOString():null,is_active:true};const {error}=await sb.from('discount_coupons').insert(payload);if(error){msg.textContent='Could not save coupon: '+error.message;return}e.target.reset();msg.textContent='Coupon saved successfully.';loadCoupons()});
 async function loadReviews(){const host=$('reviewAdminRows');if(!host)return;const {data,error}=await sb.from('product_reviews').select('id,customer_name,rating,review_text,is_approved,created_at,products(name)').order('created_at',{ascending:false});if(error){host.innerHTML=`<tr><td colspan="5">${safe(error.message)} — run the SQL upgrade.</td></tr>`;return}host.innerHTML=(data||[]).map(r=>`<tr><td><b>${safe(r.products?.name||'Deleted product')}</b><br><small>${safe(r.customer_name)}</small></td><td>${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</td><td>${safe(r.review_text)}</td><td>${r.is_approved?'Approved':'Pending'}</td><td>${r.is_approved?`<button class="table-action" data-review-action="hide" data-review-id="${r.id}">Hide</button>`:`<button class="table-action" data-review-action="approve" data-review-id="${r.id}">Approve</button>`} <button class="table-action danger" data-review-action="delete" data-review-id="${r.id}">Delete</button></td></tr>`).join('')||'<tr><td colspan="5">No reviews submitted yet.</td></tr>';host.querySelectorAll('[data-review-action]').forEach(b=>b.onclick=async()=>{const action=b.dataset.reviewAction;if(action==='delete'&&!confirm('Delete this review?'))return;const update=action==='approve'?{is_approved:true}:action==='hide'?{is_approved:false}:null;const q=update?sb.from('product_reviews').update(update).eq('id',b.dataset.reviewId):sb.from('product_reviews').delete().eq('id',b.dataset.reviewId);const {error}=await q;if(error)alert(error.message);else loadReviews()});}
 $('refreshReviews')?.addEventListener('click',loadReviews);
+
+// SALES ANALYTICS — calculated from live orders and product inventory
+function renderAnalytics(){
+ const days=Number($('analyticsRange')?.value||30),now=new Date(),start=new Date(now);start.setHours(0,0,0,0);start.setDate(start.getDate()-days+1);
+ const periodOrders=cachedOrders.filter(o=>o.status!=='cancelled'&&new Date(o.created_at)>=start&&new Date(o.created_at)<=now);
+ const revenue=periodOrders.reduce((sum,o)=>sum+Number(o.total||0),0);
+ $('analyticsRevenue').textContent=money(revenue);$('analyticsOrders').textContent=String(periodOrders.length);$('analyticsAverage').textContent=money(periodOrders.length?revenue/periodOrders.length:0);
+ const counts={};orderStatuses.forEach(s=>counts[s]=cachedOrders.filter(o=>o.status===s).length);
+ $('analyticsStatuses').innerHTML=orderStatuses.map(s=>`<span>${statusLabels[s]}: <b>${counts[s]}</b></span>`).join('');
+ const buckets=[];for(let i=days-1;i>=0;i--){const d=new Date(now);d.setHours(0,0,0,0);d.setDate(d.getDate()-i);buckets.push({date:d,label:days===7?d.toLocaleDateString('en',{weekday:'short'}):d.toLocaleDateString('en',{day:'numeric',month:'short'}),value:0})}
+ periodOrders.forEach(o=>{const d=new Date(o.created_at);d.setHours(0,0,0,0);const b=buckets.find(x=>x.date.getTime()===d.getTime());if(b)b.value+=Number(o.total||0)});
+ const max=Math.max(...buckets.map(b=>b.value),1);$('analyticsChartCaption').textContent=`Daily revenue · ${days} days`;
+ $('analyticsChart').innerHTML=buckets.map(b=>`<div class="analytics-bar-col"><span class="analytics-bar-value">${b.value?Math.round(b.value).toLocaleString('en-BD'):''}</span><div class="analytics-bar" title="${dateLabel(b.date)} · ${money(b.value)}" style="height:${Math.max(2,b.value/max*72)}%"></div><span class="analytics-bar-label">${safe(b.label)}</span></div>`).join('');
+ const best={};cachedOrders.filter(o=>o.status!=='cancelled').forEach(o=>(o.order_items||[]).forEach(i=>{const name=i.product_name||'Unknown product';best[name]=(best[name]||0)+Number(i.quantity||0)}));
+ const bestRows=Object.entries(best).sort((a,b)=>b[1]-a[1]).slice(0,6),bestMax=Math.max(...bestRows.map(x=>x[1]),1);
+ $('analyticsBestSellers').innerHTML=bestRows.map(([name,qty])=>`<div><div class="analytics-list-row"><span>${safe(name)}</span><b>${qty} sold</b></div><div class="analytics-track"><span style="width:${qty/bestMax*100}%"></span></div></div>`).join('')||'<p class="helper">No sales data yet.</p>';
+ $('analyticsOrderSummary').innerHTML=`<table class="analytics-table"><tbody>${orderStatuses.map(s=>`<tr><td>${statusLabels[s]}</td><td>${counts[s]}</td></tr>`).join('')}<tr><td><b>Total orders</b></td><td>${cachedOrders.length}</td></tr></tbody></table>`;
+ $('analyticsMessage').textContent=`Based on ${cachedOrders.length} orders currently available to your admin account.`;
+}
+async function loadAnalyticsInventory(){const host=$('analyticsLowStock');if(!host)return;const {data,error}=await sb.from('products').select('id,name,stock,is_active').order('stock',{ascending:true}).limit(100);if(error){host.innerHTML=`<p class="helper">Could not load inventory: ${safe(error.message)}</p>`;return}const low=(data||[]).filter(p=>p.is_active&&Number(p.stock)<=5);const stat=document.querySelectorAll('#overview .stat-card')[3];if(stat){stat.querySelector('strong').textContent=String(low.length);stat.querySelector('small').textContent='5 or fewer units'}host.innerHTML=low.map(p=>`<div class="analytics-list-row" style="padding:8px 0;border-bottom:1px solid #eee7e1"><span>${safe(p.name)}</span><b>${Number(p.stock)} left</b></div>`).join('')||'<p class="helper">No low-stock products. Inventory looks healthy.</p>'}
+$('analyticsRange')?.addEventListener('change',renderAnalytics);
+$('refreshAnalytics')?.addEventListener('click',async()=>{await loadOrders();await loadAnalyticsInventory();renderAnalytics()});
