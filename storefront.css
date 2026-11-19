@@ -27,3 +27,8 @@ footer{background:#111;color:#fff}footer .brand{color:#fff}footer .brand small{c
 .flash-start-countdown{color:#6b6256}
 .flash-schedule-fields{margin-top:12px}
 .flash-schedule-fields input{width:100%}
+
+/* Wishlist, reviews and coupon enhancements */
+.product-card{position:relative}.wishlist-toggle{position:absolute;z-index:3;right:12px;top:12px;width:38px;height:38px;border:0;border-radius:50%;background:#fff;color:#392c25;font-size:22px;cursor:pointer;box-shadow:0 3px 14px #0002}.wishlist-toggle.active{color:#b32645}.wishlist-toggle.active:after{content:'♥'}
+.customer-reviews{background:#f8f5f1}.review-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}.review-card,.product-review-card{background:#fff;border:1px solid #e9e1d9;padding:20px}.review-stars{color:#b47a32;letter-spacing:2px}.review-card p,.product-review-card p{line-height:1.65}.review-card small,.product-review-card small{color:#766b62}.product-review-panel{margin-top:28px;padding-top:22px;border-top:1px solid #e7ded5}.product-review-panel h3{font-family:inherit}.product-reviews-list{display:grid;gap:10px;margin:14px 0}.review-form{display:grid;gap:10px;max-width:520px;margin-top:18px}.review-form input,.review-form select,.review-form textarea,.coupon-entry input{width:100%;border:1px solid #ddd3c9;padding:12px;font:inherit;background:#fff}.coupon-entry{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}.coupon-entry label{display:grid;gap:6px}.coupon-entry p{grid-column:1/-1;margin:0}.coupon-entry .btn{height:44px}.wishlist-empty{padding:20px;text-align:center;color:#776b62}
+@media(max-width:600px){.coupon-entry{grid-template-columns:1fr auto}}

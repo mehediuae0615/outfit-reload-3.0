@@ -1,0 +1,17 @@
+OUTFIT RELOAD 3.0 — WISHLIST, CUSTOMER REVIEWS & COUPONS
+
+1. Extract this ZIP and upload all files to your GitHub repository, replacing the previous project files.
+2. In Supabase Dashboard → SQL Editor, run WISHLIST-REVIEWS-COUPONS-UPGRADE.sql once. Run it after the existing Flash Sale upgrade.
+3. Wait for the SQL editor to report success.
+4. Open the live site in a private/incognito tab or hard refresh.
+5. Admin → Coupons: create a coupon. Example: WELCOME10, type Percentage, value 10.
+6. Storefront: save products with the heart icon; wishlist is stored in that browser/device.
+7. Product details: customers can submit reviews. They remain pending until approved in Admin → Reviews.
+8. Checkout: enter a coupon and tap APPLY. The final discount is recalculated securely by the checkout database function.
+
+IMPORTANT
+- Wishlist is device/browser-local because customer accounts are not enabled. It does not sync between devices.
+- Reviews are public submissions but are hidden until an admin approves them.
+- Coupons are applied server-side at order creation; do not skip the SQL migration.
+- Existing products, variants, Flash Sale, orders, CMS and admin login are retained.
+- SQL code is also included separately in the chat for convenience.
