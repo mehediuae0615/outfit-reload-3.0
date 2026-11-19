@@ -94,6 +94,7 @@ $('checkoutForm').addEventListener('submit',async e=>{
   $('checkoutFormWrap').hidden=true;
   $('orderSuccess').hidden=false;
   $('successOrderNumber').textContent=result.order_number;
+  saveMyOrder(result.order_number, values.customer_phone);
   const deliveryFee=$('deliveryArea').value==='inside_dhaka'?Number((window.OUTFIT_RELOAD_SETTINGS||{}).deliveryInside??80):Number((window.OUTFIT_RELOAD_SETTINGS||{}).deliveryOutside??130);
   $('successOrderTotal').textContent=bkashDeliveryConfig.enabled?'Delivery charge paid by bKash: '+money(deliveryFee)+' · Remaining COD: '+money(Math.max(0,Number(total)-deliveryFee)):'Total payable on delivery: '+money(total);
  }catch(err){
@@ -117,7 +118,7 @@ function refreshFlashSales(){
  lastFlashSignature=signature;
 }
 setInterval(refreshFlashSales,1000);
-renderProducts();updateCart();renderBag();
+renderProducts();updateCart();renderBag();ensureMyOrdersUI();renderMyOrders();
 // Category tiles filter the live Supabase product list without changing checkout/admin flows.
 function applyCategoryFilter(category){
  activeCategoryFilter=category||'';
@@ -173,6 +174,76 @@ trackingForm?.addEventListener('submit',async e=>{
  }catch(err){console.error('Order tracking error:',err);errorBox.textContent=err.message||'Unable to look up this order right now.';}
  finally{button.disabled=false;button.textContent='TRACK ORDER ↗';}
 });
+
+
+// My Orders: keep recent order references on this device only. The existing
+// secure Supabase RPCs still verify each order using its order number + phone.
+const MY_ORDERS_KEY='or_my_orders_v1';
+function getMyOrders(){try{const v=JSON.parse(localStorage.getItem(MY_ORDERS_KEY)||'[]');return Array.isArray(v)?v.filter(x=>x&&x.order_number&&x.phone).slice(0,10):[]}catch(_){return []}}
+function saveMyOrder(orderNumber,phone){
+ const order={order_number:String(orderNumber||'').trim().toUpperCase(),phone:String(phone||'').trim(),saved_at:new Date().toISOString()};
+ if(!order.order_number||!order.phone)return;
+ const all=getMyOrders().filter(x=>x.order_number!==order.order_number);
+ all.unshift(order);
+ try{localStorage.setItem(MY_ORDERS_KEY,JSON.stringify(all.slice(0,10)))}catch(err){console.warn('Could not save this order on this device:',err)}
+ renderMyOrders();
+}
+function ensureMyOrdersUI(){
+ const host=document.querySelector('#track-order .track-order-inner');
+ if(!host||$('myOrdersPanel'))return;
+ const panel=document.createElement('div');panel.id='myOrdersPanel';panel.className='my-orders-panel';
+ panel.innerHTML=`<div class="my-orders-heading"><div><p class="eyebrow">SAVED ON THIS DEVICE</p><h3>My Orders</h3><p class="my-orders-note">Your recent orders appear here automatically on this device. Select an order to refresh its latest status.</p></div><button type="button" class="my-orders-refresh" id="refreshMyOrders">REFRESH ALL ↻</button></div><div id="myOrdersList" aria-live="polite"></div>`;
+ const form=$('trackingForm');if(form)host.insertBefore(panel,form);else host.appendChild(panel);
+ const style=document.createElement('style');style.id='myOrdersStyles';style.textContent=`
+ #myOrdersPanel{margin:28px 0 34px;padding:22px;background:#fff;border:1px solid #e4dbd2;border-radius:3px}
+ .my-orders-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+ .my-orders-heading h3{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:500;margin:3px 0 6px;color:#30241e}
+ .my-orders-note{font-size:.88rem;line-height:1.6;color:#766b63;margin:0;max-width:560px}
+ .my-orders-refresh,.my-order-action{border:1px solid #d8ccc1;background:#f8f5f1;color:#4a3b32;padding:10px 12px;font:700 .7rem inherit;letter-spacing:.05em;cursor:pointer;white-space:nowrap}
+ .my-order-card{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 0;border-top:1px solid #eee6df}
+ .my-order-main{min-width:0}.my-order-main strong{display:block;color:#352920;font-size:.95rem;overflow-wrap:anywhere}.my-order-main small{display:block;color:#85796f;margin-top:5px;font-size:.78rem}
+ .my-order-state{display:inline-block;margin-top:8px;padding:5px 9px;background:#eee7df;color:#5a402e;font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+ .my-order-actions{display:flex;gap:7px;flex-shrink:0}.my-order-action.remove{background:#fff;color:#8b5146}
+ .my-orders-empty{padding:18px 0;color:#766b63;font-size:.9rem;line-height:1.6}
+ @media(max-width:600px){#myOrdersPanel{padding:16px}.my-orders-heading{display:block}.my-orders-refresh{margin-top:12px}.my-order-card{align-items:flex-start;flex-direction:column}.my-order-actions{width:100%}.my-order-action{flex:1}}
+ `;
+ document.head.appendChild(style);
+ $('refreshMyOrders').addEventListener('click',()=>renderMyOrders(true));
+}
+async function getSavedOrderStatus(order){
+ const args={p_order_number:order.order_number,p_phone:order.phone};
+ const [{data,error},{data:paymentInfo,error:paymentError}]=await Promise.all([
+  supabaseClient.rpc('track_customer_order',args),
+  supabaseClient.rpc('track_customer_bkash_payment',args)
+ ]);
+ if(error)throw error;if(paymentError)throw paymentError;
+ if(!data||data.found!==true)throw new Error('Order could not be verified.');
+ return {data,paymentInfo};
+}
+async function renderMyOrders(refresh=false){
+ ensureMyOrdersUI();const list=$('myOrdersList');if(!list)return;
+ const orders=getMyOrders();
+ if(!orders.length){list.innerHTML='<p class="my-orders-empty">No saved orders yet. After you place an order on this device, it will appear here automatically.</p>';return}
+ const statusLabels={pending:'Pending',confirmed:'Confirmed',processing:'Processing',shipped:'Shipped',delivered:'Delivered',cancelled:'Cancelled'};
+ const bkashLabels={pending:'bKash · Pending',verified:'bKash · Verified',rejected:'bKash · Rejected',not_required:'Cash on Delivery'};
+ list.innerHTML=orders.map((o,i)=>`<article class="my-order-card" data-my-order="${i}"><div class="my-order-main"><strong>${escapeHtml(o.order_number)}</strong><small>Saved ${escapeHtml(new Date(o.saved_at||Date.now()).toLocaleDateString('en-GB'))}</small><span class="my-order-state" data-order-status>Loading latest status…</span><small data-payment-status></small></div><div class="my-order-actions"><button type="button" class="my-order-action" data-refresh-order="${i}">REFRESH ↻</button><button type="button" class="my-order-action remove" data-remove-order="${i}">REMOVE</button></div></article>`).join('');
+ list.querySelectorAll('[data-remove-order]').forEach(btn=>btn.addEventListener('click',()=>{const next=getMyOrders();next.splice(Number(btn.dataset.removeOrder),1);localStorage.setItem(MY_ORDERS_KEY,JSON.stringify(next));renderMyOrders()}));
+ list.querySelectorAll('[data-refresh-order]').forEach(btn=>btn.addEventListener('click',()=>refreshOne(Number(btn.dataset.refreshOrder),btn)));
+ const jobs=orders.map((order,i)=>refreshOne(i,null));
+ await Promise.allSettled(jobs);
+ async function refreshOne(index,button){
+  const order=orders[index],card=list.querySelector(`[data-my-order="${index}"]`);if(!card)return;
+  const status=card.querySelector('[data-order-status]'),payment=card.querySelector('[data-payment-status]');
+  if(button){button.disabled=true;button.textContent='CHECKING…'}
+  try{
+   const {data,paymentInfo}=await getSavedOrderStatus(order);
+   status.textContent=statusLabels[data.status]||String(data.status||'Status unavailable');
+   const bkashStatus=paymentInfo?.bkash_payment_status||'not_required';
+   payment.textContent=paymentInfo?.payment_method==='bkash_delivery_cod'?(bkashLabels[bkashStatus]||'bKash · Status unavailable'):'Cash on Delivery';
+  }catch(err){status.textContent='Could not refresh';payment.textContent='Check your connection or use Track Order below.';console.warn('My Orders refresh:',err)}
+  finally{if(button){button.disabled=false;button.textContent='REFRESH ↻'}}
+ }
+}
 
 
 // Wishlist is stored locally on this device; it does not require customer accounts.
