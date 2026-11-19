@@ -110,22 +110,42 @@ $('adminMenu').addEventListener('click',()=>$('sidebar').classList.toggle('open'
 checkSession();
 
 
-// LIVE ORDER MANAGEMENT
+// LIVE ORDER MANAGEMENT — search, filters, summaries and CSV export
 const orderStatuses=['pending','confirmed','processing','shipped','delivered','cancelled'];
 const statusLabels={pending:'Pending',confirmed:'Confirmed',processing:'Processing',shipped:'Shipped',delivered:'Delivered',cancelled:'Cancelled'};
 let cachedOrders=[];
 function money(v){return '৳ '+Number(v||0).toLocaleString('en-BD',{maximumFractionDigits:2})}
 function dateLabel(v){try{return new Date(v).toLocaleString('en-BD',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}catch{return '—'}}
+function filteredOrders(){
+ const status=$('orderStatusFilter')?.value||'all';
+ const payment=$('orderPaymentFilter')?.value||'all';
+ const term=($('orderSearch')?.value||'').trim().toLowerCase();
+ const from=$('orderDateFrom')?.value||'',to=$('orderDateTo')?.value||'';
+ return cachedOrders.filter(o=>{
+  if(status!=='all'&&o.status!==status)return false;
+  if(payment!=='all'&&String(o.payment_method||'cod').toLowerCase()!==payment)return false;
+  if(term&&!`${o.order_number||''} ${o.customer_name||''} ${o.customer_phone||''} ${o.customer_email||''}`.toLowerCase().includes(term))return false;
+  const d=new Date(o.created_at);if(from){const min=new Date(from+'T00:00:00');if(d<min)return false}if(to){const max=new Date(to+'T23:59:59.999');if(d>max)return false}
+  return true;
+ });
+}
+function renderOrderSummary(){
+ const count=status=>cachedOrders.filter(o=>o.status===status).length;
+ $('orderSummaryTotal').textContent=String(cachedOrders.length);
+ ['pending','processing','delivered','cancelled'].forEach(s=>{const el=$('orderSummary'+s[0].toUpperCase()+s.slice(1));if(el)el.textContent=String(count(s))});
+}
 function renderOrders(){
  const filter=$('orderStatusFilter')?.value||'all';
- const rows=cachedOrders.filter(o=>filter==='all'||o.status===filter);
- $('orderCount').textContent=`${rows.length} order${rows.length===1?'':'s'}`;
+ const rows=filteredOrders();
+ $('orderCount').textContent=`${rows.length} of ${cachedOrders.length} order${cachedOrders.length===1?'':'s'}`;
+ const activeFilters=[$('orderSearch')?.value,$('orderDateFrom')?.value,$('orderDateTo')?.value,$('orderPaymentFilter')?.value!=='all',$('orderStatusFilter')?.value!=='all'].some(Boolean);
+ $('orderFilterHint').textContent=activeFilters?'Filtered results · newest orders first':'Showing all orders · newest first';
  $('adminOrderRows').innerHTML=rows.map(o=>{
   const items=(o.order_items||[]).map(i=>`<li>${safe(i.product_name)} · ${safe(i.size||'—')} / ${safe(i.color||'—')} × ${Number(i.quantity)} — ${money(i.line_total)}</li>`).join('');
   const area=o.delivery_area==='inside_dhaka'?'Inside Dhaka':'Outside Dhaka';
   const options=orderStatuses.map(st=>`<option value="${st}" ${o.status===st?'selected':''}>${statusLabels[st]}</option>`).join('');
-  return `<tr class="order-main-row"><td><strong>${safe(o.order_number)}</strong><br><small>${safe(o.payment_method||'cod').toUpperCase()}</small><details class="order-details"><summary>View details</summary><div class="order-detail-box"><b>Delivery:</b> ${area}<br><b>Address:</b> ${safe(o.delivery_address)}<br><b>Phone:</b> ${safe(o.customer_phone)}<br><b>Email:</b> ${safe(o.customer_email||'Not provided')}<br><b>Note:</b> ${safe(o.customer_note||'—')}<br><b>Items:</b><ul>${items||'<li>No item details</li>'}</ul><div>Subtotal ${money(o.subtotal)} · Delivery ${money(o.delivery_fee)} · <b>Total ${money(o.total)}</b></div></div></details></td><td><b>${safe(o.customer_name)}</b><br><small>${safe(o.customer_phone)}</small></td><td>${dateLabel(o.created_at)}</td><td><b>${money(o.total)}</b></td><td><span class="pill status-${safe(o.status)}">${statusLabels[o.status]||safe(o.status)}</span></td><td><div class="order-action"><select data-status-select="${o.id}" aria-label="New status for ${safe(o.order_number)}">${options}</select><button class="table-action" data-save-status="${o.id}" ${o.status==='cancelled'?'disabled':''}>Save</button></div></td></tr>`;
- }).join('')||`<tr><td colspan="6">${filter==='all'?'No orders found yet.':'No '+safe(filter)+' orders.'}</td></tr>`;
+  return `<tr class="order-main-row"><td><strong>${safe(o.order_number)}</strong><br><small>${safe(o.payment_method||'cod').toUpperCase()}</small><details class="order-details"><summary>View details</summary><div class="order-detail-box"><b>Delivery:</b> ${area}<br><b>Address:</b> ${safe(o.delivery_address)}<br><b>Phone:</b> ${safe(o.customer_phone)}<br><b>Email:</b> ${safe(o.customer_email||'Not provided')}<br><b>Note:</b> ${safe(o.customer_note||'—')}<br><b>Items:</b><ul>${items||'<li>No item details</li>'}</ul><div>Subtotal ${money(o.subtotal)} · Delivery ${money(o.delivery_fee)} · <b>Total ${money(o.total)}</b></div></div></details></td><td><b>${safe(o.customer_name)}</b><br><small>${safe(o.customer_phone)}</small></td><td>${dateLabel(o.created_at)}</td><td><b>${money(o.total)}</b></td><td><span class="pill status-${safe(o.status)}">${statusLabels[o.status]||safe(o.status)}</span></td><td><div class="order-action"><select data-status-select="${o.id}" aria-label="New status for ${safe(o.order_number)}" ${o.status==='cancelled'?'disabled':''}>${options}</select><button class="table-action" data-save-status="${o.id}" ${o.status==='cancelled'?'disabled':''}>Save</button></div></td></tr>`;
+ }).join('')||`<tr><td colspan="6">${cachedOrders.length?(filter==='all'?'No orders match these filters.':'No '+safe(filter)+' orders match these filters.'):'No orders found yet.'}</td></tr>`;
  document.querySelectorAll('[data-save-status]').forEach(btn=>btn.addEventListener('click',()=>saveOrderStatus(btn.dataset.saveStatus,btn)));
 }
 async function loadOrders(){
@@ -133,7 +153,7 @@ async function loadOrders(){
  $('ordersMessage').textContent='Loading orders…';
  const {data,error}=await sb.from('orders').select('id,order_number,customer_name,customer_phone,customer_email,delivery_area,delivery_address,customer_note,payment_method,status,subtotal,delivery_fee,total,created_at,order_items(id,product_name,unit_price,size,color,quantity,line_total)').order('created_at',{ascending:false});
  if(error){target.innerHTML=`<tr><td colspan="6">Could not load orders: ${safe(error.message)}</td></tr>`;$('ordersMessage').textContent='Check that the checkout database setup has been run and admin policies are active.';return}
- cachedOrders=data||[];renderOrders();
+ cachedOrders=data||[];renderOrderSummary();renderOrders();
  const totalSales=cachedOrders.filter(o=>o.status!=='cancelled').reduce((sum,o)=>sum+Number(o.total||0),0);
  const statCards=document.querySelectorAll('#overview .stat-card');
  if(statCards[0])statCards[0].querySelector('strong').textContent=money(totalSales);
@@ -151,9 +171,19 @@ async function saveOrderStatus(id,btn){
  if(error){alert('Could not update order: '+error.message);btn.disabled=false;btn.textContent='Save';return}
  $('ordersMessage').textContent='Order status updated successfully.';await loadOrders();
 }
+function csvCell(value){let s=String(value??'');if(/^[=+\-@\t\r]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'}
+function exportOrdersCsv(){
+ const rows=filteredOrders();if(!rows.length){alert('There are no orders to export with the current filters.');return}
+ const headers=['Order Number','Customer','Phone','Email','Date','Payment Method','Status','Delivery Area','Address','Items','Subtotal','Delivery Fee','Total'];
+ const lines=[headers,...rows.map(o=>[o.order_number,o.customer_name,o.customer_phone,o.customer_email,dateLabel(o.created_at),o.payment_method||'cod',o.status,o.delivery_area,o.delivery_address,(o.order_items||[]).map(i=>`${i.product_name} (${i.size||'-'}/${i.color||'-'}) x${i.quantity}`).join('; '),o.subtotal,o.delivery_fee,o.total])].map(row=>row.map(csvCell).join(','));
+ const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`outfit-reload-orders-${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+ $('ordersMessage').textContent=`Exported ${rows.length} order(s) to CSV.`;
+}
 $('refreshOrders')?.addEventListener('click',loadOrders);
-$('orderStatusFilter')?.addEventListener('change',renderOrders);
-
+['orderStatusFilter','orderPaymentFilter','orderDateFrom','orderDateTo'].forEach(id=>$(id)?.addEventListener('change',renderOrders));
+$('orderSearch')?.addEventListener('input',renderOrders);
+$('clearOrderFilters')?.addEventListener('click',()=>{$('orderSearch').value='';$('orderStatusFilter').value='all';$('orderPaymentFilter').value='all';$('orderDateFrom').value='';$('orderDateTo').value='';renderOrders()});
+$('exportOrdersCsv')?.addEventListener('click',exportOrdersCsv);
 
 // Coupon administration
 async function loadCoupons(){const host=$('couponRows');if(!host)return;const {data,error}=await sb.from('discount_coupons').select('*').order('created_at',{ascending:false});if(error){host.innerHTML=`<tr><td colspan="5">${safe(error.message)} — run the wishlist/reviews/coupons SQL upgrade.</td></tr>`;return}host.innerHTML=(data||[]).map(c=>`<tr><td><b>${safe(c.code)}</b></td><td>${c.discount_type==='percent'?Number(c.discount_value)+'%':'৳ '+Number(c.discount_value)}</td><td>${c.used_count}${c.usage_limit?'/'+c.usage_limit:''}</td><td>${c.is_active?'Active':'Disabled'}</td><td><button class="table-action" data-coupon-toggle="${c.id}" data-active="${c.is_active}">${c.is_active?'Disable':'Enable'}</button> <button class="table-action danger" data-coupon-delete="${c.id}">Delete</button></td></tr>`).join('')||'<tr><td colspan="5">No coupons created yet.</td></tr>';host.querySelectorAll('[data-coupon-toggle]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('discount_coupons').update({is_active:b.dataset.active!=='true'}).eq('id',b.dataset.couponToggle);if(error)alert(error.message);else loadCoupons()});host.querySelectorAll('[data-coupon-delete]').forEach(b=>b.onclick=async()=>{if(!confirm('Delete this coupon?'))return;const {error}=await sb.from('discount_coupons').delete().eq('id',b.dataset.couponDelete);if(error)alert(error.message);else loadCoupons()});}
