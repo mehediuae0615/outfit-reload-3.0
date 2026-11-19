@@ -90,7 +90,10 @@ body:not(.admin-body) .site-header nav a:after{content:"";position:absolute;left
 body:not(.admin-body) .site-header nav a:hover:after{right:0}
 body:not(.admin-body) .header-actions{align-items:center;gap:20px;white-space:nowrap}
 body:not(.admin-body) .header-search,body:not(.admin-body) .bag-trigger{font-size:9px;letter-spacing:1.3px;font-weight:700}
-body:not(.admin-body) .bag-trigger{border:1px solid #d8cbbc;padding:11px 13px}
+body:not(.admin-body) .bag-trigger{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;border:1px solid #d8cbbc;border-radius:3px;padding:8px 12px;background:#fffdf9;color:#302219;transition:background .2s,border-color .2s,transform .2s}
+body:not(.admin-body) .bag-trigger:hover{background:#f0e8de;border-color:#9a7859;transform:translateY(-1px)}
+body:not(.admin-body) .bag-icon{width:19px;height:19px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+body:not(.admin-body) .bag-label{font-size:9px;letter-spacing:1.3px;font-weight:700}
 body:not(.admin-body) #bagCount{display:inline-grid;place-items:center;min-width:18px;height:18px;margin-left:5px;border-radius:50%;background:#5b4030;color:#fff;font-size:9px}
 body:not(.admin-body) .hero{min-height:620px;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:5%;padding:52px clamp(22px,7vw,108px) 62px;background:#eee8de;overflow:hidden}
 body:not(.admin-body) .hero-copy{padding:35px 0;max-width:530px}
@@ -166,7 +169,10 @@ body:not(.admin-body) .track-order-section{background:#f1ece5}
  body:not(.admin-body) .site-header nav a{padding:13px 2px;border-bottom:1px solid #eee8e0;font-size:10px;letter-spacing:1.4px}
  body:not(.admin-body) .header-actions{gap:9px}
  body:not(.admin-body) .header-search{display:none}
- body:not(.admin-body) .bag-trigger{padding:9px 10px;font-size:8px;letter-spacing:1px}
+ body:not(.admin-body) .bag-trigger{min-height:36px;gap:6px;padding:7px 9px}
+ body:not(.admin-body) .bag-icon{width:17px;height:17px}
+ body:not(.admin-body) .bag-label{font-size:8px;letter-spacing:1px}
+ body:not(.admin-body) #bagCount{min-width:17px;height:17px;margin-left:0;font-size:8px}
  body:not(.admin-body) .hero{display:flex;flex-direction:column;gap:22px;padding:34px 18px 25px;min-height:0}
  body:not(.admin-body) .hero-copy{padding:5px 2px 0;max-width:none}
  body:not(.admin-body) .eyebrow{font-size:8px;letter-spacing:1.8px;margin-bottom:13px}
