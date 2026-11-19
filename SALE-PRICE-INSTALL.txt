@@ -1,0 +1,13 @@
+OUTFIT RELOAD 3.0 — SALE PRICE INSTALL
+
+1. In Supabase, open SQL Editor.
+2. Run SALE-PRICE-UPGRADE.sql once. This adds the optional sale_price column and updates the existing place_cod_order RPC so order totals and order item prices use the sale price when valid.
+3. Upload/replace all website files from this ZIP in the GitHub repository root.
+4. Open Admin Panel > Products. Add or edit a product:
+   - Regular Price: normal/original price
+   - Sale Price: optional discounted price; leave blank when not on sale.
+   Sale Price must be greater than zero and lower than Regular Price.
+5. Save, then check the product card, product details, shopping bag, and checkout.
+
+Existing products keep their current regular price and have no sale price by default.
+Existing Admin, CMS, variants, stock, and Supabase configuration files are retained.

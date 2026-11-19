@@ -14,10 +14,10 @@ async function checkSession(){
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();msg.textContent='Signing in…';const {error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error){msg.textContent=error.message;return}msg.textContent='';await checkSession()});
 $('logoutBtn').addEventListener('click',async()=>{await sb.auth.signOut();await checkSession()});
 async function loadProducts(){
- const {data,error}=await sb.from('products').select('id,name,sku,price,stock,is_active,new_arrival,best_seller,featured,trending,categories(name)').order('created_at',{ascending:false});
+ const {data,error}=await sb.from('products').select('id,name,sku,price,sale_price,stock,is_active,new_arrival,best_seller,featured,trending,categories(name)').order('created_at',{ascending:false});
  if(error){$('adminProductRows').innerHTML=`<tr><td colspan="7">Could not load products: ${safe(error.message)}</td></tr>`;return}
  $('productTotal').textContent=data.length;
- $('adminProductRows').innerHTML=data.map(p=>`<tr><td><strong>${safe(p.name)}</strong><br><small>${safe(p.sku||'SKU pending')}</small></td><td>${safe(p.categories?.name||'—')}</td><td>৳ ${Number(p.price).toLocaleString('en-BD')}</td><td>${Number(p.stock)||0}</td><td><span class="pill">${p.is_active?'Active':'Hidden'}</span></td><td><button data-edit="${p.id}" class="table-action">Edit</button> <button data-delete="${p.id}" class="table-action danger">Delete</button></td></tr>`).join('')||'<tr><td colspan="7">No products yet. Add your first product.</td></tr>';
+ $('adminProductRows').innerHTML=data.map(p=>`<tr><td><strong>${safe(p.name)}</strong><br><small>${safe(p.sku||'SKU pending')}</small></td><td>${safe(p.categories?.name||'—')}</td><td>${p.sale_price&&Number(p.sale_price)>0&&Number(p.sale_price)<Number(p.price)?`<strong>৳ ${Number(p.sale_price).toLocaleString('en-BD')}</strong><br><small><s>৳ ${Number(p.price).toLocaleString('en-BD')}</s></small>`:`৳ ${Number(p.price).toLocaleString('en-BD')}`}</td><td>${Number(p.stock)||0}</td><td><span class="pill">${p.is_active?'Active':'Hidden'}</span></td><td><button data-edit="${p.id}" class="table-action">Edit</button> <button data-delete="${p.id}" class="table-action danger">Delete</button></td></tr>`).join('')||'<tr><td colspan="7">No products yet. Add your first product.</td></tr>';
  document.querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('Delete this product permanently?'))return;const {error}=await sb.from('products').delete().eq('id',b.dataset.delete);if(error)alert(error.message);else await loadProducts()}));
  document.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>openEdit(b.dataset.edit)));
 }
@@ -39,7 +39,7 @@ async function openEdit(id){
  if(ve){alert('Could not load variants: '+ve.message);return}
  editingId=id;existingImages=p.image_urls||[];
  $('modalTitle').textContent='Edit product';$('saveProductBtn').textContent='UPDATE PRODUCT';
- $('pName').value=p.name||'';$('pCategory').value=cat?.name||'Shirts';$('pPrice').value=p.price||'';$('pStock').value=p.stock||0;$('pDescription').value=p.description||'';$('pMaterial').value=p.material||'';$('pSizeGuide').value=p.size_guide||'';
+ $('pName').value=p.name||'';$('pCategory').value=cat?.name||'Shirts';$('pPrice').value=p.price||'';$('pSalePrice').value=p.sale_price||'';$('pStock').value=p.stock||0;$('pDescription').value=p.description||'';$('pMaterial').value=p.material||'';$('pSizeGuide').value=p.size_guide||'';
  $('pSizes').value=(p.sizes||[]).join(', ');$('pColors').value=(p.colors||[]).join(', ');
  $('pNewArrival').checked=!!p.new_arrival;$('pBestSeller').checked=!!p.best_seller;$('pFeatured').checked=!!p.featured;$('pTrending').checked=!!p.trending;$('pActive').checked=!!p.is_active;
  $('existingImages').textContent=existingImages.length?`Current images: ${existingImages.length}. New uploads will be added.`:'No current images.';
@@ -48,11 +48,11 @@ async function openEdit(id){
 $('productForm').addEventListener('submit',async e=>{
  e.preventDefault();const btn=$('saveProductBtn');const wasEditing=!!editingId;btn.disabled=true;btn.textContent='SAVING…';
  try{
-  const name=$('pName').value.trim(),category=$('pCategory').value,price=Number($('pPrice').value),stock=Number($('pStock').value);
+  const name=$('pName').value.trim(),category=$('pCategory').value,price=Number($('pPrice').value),saleRaw=$('pSalePrice').value.trim(),sale_price=saleRaw===''?null:Number(saleRaw),stock=Number($('pStock').value); if(sale_price!==null&&(sale_price<=0||sale_price>=price))throw new Error('Sale Price must be greater than 0 and lower than Regular Price.');
   const {data:cat,error:ce}=await sb.from('categories').select('id').eq('name',category).single();if(ce)throw ce;
   const files=[...$('pImages').files], urls=[...existingImages];
   for(const file of files){const ext=(file.name.split('.').pop()||'jpg').toLowerCase(),filePath=`${crypto.randomUUID()}.${ext}`;const {error:ue}=await sb.storage.from('product-images').upload(filePath,file,{upsert:false,contentType:file.type});if(ue)throw ue;const {data}=sb.storage.from('product-images').getPublicUrl(filePath);urls.push(data.publicUrl)}
-  const payload={name,slug:name.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+Date.now().toString().slice(-5),category_id:cat.id,price,stock,description:$('pDescription').value.trim(),material:$('pMaterial').value.trim(),size_guide:$('pSizeGuide').value.trim(),image_urls:urls,sizes:splitList($('pSizes').value),colors:splitList($('pColors').value),new_arrival:$('pNewArrival').checked,best_seller:$('pBestSeller').checked,featured:$('pFeatured').checked,trending:$('pTrending').checked,is_active:$('pActive').checked,updated_at:new Date().toISOString()};
+  const payload={name,slug:name.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+Date.now().toString().slice(-5),category_id:cat.id,price,sale_price,stock,description:$('pDescription').value.trim(),material:$('pMaterial').value.trim(),size_guide:$('pSizeGuide').value.trim(),image_urls:urls,sizes:splitList($('pSizes').value),colors:splitList($('pColors').value),new_arrival:$('pNewArrival').checked,best_seller:$('pBestSeller').checked,featured:$('pFeatured').checked,trending:$('pTrending').checked,is_active:$('pActive').checked,updated_at:new Date().toISOString()};
   let productId=editingId;
   if(editingId){const {error}=await sb.from('products').update(payload).eq('id',editingId);if(error)throw error;}
   else{payload.sku='OR-'+Date.now().toString().slice(-8);const {data,error}=await sb.from('products').insert(payload).select('id').single();if(error)throw error;productId=data.id;}

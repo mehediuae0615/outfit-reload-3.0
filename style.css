@@ -214,3 +214,10 @@ body:not(.admin-body) .track-order-section{background:#f1ece5}
 @media(min-width:701px) and (max-width:900px){body:not(.admin-body) .product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
 
+
+/* Sale pricing */
+.product-prices{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.sale-price{font-weight:700;color:#b3261e}
+.regular-price{color:#888;font-size:.88em;font-weight:400}
+.discount-badge{display:inline-block;background:#b3261e;color:#fff;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.04em;padding:4px 6px}
+.detail-price .sale-price{font-size:1.15em}
