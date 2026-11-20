@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <title>Product | Outfit Reload 3.0</title>
+  <meta name="description" content="Explore men's fashion at Outfit Reload 3.0.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://mehediuae0615.github.io/outfit-reload-3.0/product.html">
+  <meta property="og:site_name" content="Outfit Reload 3.0">
+  <meta property="og:type" content="product">
+  <meta property="og:title" content="Product | Outfit Reload 3.0">
+  <meta property="og:description" content="Explore men's fashion at Outfit Reload 3.0.">
+  <meta property="og:url" content="https://mehediuae0615.github.io/outfit-reload-3.0/product.html">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=80">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Product | Outfit Reload 3.0">
+  <meta name="twitter:description" content="Explore men's fashion at Outfit Reload 3.0.">
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=80">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#fff;color:#171717;font-family:"DM Sans",sans-serif}
+    a{color:inherit}.top{height:70px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;padding:0 max(5vw,20px)}
+    .brand{font-family:"Playfair Display",serif;font-size:23px;font-weight:700;text-decoration:none;letter-spacing:.2px}
+    .back{font-size:13px;text-decoration:none;border:1px solid #ddd;padding:10px 15px;border-radius:3px}
+    main{max-width:1100px;margin:48px auto;padding:0 22px}.product{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.95fr);gap:56px;align-items:start}
+    .photo{background:#f5f5f3;min-height:420px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .photo img{width:100%;height:100%;max-height:650px;object-fit:cover;display:block}
+    .eyebrow{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#777;margin:8px 0 15px}
+    h1{font-family:"Playfair Display",serif;font-size:clamp(32px,4vw,48px);line-height:1.12;margin:0 0 18px}
+    .price{font-size:24px;font-weight:700;margin:0 0 22px}.desc{font-size:15px;line-height:1.8;color:#555;white-space:pre-line}
+    .facts{border-top:1px solid #eee;margin-top:28px;padding-top:18px;display:grid;gap:12px;font-size:13px;color:#555}
+    .facts strong{color:#222;font-weight:600}.notice{padding:70px 20px;text-align:center;color:#666}
+    .shop{display:inline-block;margin-top:20px;background:#171717;color:white;text-decoration:none;padding:14px 22px;font-size:12px;letter-spacing:1px;text-transform:uppercase}
+    footer{text-align:center;padding:28px 15px;border-top:1px solid #eee;color:#888;font-size:12px;margin-top:65px}
+    @media(max-width:760px){main{margin:25px auto}.product{grid-template-columns:1fr;gap:28px}.photo{min-height:300px}.photo img{max-height:520px}.top{height:62px}.brand{font-size:20px}}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="./">OUTFIT RELOAD 3.0</a>
+    <a class="back" href="./">Back to store</a>
+  </header>
+  <main>
+    <section id="loading" class="notice">Loading product...</section>
+    <section id="notFound" class="notice" hidden>
+      <h2>Product not found</h2>
+      <p>This product may be unavailable or the link may be incorrect.</p>
+      <a class="shop" href="./">Continue shopping</a>
+    </section>
+    <article id="product" class="product" hidden>
+      <div class="photo"><img id="productImage" alt=""></div>
+      <div>
+        <div id="category" class="eyebrow">MEN'S COLLECTION</div>
+        <h1 id="name"></h1>
+        <p id="price" class="price"></p>
+        <p id="description" class="desc"></p>
+        <div class="facts">
+          <div id="stock"></div>
+          <div id="material"></div>
+          <div id="sizes"></div>
+          <div id="colors"></div>
+        </div>
+        <a class="shop" href="./">Shop more products</a>
+      </div>
+    </article>
+  </main>
+  <footer>© <span id="year"></span> Outfit Reload 3.0 · Men's Fashion Bangladesh</footer>
+
+  <script>
+    const BASE_URL = "https://mehediuae0615.github.io/outfit-reload-3.0/";
+    const $ = (id) => document.getElementById(id);
+    $("year").textContent = new Date().getFullYear();
+
+    function plain(value) {
+      return String(value ?? "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    }
+    function listValue(value) {
+      if (Array.isArray(value)) return value.map(plain).filter(Boolean).join(", ");
+      if (typeof value === "string") {
+        try {
+          const parsed = JSON.parse(value);
+          if (Array.isArray(parsed)) return parsed.map(plain).filter(Boolean).join(", ");
+        } catch (_) {}
+        return value.trim();
+      }
+      return "";
+    }
+    function getImage(p) {
+      let images = p.image_urls;
+      if (typeof images === "string") {
+        try { images = JSON.parse(images); } catch (_) { images = [images]; }
+      }
+      if (Array.isArray(images) && images.length) {
+        const first = images.find(x => typeof x === "string" && x.trim()) ||
+          images.find(x => x && (x.url || x.src));
+        if (typeof first === "string") return first;
+        if (first) return first.url || first.src || p.image || "";
+      }
+      return p.image || "";
+    }
+    function setMeta(selector, content) {
+      const el = document.querySelector(selector);
+      if (el && content) el.setAttribute("content", content);
+    }
+    function showProduct(p) {
+      const name = plain(p.name) || "Men's Fashion";
+      const category = plain(p.category);
+      const description = plain(p.description) || `${name} from Outfit Reload 3.0. Explore men's fashion in Bangladesh.`;
+      const image = getImage(p);
+      const id = encodeURIComponent(String(p.id));
+      const url = BASE_URL + "product.html?id=" + id;
+      const now = new Date();
+      const starts = p.sale_starts_at ? new Date(p.sale_starts_at) : null;
+      const ends = p.sale_ends_at ? new Date(p.sale_ends_at) : null;
+      const saleActive = Number(p.sale_price) > 0 &&
+        (!starts || isNaN(starts) || now >= starts) &&
+        (!ends || isNaN(ends) || now <= ends);
+      const amount = Number(saleActive ? p.sale_price : p.price);
+      const currency = "BDT";
+      const stock = Number(p.stock);
+      const available = Number.isFinite(stock) && stock > 0;
+
+      document.title = `${name} | Outfit Reload 3.0`;
+      setMeta('meta[name="description"]', description.slice(0, 300));
+      setMeta('meta[property="og:title"]', name + " | Outfit Reload 3.0");
+      setMeta('meta[property="og:description"]', description.slice(0, 300));
+      setMeta('meta[property="og:url"]', url);
+      setMeta('meta[property="og:image"]', image);
+      setMeta('meta[name="twitter:title"]', name + " | Outfit Reload 3.0");
+      setMeta('meta[name="twitter:description"]', description.slice(0, 300));
+      setMeta('meta[name="twitter:image"]', image);
+      let canonical = document.querySelector('link[rel="canonical"]');
+      if (canonical) canonical.href = url;
+
+      $("category").textContent = category || "MEN'S COLLECTION";
+      $("name").textContent = name;
+      $("price").textContent = Number.isFinite(amount) ? `৳${amount.toLocaleString("en-BD")}` : "";
+      $("description").textContent = description;
+      $("productImage").src = image || "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1000&q=80";
+      $("productImage").alt = name;
+      $("stock").innerHTML = `<strong>Availability:</strong> ${available ? "In stock" : "Currently unavailable"}`;
+      $("material").innerHTML = p.material ? `<strong>Material:</strong> ${plain(p.material)}` : "";
+      const sizes = listValue(p.sizes);
+      const colors = listValue(p.colors);
+      $("sizes").innerHTML = sizes ? `<strong>Sizes:</strong> ${plain(sizes)}` : "";
+      $("colors").innerHTML = colors ? `<strong>Colors:</strong> ${plain(colors)}` : "";
+
+      const schema = {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": name,
+        "description": description,
+        "image": image ? [image] : undefined,
+        "sku": String(p.id),
+        "brand": {"@type":"Brand","name":"Outfit Reload 3.0"},
+        "offers": {
+          "@type":"Offer",
+          "url":url,
+          "priceCurrency":currency,
+          "price":Number.isFinite(amount) ? amount : undefined,
+          "availability":available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+          "itemCondition":"https://schema.org/NewCondition"
+        }
+      };
+      const script = document.createElement("script");
+      script.type = "application/ld+json";
+      script.textContent = JSON.stringify(schema);
+      document.head.appendChild(script);
+
+      $("loading").hidden = true;
+      $("product").hidden = false;
+    }
+
+    async function init() {
+      const id = new URLSearchParams(location.search).get("id");
+      if (!id || !window.supabase || !window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+        $("loading").hidden = true;
+        $("notFound").hidden = false;
+        return;
+      }
+      try {
+        const client = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+        const { data, error } = await client.from("products")
+          .select("*").eq("id", id).eq("is_active", true).maybeSingle();
+        if (error || !data) throw error || new Error("Product not found");
+        showProduct(data);
+      } catch (error) {
+        console.error("Product page error:", error);
+        $("loading").hidden = true;
+        $("notFound").hidden = false;
+      }
+    }
+    init();
+  </script>
+</body>
+</html>
