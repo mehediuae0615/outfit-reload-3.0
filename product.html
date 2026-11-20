@@ -186,8 +186,17 @@
       }
       try {
         const client = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-        const { data, error } = await client.from("products")
+        let { data, error } = await client.from("products")
           .select("*").eq("id", id).eq("is_active", true).maybeSingle();
+
+        // If the URL contains a product name rather than a database ID,
+        // try an exact name match as a convenient fallback.
+        if (!data && !error) {
+          const byName = await client.from("products")
+            .select("*").eq("name", decodeURIComponent(id)).eq("is_active", true).maybeSingle();
+          data = byName.data;
+          error = byName.error;
+        }
         if (error || !data) throw error || new Error("Product not found");
         showProduct(data);
       } catch (error) {
