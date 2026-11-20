@@ -191,9 +191,11 @@
 
         // If the URL contains a product name rather than a database ID,
         // try an exact name match as a convenient fallback.
-        if (!data && !error) {
+        if (!data) {
+          // A name in the URL is not a UUID, so the first ID lookup may error.
+          // Always try an exact product-name lookup when the ID lookup returns no row.
           const byName = await client.from("products")
-            .select("*").eq("name", decodeURIComponent(id)).eq("is_active", true).maybeSingle();
+            .select("*").ilike("name", decodeURIComponent(id)).eq("is_active", true).maybeSingle();
           data = byName.data;
           error = byName.error;
         }
