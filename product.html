@@ -133,6 +133,12 @@
     return active?sale:regular;
   }
   function setMeta(selector,value){const el=document.querySelector(selector);if(el&&value)el.setAttribute('content',value);}
+  function setRobots(value){setMeta('meta[name="robots"]',value);}
+  function setCanonical(url){const el=document.querySelector('link[rel="canonical"]');if(el)el.href=url;}
+  function addJsonLd(data,id){
+    const old=document.getElementById(id);if(old)old.remove();
+    const script=document.createElement('script');script.type='application/ld+json';script.id=id;script.textContent=JSON.stringify(data);document.head.appendChild(script);
+  }
   function renderChoices(){
     const sizeFromVariants=[...new Set(variants.map(v=>String(v.size||'').trim()).filter(v=>v&&v!=='One Size'))];
     const colorFromVariants=[...new Set(variants.map(v=>String(v.color||'').trim()).filter(v=>v&&v!=='Default'))];
@@ -173,22 +179,30 @@
   function showProduct(p){
     productData=p;
     const name=plain(p.name)||"Men's Fashion";
-    const category=plain(p.category?.name||p.category)||"MEN'S COLLECTION";
-    const description=plain(p.description)||`${name} from Outfit Reload 3.0. Explore men's fashion in Bangladesh.`;
+    const category=plain(p.category?.name||p.category)||"Men's Collection";
+    const rawDescription=plain(p.description);
+    const description=rawDescription||`${name} in ${category}. Shop men's fashion online in Bangladesh at Outfit Reload 3.0.`;
+    const seoTitle=`${name} | ${category} | Outfit Reload 3.0`.slice(0,65);
+    const seoDescription=(rawDescription||`Shop ${name} from our ${category} collection at Outfit Reload 3.0. Explore men's fashion online in Bangladesh.`).slice(0,160);
     const image=imageFor(p);
     const id=encodeURIComponent(String(p.id));
     const url=BASE_URL+'product.html?id='+id;
     const amount=currentPrice(p);
-    document.title=`${name} | Outfit Reload 3.0`;
-    setMeta('meta[name="description"]',description.slice(0,300));
-    setMeta('meta[property="og:title"]',name+' | Outfit Reload 3.0');
-    setMeta('meta[property="og:description"]',description.slice(0,300));
+    const variantStock=variants.length?variants.reduce((sum,v)=>sum+Math.max(0,Number(v.stock)||0),0):Number(p.stock||0);
+    const inStock=p.is_active!==false&&variantStock>0;
+    document.title=seoTitle;
+    setMeta('meta[name="description"]',seoDescription);
+    setMeta('meta[name="robots"]','index, follow, max-image-preview:large');
+    setMeta('meta[property="og:type"]','product');
+    setMeta('meta[property="og:title"]',seoTitle);
+    setMeta('meta[property="og:description"]',seoDescription);
     setMeta('meta[property="og:url"]',url);
     setMeta('meta[property="og:image"]',image);
-    setMeta('meta[name="twitter:title"]',name+' | Outfit Reload 3.0');
-    setMeta('meta[name="twitter:description"]',description.slice(0,300));
+    setMeta('meta[name="twitter:card"]','summary_large_image');
+    setMeta('meta[name="twitter:title"]',seoTitle);
+    setMeta('meta[name="twitter:description"]',seoDescription);
     setMeta('meta[name="twitter:image"]',image);
-    const canonical=document.querySelector('link[rel="canonical"]');if(canonical)canonical.href=url;
+    setCanonical(url);
     $('category').textContent=category;$('name').textContent=name;$('price').textContent=money(amount);
     $('description').textContent=description;$('productImage').src=image||'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1000&q=80';
     $('productImage').alt=name;
@@ -196,8 +210,34 @@
     const sizes=toList(p.sizes),colors=toList(p.colors);
     $('sizes').innerHTML=sizes.length?'<strong>Available sizes:</strong> '+sizes.map(plain).join(', '):'';
     $('colors').innerHTML=colors.length?'<strong>Available colours:</strong> '+colors.map(plain).join(', '):'';
-    const schema={"@context":"https://schema.org/","@type":"Product","name":name,"description":description,"image":image?[image]:undefined,"sku":String(p.id),"brand":{"@type":"Brand","name":"Outfit Reload 3.0"},"offers":{"@type":"Offer","url":url,"priceCurrency":"BDT","price":amount,"availability":Number(p.stock)>0?"https://schema.org/InStock":"https://schema.org/OutOfStock","itemCondition":"https://schema.org/NewCondition"}};
-    const script=document.createElement('script');script.type='application/ld+json';script.textContent=JSON.stringify(schema);document.head.appendChild(script);
+    const schema={
+      "@context":"https://schema.org/",
+      "@type":"Product",
+      "name":name,
+      "description":description,
+      "image":image?[image]:undefined,
+      "sku":String(p.id),
+      "category":category,
+      "brand":{"@type":"Brand","name":"Outfit Reload 3.0"},
+      "offers":{
+        "@type":"Offer",
+        "url":url,
+        "priceCurrency":"BDT",
+        "price":amount,
+        "availability":inStock?"https://schema.org/InStock":"https://schema.org/OutOfStock",
+        "itemCondition":"https://schema.org/NewCondition"
+      }
+    };
+    addJsonLd(schema,'product-jsonld');
+    addJsonLd({
+      "@context":"https://schema.org",
+      "@type":"BreadcrumbList",
+      "itemListElement":[
+        {"@type":"ListItem","position":1,"name":"Home","item":BASE_URL},
+        {"@type":"ListItem","position":2,"name":"Collections","item":BASE_URL+'collections.htm'},
+        {"@type":"ListItem","position":3,"name":name,"item":url}
+      ]
+    },'breadcrumb-jsonld');
     $('loading').hidden=true;$('product').hidden=false;
   }
   $('addProductToBag').addEventListener('click',()=>{
@@ -224,9 +264,9 @@
       const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
       const isUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
       let query=client.from('products').select('*');
-      const result=isUuid?await query.eq('id',id).maybeSingle():await query.ilike('name',decodeURIComponent(id)).eq('is_active',true).maybeSingle();
+      const result=isUuid?await query.eq('id',id).maybeSingle():await query.ilike('name',id).eq('is_active',true).maybeSingle();
       if(result.error)throw result.error;
-      if(!result.data)throw new Error('Product not found: '+id);
+      if(!result.data||result.data.is_active===false)throw new Error('Product not found or unavailable: '+id);
       let p=result.data;
       if(p.category_id){
         const cat=await client.from('categories').select('name').eq('id',p.category_id).maybeSingle();
@@ -237,6 +277,7 @@
       showProduct(p);renderChoices();
     }catch(err){
       console.error('Product page error:',err);
+      setRobots('noindex, follow');
       $('loading').textContent='Unable to load this product. Please refresh or return to Collections.';
       $('loading').hidden=false;$('notFound').hidden=true;
     }
