@@ -35,6 +35,22 @@
     .facts{border-top:1px solid #eee;margin-top:28px;padding-top:18px;display:grid;gap:12px;font-size:13px;color:#555}
     .facts strong{color:#222;font-weight:600}.notice{padding:70px 20px;text-align:center;color:#666}
     .shop{display:inline-block;margin-top:20px;background:#171717;color:white;text-decoration:none;padding:14px 22px;font-size:12px;letter-spacing:1px;text-transform:uppercase}
+
+    .buy-panel{border-top:1px solid #eee;margin-top:22px;padding-top:20px}
+    .buy-option{margin:0 0 17px}.buy-option strong{display:block;font-size:13px;margin-bottom:9px}
+    .choice-list{display:flex;flex-wrap:wrap;gap:8px}
+    .choice{border:1px solid #ddd;background:#fff;padding:9px 13px;min-width:42px;cursor:pointer;font:inherit;font-size:13px}
+    .choice.selected{background:#171717;color:#fff;border-color:#171717}
+    .choice:disabled{opacity:.35;cursor:not-allowed}
+    .muted,.buy-message,.buy-note{font-size:12px;color:#777}
+    .buy-actions{display:flex;align-items:center;gap:10px;margin-top:18px}
+    .buy-actions label{font-size:13px}
+    .buy-actions input{width:66px;padding:12px;border:1px solid #ddd;font:inherit}
+    .buy-actions .shop{margin:0;flex:1;border:0;cursor:pointer;font:inherit;font-size:12px}
+    .buy-actions .shop:disabled{opacity:.45;cursor:not-allowed}
+    .buy-message{min-height:18px;margin:12px 0 0;color:#9a3b20}
+    .buy-note{margin-top:14px}
+    .back-shop{display:inline-block;margin-top:20px;font-size:12px;color:#555}
     footer{text-align:center;padding:28px 15px;border-top:1px solid #eee;color:#888;font-size:12px;margin-top:65px}
     @media(max-width:760px){main{margin:25px auto}.product{grid-template-columns:1fr;gap:28px}.photo{min-height:300px}.photo img{max-height:520px}.top{height:62px}.brand{font-size:20px}}
   </style>
@@ -66,154 +82,167 @@
           <div id="sizes"></div>
           <div id="colors"></div>
         </div>
-        <a class="shop" href="./">Shop more products</a>
+        <div class="buy-panel">
+          <div class="buy-option"><strong>Size</strong><div id="buySizes" class="choice-list"><span class="muted">Loading options…</span></div></div>
+          <div class="buy-option"><strong>Colour</strong><div id="buyColors" class="choice-list"><span class="muted">Loading options…</span></div></div>
+          <div class="buy-actions">
+            <label for="buyQty">Qty</label><input id="buyQty" type="number" min="1" value="1">
+            <button id="addProductToBag" class="shop" type="button" disabled>ADD TO BAG ↗</button>
+          </div>
+          <p id="buyMessage" class="buy-message" aria-live="polite">Select your size and colour.</p>
+          <p class="buy-note">Cash on Delivery · Delivery across Bangladesh · Secure checkout</p>
+        </div>
+        <a class="back-shop" href="collections.htm">Continue shopping</a>
       </div>
     </article>
   </main>
   <footer>© <span id="year"></span> Outfit Reload 3.0 · Men's Fashion Bangladesh</footer>
 
-  <script>
-    const BASE_URL = "https://mehediuae0615.github.io/outfit-reload-3.0/";
-    const $ = (id) => document.getElementById(id);
-    $("year").textContent = new Date().getFullYear();
+  
+<script>
+  const BASE_URL="https://mehediuae0615.github.io/outfit-reload-3.0/";
+  const $=id=>document.getElementById(id);
+  const money=n=>'৳ '+Number(n||0).toLocaleString('en-BD');
+  let productData=null, variants=[], chosenSize='', chosenColor='';
+  $("year").textContent=new Date().getFullYear();
 
-    function plain(value) {
-      return String(value ?? "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  function plain(value){return String(value??'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();}
+  function toList(value){
+    if(Array.isArray(value))return value.map(x=>plain(x?.name??x)).filter(Boolean);
+    if(typeof value==='string'){
+      try{const v=JSON.parse(value);if(Array.isArray(v))return v.map(x=>plain(x?.name??x)).filter(Boolean);}catch(_){}
+      return value.split(',').map(x=>x.trim()).filter(Boolean);
     }
-    function listValue(value) {
-      if (Array.isArray(value)) return value.map(plain).filter(Boolean).join(", ");
-      if (typeof value === "string") {
-        try {
-          const parsed = JSON.parse(value);
-          if (Array.isArray(parsed)) return parsed.map(plain).filter(Boolean).join(", ");
-        } catch (_) {}
-        return value.trim();
+    return [];
+  }
+  function imageFor(p){
+    let imgs=p.image_urls;
+    if(typeof imgs==='string'){try{imgs=JSON.parse(imgs)}catch(_){imgs=[imgs]}}
+    if(Array.isArray(imgs)&&imgs.length){
+      const first=imgs.find(x=>typeof x==='string'&&x.trim())||imgs.find(x=>x&&(x.url||x.src));
+      if(typeof first==='string')return first;
+      if(first)return first.url||first.src||p.image||'';
+    }
+    return p.image||'';
+  }
+  function currentPrice(p){
+    const sale=Number(p.sale_price),regular=Number(p.price);
+    const start=p.sale_starts_at?new Date(p.sale_starts_at).getTime():null;
+    const end=p.sale_ends_at?new Date(p.sale_ends_at).getTime():null;
+    const active=sale>0&&sale<regular&&(!start||Date.now()>=start)&&(!end||Date.now()<=end);
+    return active?sale:regular;
+  }
+  function setMeta(selector,value){const el=document.querySelector(selector);if(el&&value)el.setAttribute('content',value);}
+  function renderChoices(){
+    const sizeFromVariants=[...new Set(variants.map(v=>String(v.size||'').trim()).filter(v=>v&&v!=='One Size'))];
+    const colorFromVariants=[...new Set(variants.map(v=>String(v.color||'').trim()).filter(v=>v&&v!=='Default'))];
+    const sizes=sizeFromVariants.length?sizeFromVariants:toList(productData.sizes);
+    const colors=colorFromVariants.length?colorFromVariants:toList(productData.colors);
+    if(!sizes.length)sizes.push('One Size');
+    if(!colors.length)colors.push('Default');
+    $('buySizes').innerHTML=sizes.map((v,i)=>`<button type="button" class="choice" data-size="${plain(v).replace(/"/g,'&quot;')}">${plain(v)}</button>`).join('');
+    $('buyColors').innerHTML=colors.map(v=>`<button type="button" class="choice" data-color="${plain(v).replace(/"/g,'&quot;')}">${plain(v)}</button>`).join('');
+    $('buySizes').querySelectorAll('[data-size]').forEach(b=>b.addEventListener('click',()=>{
+      chosenSize=b.dataset.size;$('buySizes').querySelectorAll('.choice').forEach(x=>x.classList.toggle('selected',x===b));updateBuyAvailability();
+    }));
+    $('buyColors').querySelectorAll('[data-color]').forEach(b=>b.addEventListener('click',()=>{
+      chosenColor=b.dataset.color;$('buyColors').querySelectorAll('.choice').forEach(x=>x.classList.toggle('selected',x===b));updateBuyAvailability();
+    }));
+    if(sizes.length===1){chosenSize=sizes[0];$('buySizes').querySelector('.choice')?.classList.add('selected');}
+    if(colors.length===1){chosenColor=colors[0];$('buyColors').querySelector('.choice')?.classList.add('selected');}
+    updateBuyAvailability();
+  }
+  function matchedVariant(){
+    return variants.find(v=>(!v.size||v.size===chosenSize||v.size==='One Size')&&(!v.color||v.color===chosenColor||v.color==='Default'));
+  }
+  function updateBuyAvailability(){
+    if(!productData)return;
+    const needsSize=$('buySizes').querySelectorAll('[data-size]').length>1;
+    const needsColor=$('buyColors').querySelectorAll('[data-color]').length>1;
+    if((needsSize&&!chosenSize)||(needsColor&&!chosenColor)){
+      $('buyMessage').textContent='Please select '+(!chosenSize&&needsSize?'a size':'')+(!chosenColor&&needsColor?' a colour':'')+'.';
+      $('addProductToBag').disabled=true;return;
+    }
+    const variant=matchedVariant();
+    const stock=variant?Number(variant.stock):Number(productData.stock||0);
+    const active=productData.is_active!==false;
+    $('stock').innerHTML='<strong>Availability:</strong> '+(active&&stock>0?'In stock':'Currently unavailable');
+    $('buyMessage').textContent=active&&stock>0?`In stock · ${stock} available`:'This product is currently out of stock.';
+    $('addProductToBag').disabled=!active||stock<=0;
+  }
+  function showProduct(p){
+    productData=p;
+    const name=plain(p.name)||"Men's Fashion";
+    const category=plain(p.category?.name||p.category)||"MEN'S COLLECTION";
+    const description=plain(p.description)||`${name} from Outfit Reload 3.0. Explore men's fashion in Bangladesh.`;
+    const image=imageFor(p);
+    const id=encodeURIComponent(String(p.id));
+    const url=BASE_URL+'product.html?id='+id;
+    const amount=currentPrice(p);
+    document.title=`${name} | Outfit Reload 3.0`;
+    setMeta('meta[name="description"]',description.slice(0,300));
+    setMeta('meta[property="og:title"]',name+' | Outfit Reload 3.0');
+    setMeta('meta[property="og:description"]',description.slice(0,300));
+    setMeta('meta[property="og:url"]',url);
+    setMeta('meta[property="og:image"]',image);
+    setMeta('meta[name="twitter:title"]',name+' | Outfit Reload 3.0');
+    setMeta('meta[name="twitter:description"]',description.slice(0,300));
+    setMeta('meta[name="twitter:image"]',image);
+    const canonical=document.querySelector('link[rel="canonical"]');if(canonical)canonical.href=url;
+    $('category').textContent=category;$('name').textContent=name;$('price').textContent=money(amount);
+    $('description').textContent=description;$('productImage').src=image||'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1000&q=80';
+    $('productImage').alt=name;
+    $('material').innerHTML=p.material?'<strong>Material:</strong> '+plain(p.material):'';
+    const sizes=toList(p.sizes),colors=toList(p.colors);
+    $('sizes').innerHTML=sizes.length?'<strong>Available sizes:</strong> '+sizes.map(plain).join(', '):'';
+    $('colors').innerHTML=colors.length?'<strong>Available colours:</strong> '+colors.map(plain).join(', '):'';
+    const schema={"@context":"https://schema.org/","@type":"Product","name":name,"description":description,"image":image?[image]:undefined,"sku":String(p.id),"brand":{"@type":"Brand","name":"Outfit Reload 3.0"},"offers":{"@type":"Offer","url":url,"priceCurrency":"BDT","price":amount,"availability":Number(p.stock)>0?"https://schema.org/InStock":"https://schema.org/OutOfStock","itemCondition":"https://schema.org/NewCondition"}};
+    const script=document.createElement('script');script.type='application/ld+json';script.textContent=JSON.stringify(schema);document.head.appendChild(script);
+    $('loading').hidden=true;$('product').hidden=false;
+  }
+  $('addProductToBag').addEventListener('click',()=>{
+    if(!productData)return;
+    const variant=matchedVariant();
+    const stock=variant?Number(variant.stock):Number(productData.stock||0);
+    const qty=Math.max(1,Math.floor(Number($('buyQty').value)||1));
+    if(!chosenSize||!chosenColor){$('buyMessage').textContent='Please choose size and colour.';return;}
+    if(stock<=0||qty>stock){$('buyMessage').textContent='Only '+Math.max(0,stock)+' item(s) available.';return;}
+    let cart=[];try{cart=JSON.parse(sessionStorage.getItem('or_cart')||'[]');if(!Array.isArray(cart))cart=[];}catch(_){cart=[];}
+    const price=currentPrice(productData);
+    const key=[productData.id,chosenSize==='One Size'?'':chosenSize,chosenColor==='Default'?'':chosenColor].join('|');
+    const found=cart.find(x=>x.key===key);
+    if(found){if(Number(found.qty)+qty>stock){$('buyMessage').textContent='The bag would exceed available stock.';return;}found.qty=Number(found.qty)+qty;}
+    else cart.push({key,id:productData.id,name:productData.name,price,regularPrice:Number(productData.price),salePrice:price<Number(productData.price)?price:null,size:chosenSize==='One Size'?'':chosenSize,color:chosenColor==='Default'?'':chosenColor,qty});
+    try{sessionStorage.setItem('or_cart',JSON.stringify(cart));window.location.href=BASE_URL+'?openBag=1';}
+    catch(err){$('buyMessage').textContent='Could not save your bag. Please enable site storage and try again.';}
+  });
+  async function init(){
+    const id=new URLSearchParams(location.search).get('id');
+    if(!id){$('loading').hidden=true;$('notFound').hidden=false;return;}
+    try{
+      if(!window.supabase||!window.SUPABASE_URL||!window.SUPABASE_ANON_KEY)throw new Error('Store connection is not configured.');
+      const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
+      const isUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+      let query=client.from('products').select('*');
+      const result=isUuid?await query.eq('id',id).maybeSingle():await query.ilike('name',decodeURIComponent(id)).eq('is_active',true).maybeSingle();
+      if(result.error)throw result.error;
+      if(!result.data)throw new Error('Product not found: '+id);
+      let p=result.data;
+      if(p.category_id){
+        const cat=await client.from('categories').select('name').eq('id',p.category_id).maybeSingle();
+        if(!cat.error&&cat.data)p={...p,category:{name:cat.data.name}};
       }
-      return "";
+      const variantResult=await client.from('product_variants').select('size,color,stock').eq('product_id',p.id);
+      variants=variantResult.error?[]:(variantResult.data||[]);
+      showProduct(p);renderChoices();
+    }catch(err){
+      console.error('Product page error:',err);
+      $('loading').textContent='Unable to load this product. Please refresh or return to Collections.';
+      $('loading').hidden=false;$('notFound').hidden=true;
     }
-    function getImage(p) {
-      let images = p.image_urls;
-      if (typeof images === "string") {
-        try { images = JSON.parse(images); } catch (_) { images = [images]; }
-      }
-      if (Array.isArray(images) && images.length) {
-        const first = images.find(x => typeof x === "string" && x.trim()) ||
-          images.find(x => x && (x.url || x.src));
-        if (typeof first === "string") return first;
-        if (first) return first.url || first.src || p.image || "";
-      }
-      return p.image || "";
-    }
-    function setMeta(selector, content) {
-      const el = document.querySelector(selector);
-      if (el && content) el.setAttribute("content", content);
-    }
-    function showProduct(p) {
-      const name = plain(p.name) || "Men's Fashion";
-      const category = plain(p.category);
-      const description = plain(p.description) || `${name} from Outfit Reload 3.0. Explore men's fashion in Bangladesh.`;
-      const image = getImage(p);
-      const id = encodeURIComponent(String(p.id));
-      const url = BASE_URL + "product.html?id=" + id;
-      const now = new Date();
-      const starts = p.sale_starts_at ? new Date(p.sale_starts_at) : null;
-      const ends = p.sale_ends_at ? new Date(p.sale_ends_at) : null;
-      const saleActive = Number(p.sale_price) > 0 &&
-        (!starts || isNaN(starts) || now >= starts) &&
-        (!ends || isNaN(ends) || now <= ends);
-      const amount = Number(saleActive ? p.sale_price : p.price);
-      const currency = "BDT";
-      const stock = Number(p.stock);
-      const available = Number.isFinite(stock) && stock > 0;
+  }
+  init();
+</script>
 
-      document.title = `${name} | Outfit Reload 3.0`;
-      setMeta('meta[name="description"]', description.slice(0, 300));
-      setMeta('meta[property="og:title"]', name + " | Outfit Reload 3.0");
-      setMeta('meta[property="og:description"]', description.slice(0, 300));
-      setMeta('meta[property="og:url"]', url);
-      setMeta('meta[property="og:image"]', image);
-      setMeta('meta[name="twitter:title"]', name + " | Outfit Reload 3.0");
-      setMeta('meta[name="twitter:description"]', description.slice(0, 300));
-      setMeta('meta[name="twitter:image"]', image);
-      let canonical = document.querySelector('link[rel="canonical"]');
-      if (canonical) canonical.href = url;
-
-      $("category").textContent = category || "MEN'S COLLECTION";
-      $("name").textContent = name;
-      $("price").textContent = Number.isFinite(amount) ? `৳${amount.toLocaleString("en-BD")}` : "";
-      $("description").textContent = description;
-      $("productImage").src = image || "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1000&q=80";
-      $("productImage").alt = name;
-      $("stock").innerHTML = `<strong>Availability:</strong> ${available ? "In stock" : "Currently unavailable"}`;
-      $("material").innerHTML = p.material ? `<strong>Material:</strong> ${plain(p.material)}` : "";
-      const sizes = listValue(p.sizes);
-      const colors = listValue(p.colors);
-      $("sizes").innerHTML = sizes ? `<strong>Sizes:</strong> ${plain(sizes)}` : "";
-      $("colors").innerHTML = colors ? `<strong>Colors:</strong> ${plain(colors)}` : "";
-
-      const schema = {
-        "@context": "https://schema.org/",
-        "@type": "Product",
-        "name": name,
-        "description": description,
-        "image": image ? [image] : undefined,
-        "sku": String(p.id),
-        "brand": {"@type":"Brand","name":"Outfit Reload 3.0"},
-        "offers": {
-          "@type":"Offer",
-          "url":url,
-          "priceCurrency":currency,
-          "price":Number.isFinite(amount) ? amount : undefined,
-          "availability":available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-          "itemCondition":"https://schema.org/NewCondition"
-        }
-      };
-      const script = document.createElement("script");
-      script.type = "application/ld+json";
-      script.textContent = JSON.stringify(schema);
-      document.head.appendChild(script);
-
-      $("loading").hidden = true;
-      $("product").hidden = false;
-    }
-
-    async function init() {
-      const id = new URLSearchParams(location.search).get("id");
-      if (!id || !window.supabase || !window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
-        $("loading").hidden = true;
-        $("notFound").hidden = false;
-        return;
-      }
-      try {
-        const client = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
-        let data = null;
-
-        if (isUuid) {
-          // UUID links must be matched against the real database primary key.
-          // Do not run a product-name fallback for a UUID: it hides the real error.
-          const result = await client.from("products")
-            .select("*").eq("id", id).maybeSingle();
-          if (result.error) throw result.error;
-          data = result.data;
-        } else {
-          // Keep support for older links that use the product name.
-          const result = await client.from("products")
-            .select("*").ilike("name", decodeURIComponent(id)).eq("is_active", true).maybeSingle();
-          if (result.error) throw result.error;
-          data = result.data;
-        }
-
-        if (!data) throw new Error(`No product row found for ${isUuid ? "ID" : "name"}: ${id}`);
-        if (data.is_active === false) throw new Error("This product is currently inactive.");
-        showProduct(data);
-      } catch (error) {
-        console.error("Product page error:", error);
-        $("loading").hidden = true;
-        $("notFound").hidden = false;
-      }
-    }
-    init();
-  </script>
 </body>
 </html>

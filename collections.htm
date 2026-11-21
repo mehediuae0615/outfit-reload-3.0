@@ -41,7 +41,7 @@ body{background:#fff;color:#171717;font-family:"DM Sans",sans-serif}
 .collection-sort select{border:1px solid #ddd;background:white;padding:10px 30px 10px 12px;font-size:11px;color:#222}
 .category-links{display:flex;gap:10px;overflow-x:auto;padding:0 0 24px;scrollbar-width:none}
 .category-links a{white-space:nowrap;border:1px solid #ddd;padding:10px 17px;font-size:10px;letter-spacing:.5px;transition:.2s}
-.category-links a:hover{background:#171717;color:white;border-color:#171717}
+.category-links a:hover,.category-links a.active{background:#171717;color:white;border-color:#171717}
 .product-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:34px 15px}
 .product-photo{height:auto;aspect-ratio:3/4;background:#f4f4f4}
 .product-photo img{object-fit:cover}
@@ -266,22 +266,119 @@ footer{background:#171717}
 <script>document.write('<script src="config.js?v='+Date.now()+'"><\/script>');</script>
 <script>document.write('<script src="app.js?v='+Date.now()+'"><\/script>');</script>
 <script>document.write('<script src="product-links.js?v='+Date.now()+'"><\/script>');</script>
+
 <script>
- const grid=document.getElementById('productGrid'),count=document.querySelector('.collection-count'),sort=document.getElementById('sortProducts'),menu=document.getElementById('menuToggle'),nav=document.getElementById('mainNav');
+ const grid=document.getElementById('productGrid');
+ const count=document.querySelector('.collection-count');
+ const sort=document.getElementById('sortProducts');
+ const menu=document.getElementById('menuToggle');
+ const collectionNav=document.getElementById('mainNav');
  let selectedCategory='';
  const normalize=value=>String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'');
- const aliases={shirts:['shirt','shirts','formalshirt','casualshirt'],tshirts:['tshirt','tshirts','tee','tees'],pants:['pant','pants','trouser','trousers'],jeans:['jean','jeans','denim'],shoes:['shoe','shoes','footwear'],watches:['watch','watches'],accessories:['accessory','accessories','belt','wallet','sunglasses','perfume']};
+ const aliases={
+  shirts:['shirt','shirts','formalshirt','casualshirt'],
+  tshirts:['tshirt','tshirts','tee','tees'],
+  pants:['pant','pants','trouser','trousers'],
+  jeans:['jean','jeans','denim'],
+  shoes:['shoe','shoes','footwear'],
+  watches:['watch','watches'],
+  accessories:['accessory','accessories','belt','wallet','sunglasses','perfume']
+ };
  function getProducts(){return Array.isArray(window.productsCache)?window.productsCache:[];}
- function productCategory(p){const c=p?.category;return normalize(Array.isArray(c)?c[0]?.name:c?.name||c);}
- function matches(p,cat){if(!cat)return true;const wanted=aliases[normalize(cat)]||[normalize(cat)],actual=productCategory(p);return wanted.some(term=>actual===term||actual.includes(term));}
- function bindCards(){if(!grid)return;grid.querySelectorAll('[data-product]').forEach(el=>{if(el.dataset.collectionBound)return;el.dataset.collectionBound='1';el.addEventListener('click',e=>{if(e.target.closest('[data-wishlist]'))return;if(typeof window.openProduct==='function')window.openProduct(el.dataset.product);});el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(typeof window.openProduct==='function')window.openProduct(el.dataset.product);}});});grid.querySelectorAll('[data-wishlist]').forEach(btn=>{if(btn.dataset.collectionWishBound)return;btn.dataset.collectionWishBound='1';btn.addEventListener('click',e=>{e.stopPropagation();if(typeof window.toggleWishlist==='function')window.toggleWishlist(btn.dataset.wishlist);});});}
- function render(){if(!grid)return;const all=getProducts();if(!all.length)return;let items=all.filter(p=>matches(p,selectedCategory));if(sort?.value==='low')items.sort((a,b)=>Number(a.sale_price||a.price)-Number(b.sale_price||b.price));if(sort?.value==='high')items.sort((a,b)=>Number(b.sale_price||b.price)-Number(a.sale_price||a.price));if(typeof window.card!=='function'){grid.innerHTML='<p class="helper">Products loaded, but the product display script did not initialise. Please refresh.</p>';return;}grid.innerHTML=items.length?items.map(p=>window.card(p)).join(''):'<p class="helper">No products found in this category yet.</p>';if(count)count.textContent=selectedCategory?selectedCategory.toUpperCase():'OUR COLLECTION';bindCards();}
- window.renderCollectionProducts=render;window.addEventListener('outfit:products-loaded',render);
- document.querySelectorAll('.category-links a').forEach(link=>link.addEventListener('click',e=>{e.preventDefault();selectedCategory=link.dataset.cat||'';render();document.getElementById('all-products')?.scrollIntoView({behavior:'smooth',block:'start'});}));
+ function productCategory(p){
+  const c=p?.category;
+  if(Array.isArray(c)) return normalize(c[0]?.name||c[0]);
+  return normalize(c?.name||c||'');
+ }
+ function matches(p,cat){
+  if(!cat)return true;
+  const key=normalize(cat);
+  const wanted=aliases[key]||[key];
+  const actual=productCategory(p);
+  const name=normalize(p?.name);
+  return wanted.some(term=>actual===term||actual.includes(term)||name.includes(term));
+ }
+ function bindCards(){
+  if(!grid)return;
+  grid.querySelectorAll('[data-product]').forEach(el=>{
+   if(el.dataset.collectionBound)return;
+   el.dataset.collectionBound='1';
+   // product-links.js handles navigation in the capture phase; this fallback keeps
+   // the original quick-view behavior if that helper is unavailable.
+   el.addEventListener('click',e=>{
+    if(e.target.closest('[data-wishlist]'))return;
+    if(typeof window.openProduct==='function')window.openProduct(el.dataset.product);
+   });
+   el.addEventListener('keydown',e=>{
+    if(e.key==='Enter'||e.key===' '){
+     e.preventDefault();
+     if(typeof window.openProduct==='function')window.openProduct(el.dataset.product);
+    }
+   });
+  });
+  grid.querySelectorAll('[data-wishlist]').forEach(btn=>{
+   if(btn.dataset.collectionWishBound)return;
+   btn.dataset.collectionWishBound='1';
+   btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    if(typeof window.toggleWishlist==='function')window.toggleWishlist(btn.dataset.wishlist);
+   });
+  });
+ }
+ function render(){
+  if(!grid)return;
+  const all=getProducts();
+  if(!all.length)return;
+  let items=all.filter(p=>matches(p,selectedCategory));
+  if(sort?.value==='low')items.sort((a,b)=>Number(a.sale_price||a.price)-Number(b.sale_price||b.price));
+  if(sort?.value==='high')items.sort((a,b)=>Number(b.sale_price||b.price)-Number(a.sale_price||a.price));
+  if(typeof window.card!=='function'){
+   grid.innerHTML='<p class="helper">Products loaded, but the product display script did not initialise. Please refresh.</p>';
+   return;
+  }
+  grid.innerHTML=items.length?items.map(p=>window.card(p)).join(''):'<p class="helper">No products found in this category yet.</p>';
+  if(count)count.textContent=selectedCategory?selectedCategory.toUpperCase():'OUR COLLECTION';
+  document.querySelectorAll('.category-links a').forEach(link=>{
+   const active=normalize(link.dataset.cat||'')===normalize(selectedCategory);
+   link.classList.toggle('active',!!selectedCategory&&active);
+   link.setAttribute('aria-current',active?'true':'false');
+  });
+  bindCards();
+ }
+ window.renderCollectionProducts=render;
+ window.addEventListener('outfit:products-loaded',render);
+ document.querySelectorAll('.category-links a').forEach(link=>{
+  link.addEventListener('click',e=>{
+   e.preventDefault();
+   selectedCategory=link.dataset.cat||'';
+   render();
+   document.getElementById('all-products')?.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+ });
  sort?.addEventListener('change',render);
- if(menu&&nav&&!menu.dataset.collectionMenuBound){menu.dataset.collectionMenuBound='1';menu.addEventListener('click',()=>{const open=nav.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Close menu':'Open menu');});nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded','false');}));}
- render();window.addEventListener('load',()=>{setTimeout(()=>{if(getProducts().length){render();return;}if(grid&&grid.textContent.includes('Loading collection'))grid.innerHTML='<p class="helper">The product request is taking too long. Check your internet connection, Supabase project status, and the browser console for the exact error.</p>';},12000);});
-})();
+ if(menu&&collectionNav&&!menu.dataset.collectionMenuBound){
+  menu.dataset.collectionMenuBound='1';
+  menu.addEventListener('click',()=>{
+   const open=collectionNav.classList.toggle('open');
+   menu.setAttribute('aria-expanded',String(open));
+   menu.setAttribute('aria-label',open?'Close menu':'Open menu');
+  });
+  collectionNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
+   collectionNav.classList.remove('open');
+   menu.setAttribute('aria-expanded','false');
+   menu.setAttribute('aria-label','Open menu');
+  }));
+ }
+ render();
+ window.addEventListener('load',()=>{
+  window.setTimeout(()=>{
+   if(getProducts().length){render();return;}
+   if(grid&&grid.textContent.includes('Loading collection')){
+    grid.innerHTML='<p class="helper">The product request is taking too long. Check your connection and refresh the page.</p>';
+   }
+  },12000);
+ });
 </script>
+
 </body>
 </html>

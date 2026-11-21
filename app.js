@@ -293,3 +293,15 @@ $('reviewForm')?.addEventListener('submit',async e=>{e.preventDefault();if(!acti
 async function loadHomepageReviews(){const host=$('homepageReviews');if(!host)return;const {data,error}=await supabaseClient.from('product_reviews').select('customer_name,rating,review_text,products(name)').eq('is_approved',true).order('created_at',{ascending:false}).limit(6);if(error){host.innerHTML='<p class="helper">Customer reviews will appear here.</p>';return}host.innerHTML=(data||[]).map(r=>`<article class="review-card"><div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div><p>${escapeHtml(r.review_text)}</p><b>${escapeHtml(r.customer_name)}</b><br><small>${escapeHtml(r.products?.name||'Outfit Reload customer')}</small></article>`).join('')||'<p class="helper">Be the first to share your experience with Outfit Reload.</p>';}
 $('applyCoupon')?.addEventListener('click',async()=>{const code=$('couponCode').value.trim(),msg=$('couponMessage'),subtotal=cart.reduce((n,x)=>n+x.price*x.qty,0);if(!code){msg.textContent='Enter a coupon code first.';return}msg.textContent='Checking coupon…';const {data,error}=await supabaseClient.rpc('validate_discount_coupon',{p_code:code,p_subtotal:subtotal});const r=Array.isArray(data)?data[0]:data;if(error||!r?.valid){appliedCoupon=null;msg.textContent=error?.message||r?.message||'Coupon could not be applied.';updateCheckoutTotals();return}appliedCoupon={code:r.code,discount_amount:Number(r.discount_amount)};msg.textContent=r.message+' You saved '+money(appliedCoupon.discount_amount)+'.';updateCheckoutTotals();});
 loadHomepageReviews();
+
+
+// Open the existing shopping bag when a standalone product page sends a customer back here.
+window.addEventListener('load',()=>{
+ const params=new URLSearchParams(window.location.search);
+ if(params.get('openBag')==='1'){
+  params.delete('openBag');
+  const cleanUrl=window.location.pathname+(params.toString()?'?'+params.toString():'')+window.location.hash;
+  window.history.replaceState({},'',cleanUrl);
+  openBag();
+ }
+});
