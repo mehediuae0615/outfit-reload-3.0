@@ -159,7 +159,8 @@
     updateBuyAvailability();
   }
   function matchedVariant(){
-    return variants.find(v=>(!v.size||v.size===chosenSize||v.size==='One Size')&&(!v.color||v.color===chosenColor||v.color==='Default'));
+    if(!variants.length)return null;
+    return variants.find(v=>(!v.size||v.size===chosenSize||v.size==='One Size')&&(!v.color||v.color===chosenColor||v.color==='Default'))||null;
   }
   function updateBuyAvailability(){
     if(!productData)return;
@@ -170,7 +171,7 @@
       $('addProductToBag').disabled=true;return;
     }
     const variant=matchedVariant();
-    const stock=variant?Number(variant.stock):Number(productData.stock||0);
+    const stock=variants.length?(variant?Number(variant.stock):0):Number(productData.stock||0);
     const active=productData.is_active!==false;
     $('stock').innerHTML='<strong>Availability:</strong> '+(active&&stock>0?'In stock':'Currently unavailable');
     $('buyMessage').textContent=active&&stock>0?`In stock · ${stock} available`:'This product is currently out of stock.';
@@ -243,7 +244,7 @@
   $('addProductToBag').addEventListener('click',()=>{
     if(!productData)return;
     const variant=matchedVariant();
-    const stock=variant?Number(variant.stock):Number(productData.stock||0);
+    const stock=variants.length?(variant?Number(variant.stock):0):Number(productData.stock||0);
     const qty=Math.max(1,Math.floor(Number($('buyQty').value)||1));
     if(!chosenSize||!chosenColor){$('buyMessage').textContent='Please choose size and colour.';return;}
     if(stock<=0||qty>stock){$('buyMessage').textContent='Only '+Math.max(0,stock)+' item(s) available.';return;}
