@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f6efe6">
+  <meta name="robots" content="noindex,follow">
   <title>My Account | Outfit Reload 3.0</title>
-<meta name="robots" content="noindex,follow">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="customer-account.css?v=20261119-4">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="customer-account.css?v=20261122-dashboard1">
 </head>
 <body>
   <header class="ca-header">
@@ -18,23 +18,20 @@
   </header>
 
   <main class="ca-shell">
-    <section class="ca-card" id="authPanel">
+    <section class="ca-card ca-auth-card" id="authPanel">
       <p class="ca-eyebrow">OUTFIT RELOAD 3.0 · CUSTOMER ACCOUNT</p>
       <h1 id="authTitle">Welcome back.</h1>
       <p class="ca-intro" id="authIntro">Sign in to view your orders and manage your details.</p>
-
       <div class="ca-tabs" role="tablist" aria-label="Account options">
         <button type="button" class="active" id="loginTab">Sign in</button>
         <button type="button" id="signupTab">Create account</button>
       </div>
-
       <form id="loginForm" class="ca-form">
         <label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label>
         <label>Password<input name="password" type="password" autocomplete="current-password" required minlength="6" placeholder="Your password"></label>
         <button class="ca-primary" type="submit" id="loginButton">SIGN IN ↗</button>
         <button class="ca-text-button" type="button" id="forgotButton">Forgot password?</button>
       </form>
-
       <form id="signupForm" class="ca-form" hidden>
         <label>Full name<input name="full_name" autocomplete="name" required minlength="2" maxlength="100" placeholder="Your full name"></label>
         <label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label>
@@ -42,53 +39,76 @@
         <label>Confirm password<input name="confirm_password" type="password" autocomplete="new-password" required minlength="8" placeholder="Enter password again"></label>
         <button class="ca-primary" type="submit" id="signupButton">CREATE ACCOUNT ↗</button>
       </form>
-
       <p class="ca-message" id="authMessage" role="status" aria-live="polite"></p>
       <p class="ca-footnote">Free email and password account. No paid SMS or OTP is required.</p>
     </section>
 
     <section class="ca-card ca-dashboard" id="dashboardPanel" hidden>
       <div class="ca-dashboard-head">
-        <div>
-          <p class="ca-eyebrow">YOUR ACCOUNT</p>
+        <div class="ca-avatar" id="customerAvatar" aria-hidden="true">OR</div>
+        <div class="ca-welcome-copy">
+          <p class="ca-eyebrow">YOUR OUTFIT RELOAD ACCOUNT</p>
           <h1 id="welcomeName">Welcome.</h1>
           <p class="ca-intro" id="accountEmail"></p>
         </div>
-        <button class="ca-outline" type="button" id="signOutButton">SIGN OUT</button>
+        <button class="ca-logout" type="button" id="signOutButton"><span aria-hidden="true">↪</span> Logout</button>
       </div>
 
-      <section class="ca-section">
-        <div class="ca-section-head"><div><p class="ca-eyebrow">PERSONAL DETAILS</p><h2>Your profile</h2></div></div>
-        <form id="profileForm" class="ca-form ca-profile-form">
-          <label>Full name<input name="full_name" required minlength="2" maxlength="100"></label>
-          <label>Phone number<input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="01XXXXXXXXX"></label>
-          <input type="hidden" name="address" value="">
-          <button class="ca-primary ca-wide" type="submit" id="saveProfileButton">SAVE DETAILS</button>
-        </form>
-        <p class="ca-message" id="profileMessage" role="status"></p>
-        <div class="ca-member-card">
-          <div class="ca-member-copy">
-            <p class="ca-eyebrow">THE OUTFIT RELOAD EDIT</p>
-            <h3>Good style.<br>Better choices.</h3>
-            <p>Explore carefully selected essentials made to elevate your everyday look.</p>
-            <a href="index.html" class="ca-member-link">DISCOVER THE COLLECTION <span>↗</span></a>
-          </div>
-          <div class="ca-member-art" aria-hidden="true"><span>OR</span><small>QUALITY<br>OVER<br>QUANTITY</small></div>
+      <nav class="ca-shortcuts" aria-label="Account shortcuts">
+        <a class="ca-shortcut" href="#ordersSection"><span class="ca-shortcut-icon">▢</span><span>My Orders</span></a>
+        <a class="ca-shortcut" href="index.html#wishlist"><span class="ca-shortcut-icon">♡</span><span>Wishlist</span></a>
+        <a class="ca-shortcut" href="index.html#coupons"><span class="ca-shortcut-icon">％</span><span>Coupons</span></a>
+        <a class="ca-shortcut" href="index.html#track-order"><span class="ca-shortcut-icon">◎</span><span>Track Order</span></a>
+      </nav>
+
+      <section class="ca-section" id="profileSection">
+        <div class="ca-section-heading"><h2>Account Settings</h2><span></span></div>
+        <div class="ca-settings-row"><span class="ca-row-icon">♙</span><a href="#profileForm">Edit Profile</a><a class="ca-chevron" href="#profileForm" aria-label="Edit profile">›</a></div>
+        <div class="ca-settings-row"><span class="ca-row-icon">▤</span><a href="#profileForm">Saved Details</a><a class="ca-chevron" href="#profileForm" aria-label="Saved details">›</a></div>
+        <div class="ca-settings-row"><span class="ca-row-icon">⌖</span><a href="#profileForm">Delivery Address</a><a class="ca-chevron" href="#profileForm" aria-label="Delivery address">›</a></div>
+        <div class="ca-settings-row"><span class="ca-row-icon">◎</span><span class="ca-setting-static">Language · English</span><span class="ca-chevron">›</span></div>
+
+        <div class="ca-profile-panel">
+          <div class="ca-section-head"><div><p class="ca-eyebrow">PERSONAL DETAILS</p><h3>Edit your profile</h3></div></div>
+          <form id="profileForm" class="ca-form ca-profile-form">
+            <label>Full name<input name="full_name" required minlength="2" maxlength="100" autocomplete="name"></label>
+            <label>Phone number<input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="01XXXXXXXXX"></label>
+            <label class="ca-wide">Delivery address<textarea name="address" rows="3" autocomplete="street-address" placeholder="Your preferred delivery address"></textarea></label>
+            <button class="ca-primary ca-wide" type="submit" id="saveProfileButton">SAVE DETAILS</button>
+          </form>
+          <p class="ca-message" id="profileMessage" role="status"></p>
         </div>
       </section>
 
-      <section class="ca-section">
-        <div class="ca-section-head"><div><p class="ca-eyebrow">ORDER HISTORY</p><h2>My orders</h2></div><button class="ca-outline" type="button" id="refreshOrdersButton">REFRESH ↻</button></div>
+      <section class="ca-promo">
+        <div><p class="ca-eyebrow">THE OUTFIT RELOAD EDIT</p><h2>Everyday essentials,<br>elevated.</h2><p>Good style. Better choices. Explore carefully selected essentials for your everyday look.</p><a href="index.html">SHOP THE COLLECTION <span>↗</span></a></div>
+        <div class="ca-promo-art" aria-hidden="true"><b>OR</b><small>QUALITY<br>OVER<br>QUANTITY</small></div>
+      </section>
+
+      <section class="ca-section ca-activity">
+        <div class="ca-section-heading"><h2>My Activity</h2><span></span></div>
+        <div class="ca-settings-row"><span class="ca-row-icon">☆</span><a href="index.html#reviews">Reviews</a><a class="ca-chevron" href="index.html#reviews" aria-label="Reviews">›</a></div>
+        <div class="ca-settings-row"><span class="ca-row-icon">▢</span><a href="index.html#contact">Questions &amp; Answers</a><a class="ca-chevron" href="index.html#contact" aria-label="Questions and answers">›</a></div>
+      </section>
+
+      <section class="ca-section ca-orders-section" id="ordersSection">
+        <div class="ca-section-head"><div><p class="ca-eyebrow">ORDER HISTORY</p><h2>My latest orders</h2></div><button class="ca-outline" type="button" id="refreshOrdersButton">VIEW / REFRESH ↻</button></div>
         <div id="accountOrders" class="ca-orders"><p class="ca-muted">Loading your orders…</p></div>
         <p class="ca-muted ca-small">Orders placed while signed in appear here. Older guest orders can still be tracked using the order number and checkout phone number.</p>
       </section>
     </section>
   </main>
 
+  <nav class="ca-mobile-nav" aria-label="Main navigation">
+    <a href="index.html"><span>⌂</span>Home</a>
+    <a href="index.html#wishlist"><span>♡</span>Wishlist</a>
+    <a href="index.html#cart"><span>🛒</span>Cart</a>
+    <a href="#ordersSection"><span>▤</span>Orders</a>
+    <a class="active" href="#profileSection"><span>♙</span>Profile</a>
+  </nav>
   <footer class="ca-footer">© 2026 OUTFIT RELOAD 3.0 · BANGLADESH</footer>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
-  <script src="customer-account.js"></script>
+  <script src="customer-account.js?v=20261122-dashboard1"></script>
 </body>
 </html>

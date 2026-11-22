@@ -159,8 +159,14 @@
 
     showDashboard();
     const displayName = profile.full_name || user.email || 'Customer';
-    $('welcomeName').textContent = 'Welcome, ' + displayName.split(' ')[0] + '.';
+    $('welcomeName').textContent = 'Welcome back, ' + displayName.split(' ')[0] + '.';
     $('accountEmail').textContent = user.email || '';
+    const avatar = $('customerAvatar');
+    if (avatar) {
+      const initials = displayName.trim().split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase();
+      avatar.textContent = initials || 'OR';
+      avatar.setAttribute('aria-label', displayName + ' profile');
+    }
     const form = $('profileForm');
     form.elements.full_name.value = profile?.full_name || user.user_metadata?.full_name || '';
     form.elements.phone.value = profile?.phone || '';
