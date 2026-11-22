@@ -129,7 +129,7 @@
     currentUser = user;
     const { data: profile, error: profileError } = await sb
       .from('customer_profiles')
-      .select('id,email,full_name,phone,address,is_enabled')
+      .select('id,email,full_name,phone,address,is_enabled,disable_reason')
       .eq('id', user.id)
       .maybeSingle();
     if (profileError) throw profileError;
@@ -137,7 +137,12 @@
       await sb.auth.signOut();
       currentUser = null;
       showAuth('login');
-      message('authMessage', 'This customer account is currently disabled. Please contact the store.', 'error');
+      const reason = String(profile.disable_reason || '').trim();
+      const disabledMessage = reason
+        ? 'Your account has been disabled.\nReason: ' + reason
+        : 'This customer account is currently disabled. Please contact the store.';
+      message('authMessage', disabledMessage, 'error');
+      $('authMessage').style.whiteSpace = 'pre-wrap';
       return;
     }
     if (!profile) {
@@ -175,8 +180,7 @@
       const { error } = await sb.from('customer_profiles').update({
         full_name: values.full_name.trim(),
         phone: values.phone.trim() || null,
-        address: values.address.trim() || null,
-        updated_at: new Date().toISOString()
+        address: values.address.trim() || null
       }).eq('id', currentUser.id);
       if (error) throw error;
       message('profileMessage', 'Your details have been saved.', 'success');

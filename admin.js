@@ -10,7 +10,7 @@ async function checkSession(){
  if(!session){login.hidden=false;app.hidden=true;return}
  const {data:owner,error}=await sb.from('admin_users').select('role,email').eq('user_id',session.user.id).maybeSingle();
  if(error||!owner){await sb.auth.signOut();login.hidden=false;app.hidden=true;msg.textContent='This account is not authorized as an admin.';return}
- login.hidden=true;app.hidden=false;$('adminEmail').textContent=owner.email||session.user.email;await loadProducts();await loadAnalyticsInventory();await loadAnnouncement();await loadBulkSaleStatus();await loadOrders();await loadWebsiteContent();await loadBkashSettings();await loadCoupons();await loadReviews();
+ login.hidden=true;app.hidden=false;$('adminEmail').textContent=owner.email||session.user.email;await loadProducts();await loadAnalyticsInventory();await loadAnnouncement();await loadBulkSaleStatus();await loadOrders();await loadWebsiteContent();await loadBkashSettings();await loadCoupons();await loadReviews();await loadCustomers();
 }
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();msg.textContent='Signing in…';const {error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error){msg.textContent=error.message;return}msg.textContent='';await checkSession()});
 $('logoutBtn').addEventListener('click',async()=>{await sb.auth.signOut();await checkSession()});
@@ -262,6 +262,51 @@ async function loadCoupons(){const host=$('couponRows');if(!host)return;const {d
 $('couponForm')?.addEventListener('submit',async e=>{e.preventDefault();const msg=$('couponAdminMessage');const code=$('couponCodeAdmin').value.trim().toUpperCase();const value=Number($('couponValue').value);if(!/^[A-Z0-9_-]{3,32}$/.test(code)){msg.textContent='Use 3–32 letters, numbers, hyphens or underscores.';return}const payload={code,discount_type:$('couponType').value,discount_value:value,min_order_amount:Number($('couponMinimum').value||0),max_discount:$('couponMaximum').value===''?null:Number($('couponMaximum').value),usage_limit:$('couponLimit').value===''?null:Number($('couponLimit').value),starts_at:$('couponStarts').value?new Date($('couponStarts').value).toISOString():null,expires_at:$('couponExpires').value?new Date($('couponExpires').value).toISOString():null,is_active:true};const {error}=await sb.from('discount_coupons').insert(payload);if(error){msg.textContent='Could not save coupon: '+error.message;return}e.target.reset();msg.textContent='Coupon saved successfully.';loadCoupons()});
 async function loadReviews(){const host=$('reviewAdminRows');if(!host)return;const {data,error}=await sb.from('product_reviews').select('id,customer_name,rating,review_text,is_approved,created_at,products(name)').order('created_at',{ascending:false});if(error){host.innerHTML=`<tr><td colspan="5">${safe(error.message)} — run the SQL upgrade.</td></tr>`;return}host.innerHTML=(data||[]).map(r=>`<tr><td><b>${safe(r.products?.name||'Deleted product')}</b><br><small>${safe(r.customer_name)}</small></td><td>${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</td><td>${safe(r.review_text)}</td><td>${r.is_approved?'Approved':'Pending'}</td><td>${r.is_approved?`<button class="table-action" data-review-action="hide" data-review-id="${r.id}">Hide</button>`:`<button class="table-action" data-review-action="approve" data-review-id="${r.id}">Approve</button>`} <button class="table-action danger" data-review-action="delete" data-review-id="${r.id}">Delete</button></td></tr>`).join('')||'<tr><td colspan="5">No reviews submitted yet.</td></tr>';host.querySelectorAll('[data-review-action]').forEach(b=>b.onclick=async()=>{const action=b.dataset.reviewAction;if(action==='delete'&&!confirm('Delete this review?'))return;const update=action==='approve'?{is_approved:true}:action==='hide'?{is_approved:false}:null;const q=update?sb.from('product_reviews').update(update).eq('id',b.dataset.reviewId):sb.from('product_reviews').delete().eq('id',b.dataset.reviewId);const {error}=await q;if(error)alert(error.message);else loadReviews()});}
 $('refreshReviews')?.addEventListener('click',loadReviews);
+
+// CUSTOMER MANAGEMENT
+let cachedCustomers=[];
+function renderCustomers(){
+ const host=$('adminCustomerRows');if(!host)return;
+ const query=String($('customerSearch')?.value||'').trim().toLowerCase();
+ const status=$('customerStatusFilter')?.value||'all';
+ const rows=cachedCustomers.filter(c=>{
+  const hay=[c.full_name,c.email,c.phone].join(' ').toLowerCase();
+  return (!query||hay.includes(query))&&(status==='all'||(status==='enabled'?c.is_enabled:!c.is_enabled));
+ });
+ $('customerCount').textContent=`${rows.length} customer${rows.length===1?'':'s'}`;
+ host.innerHTML=rows.map(c=>`<tr><td><b>${safe(c.full_name||'Customer')}</b><br><small>${safe(c.email||'No email')}</small></td><td>${safe(c.phone||'—')}</td><td><b>${Number(c.orders_count||0)}</b></td><td><span class="customer-status ${c.is_enabled?'':'disabled'}">${c.is_enabled?'Enabled':'Disabled'}</span></td><td>${c.is_enabled?'<span class="helper">—</span>':`<span class="customer-reason">${safe(c.disable_reason||'No reason entered')}</span>`}</td><td><div class="customer-action">${c.is_enabled?`<button class="table-action danger" data-customer-disable="${c.customer_id}">Disable</button>`:`<button class="table-action" data-customer-edit-reason="${c.customer_id}">Edit reason</button><button class="table-action" data-customer-enable="${c.customer_id}">Enable</button>`}</div></td></tr>`).join('')||'<tr><td colspan="6">No customers match this search.</td></tr>';
+ host.querySelectorAll('[data-customer-disable]').forEach(b=>b.onclick=()=>changeCustomerStatus(b.dataset.customerDisable,false));
+ host.querySelectorAll('[data-customer-edit-reason]').forEach(b=>b.onclick=()=>changeCustomerStatus(b.dataset.customerEditReason,false,true));
+ host.querySelectorAll('[data-customer-enable]').forEach(b=>b.onclick=()=>changeCustomerStatus(b.dataset.customerEnable,true));
+}
+async function loadCustomers(){
+ const host=$('adminCustomerRows');if(!host)return;
+ host.innerHTML='<tr><td colspan="6">Loading customers…</td></tr>';
+ $('customersMessage').textContent='';
+ const {data,error}=await sb.rpc('admin_list_customers');
+ if(error){host.innerHTML=`<tr><td colspan="6">Could not load customers: ${safe(error.message)}</td></tr>`;$('customersMessage').textContent='Run CUSTOMER-MANAGEMENT.sql in Supabase SQL Editor, then refresh this section.';return}
+ cachedCustomers=data||[];renderCustomers();
+ $('customersMessage').textContent=`Loaded ${cachedCustomers.length} customer account(s).`;
+}
+async function changeCustomerStatus(id,enabled,editingReason=false){
+ const customer=cachedCustomers.find(c=>c.customer_id===id);if(!customer)return;
+ let reason=null;
+ if(!enabled){
+  const promptText=editingReason?'Edit the reason shown to this customer:':'Enter the reason this account is being disabled. The customer will see this exact text when signing in:';
+  reason=window.prompt(promptText,editingReason?(customer.disable_reason||''):'');
+  if(reason===null)return;
+  reason=reason.trim();
+  if(reason.length<3){alert('Please enter a clear reason (at least 3 characters).');return}
+ }else if(!window.confirm(`Enable ${customer.full_name||customer.email||'this customer'} account?`))return;
+ $('customersMessage').textContent=enabled?'Enabling account…':'Saving account restriction…';
+ const {error}=await sb.rpc('admin_set_customer_status',{p_customer_id:id,p_is_enabled:enabled,p_disable_reason:reason});
+ if(error){$('customersMessage').textContent='Could not update account: '+error.message;return}
+ $('customersMessage').textContent=enabled?'Customer account enabled.':'Customer account disabled and reason saved.';
+ await loadCustomers();
+}
+$('refreshCustomers')?.addEventListener('click',loadCustomers);
+$('customerSearch')?.addEventListener('input',renderCustomers);
+$('customerStatusFilter')?.addEventListener('change',renderCustomers);
 
 // SALES ANALYTICS — calculated from live orders and product inventory
 function renderAnalytics(){
