@@ -71,10 +71,15 @@
   </header>
 <div class="announcement" id="announcement">GRAND OPENING SPECIAL · UP TO 50% OFF</div>
   <main>
-    <section class="collection-intro">
-      <p class="breadcrumb"><a href="index.html">Home</a> / COLLECTIONS</p>
-      <h1>Collections</h1>
-      <p>Explore the latest styles, carefully selected for your everyday wardrobe.</p>
+    <section class="or-hero-slider" id="homeHero" aria-label="Featured collection">
+      <div class="or-hero-track" id="heroSlides">
+        <a class="or-hero-slide is-active" href="collections.htm" aria-label="Explore Outfit Reload collection">
+          <img src="https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&w=1800&q=88" alt="Men's premium fashion collection" fetchpriority="high">
+        </a>
+      </div>
+      <button class="or-hero-arrow or-hero-prev" type="button" aria-label="Previous slide">‹</button>
+      <button class="or-hero-arrow or-hero-next" type="button" aria-label="Next slide">›</button>
+      <div class="or-hero-dots" id="heroDots" aria-label="Choose slide"></div>
     </section>
     <section class="section categories" id="shop-categories">
       <div class="category-grid">
@@ -231,6 +236,6 @@
       else window.location.href = 'index.html';
     });
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>document.write('<script src=\"config.js?v='+Date.now()+'\"><\/script>');</script><script>document.write('<script src=\"app.js?v='+Date.now()+'\"><\/script>');</script><script>document.write('<script src=\"customer-session.js?v='+Date.now()+'\"><\/script>');</script><script>document.write('<script src=\"cms.js?v='+Date.now()+'\"><\/script>');</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>document.write('<script src=\"config.js?v='+Date.now()+'\"><\/script>');</script><script>document.write('<script src="homepage-slider.js?v=20261123-2"><\/script>');</script><script>document.write('<script src=\"app.js?v='+Date.now()+'\"><\/script>');</script><script>document.write('<script src=\"customer-session.js?v='+Date.now()+'\"><\/script>');</script><script>document.write('<script src=\"cms.js?v='+Date.now()+'\"><\/script>');</script>
 
 </body></html>
