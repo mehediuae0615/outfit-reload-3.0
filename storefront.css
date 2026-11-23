@@ -421,3 +421,60 @@ body:not(.admin-body) .category-card.is-activating:after {
 @media (prefers-reduced-motion: reduce) {
   body:not(.admin-body) .category-card { transition: none; }
 }
+
+
+/* Mobile customer navigation and clear account entry */
+.header-user {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 58px;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.header-user-icon { font-size: 19px; line-height: 1; }
+.header-user-label { font-size: 8px; font-weight: 700; letter-spacing: .8px; }
+.mobile-bottom-nav { display: none; }
+@media (max-width: 700px) {
+  body:not(.admin-body) { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+  body:not(.admin-body) .header-user {
+    min-width: 42px;
+    flex-direction: column;
+    gap: 2px;
+    padding: 3px 2px;
+  }
+  body:not(.admin-body) .header-user-icon { font-size: 17px; }
+  body:not(.admin-body) .header-user-label { font-size: 6px; letter-spacing: .45px; }
+  body:not(.admin-body) .mobile-bottom-nav {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 100;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    min-height: calc(60px + env(safe-area-inset-bottom));
+    padding: 6px 7px calc(6px + env(safe-area-inset-bottom));
+    background: rgba(251,249,245,.97);
+    border-top: 1px solid #e5ddd2;
+    box-shadow: 0 -5px 18px rgba(48,36,29,.08);
+    backdrop-filter: blur(12px);
+  }
+  body:not(.admin-body) .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border: 0;
+    background: transparent;
+    color: #514236;
+    text-decoration: none;
+    font: 700 8px/1.2 "DM Sans", sans-serif;
+    letter-spacing: .65px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body:not(.admin-body) .mobile-nav-icon { font-size: 21px; line-height: 1; font-weight: 400; }
+  body:not(.admin-body) .mobile-nav-item:active { color: #9b6c45; transform: scale(.96); }
+}
