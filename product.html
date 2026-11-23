@@ -78,7 +78,7 @@
         <p id="description" class="desc"></p>
         <div class="facts">
           <div id="stock"></div>
-          <div id="material"></div>
+          <div id="material"></div><div id="attributes"></div>
           <div id="sizes"></div>
           <div id="colors"></div>
         </div>
@@ -208,6 +208,7 @@
     $('description').textContent=description;$('productImage').src=image||'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1000&q=80';
     $('productImage').alt=name;
     $('material').innerHTML=p.material?'<strong>Material:</strong> '+plain(p.material):'';
+    const attributeLabels={fit:'Fit',sleeve_type:'Sleeve Type',collar_type:'Collar Type',waist_type:'Waist Type',length:'Length',shoe_type:'Shoe Type',sole_type:'Sole Type',closure:'Closure',dial_size:'Dial Size',strap_type:'Strap Type',display:'Display',style:'Style',neck_type:'Neck Type',wash:'Wash',frame_shape:'Frame Shape',lens_type:'Lens Type',frame_material:'Frame Material',volume:'Volume',fragrance_type:'Fragrance Type',scent:'Scent'};const attrs=p.attributes||{};$('attributes').innerHTML=Object.entries(attrs).filter(([k,v])=>v).map(([k,v])=>'<p><strong>'+plain(attributeLabels[k]||k)+':</strong> '+plain(v)+'</p>').join('');
     const sizes=toList(p.sizes),colors=toList(p.colors);
     $('sizes').innerHTML=sizes.length?'<strong>Available sizes:</strong> '+sizes.map(plain).join(', '):'';
     $('colors').innerHTML=colors.length?'<strong>Available colours:</strong> '+colors.map(plain).join(', '):'';
