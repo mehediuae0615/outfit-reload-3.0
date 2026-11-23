@@ -186,20 +186,21 @@ function applyCategoryFilter(category){
  const wanted=aliases[normalize(category)]||[normalize(category)];
  const filtered=productsCache.filter(p=>{const c=normalize(p.category?.name||p.category||'');return wanted.some(w=>c===w||c.includes(w)||normalize(p.name).includes(w));});
  grid.innerHTML=filtered.length?filtered.map(card).join():'<p class="helper">No products found in this category yet.</p>';
- // Force a real two-column mobile grid after category filtering.
- // The inline important rule prevents other storefront styles from collapsing it to one column.
- if(activeCategoryFilter && window.matchMedia('(max-width:700px)').matches){
+ // On phones, explicitly lock the filtered category results to a two-column grid.
+ // Inline !important prevents later theme/CMS rules from collapsing it to one column.
+ if(window.matchMedia('(max-width:700px)').matches){
   grid.style.setProperty('display','grid','important');
   grid.style.setProperty('grid-template-columns','repeat(2,minmax(0,1fr))','important');
+  grid.style.setProperty('grid-auto-flow','row','important');
   grid.style.setProperty('width','100%','important');
-  grid.style.setProperty('gap','18px 10px','important');
- }else{
-  grid.style.removeProperty('display');
-  grid.style.removeProperty('grid-template-columns');
-  grid.style.removeProperty('width');
-  grid.style.removeProperty('gap');
+  grid.style.setProperty('gap','21px 12px','important');
+  grid.querySelectorAll('.product-card').forEach(cardEl=>{
+   cardEl.style.setProperty('grid-column','auto','important');
+   cardEl.style.setProperty('width','100%','important');
+   cardEl.style.setProperty('min-width','0','important');
+  });
  }
- document.querySelectorAll('.product-grid [data-product]').forEach(el=>{const open=()=>openProduct(el.dataset.product);el.addEventListener('click',open);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}})});document.querySelectorAll('[data-wishlist]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();toggleWishlist(b.dataset.wishlist)}));
+ document.querySelectorAll('.product-grid [data-product]').forEach(el=>{if(el.dataset.categoryBound)return;el.dataset.categoryBound='1';const open=()=>openProduct(el.dataset.product);el.addEventListener('click',open);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}})});document.querySelectorAll('[data-wishlist]').forEach(b=>{if(b.dataset.categoryWishBound)return;b.dataset.categoryWishBound='1';b.addEventListener('click',e=>{e.stopPropagation();toggleWishlist(b.dataset.wishlist)})});
  const heading=document.querySelector('#new .section-heading h2');if(heading)heading.innerHTML=activeCategoryFilter?escapeHtml(category)+'<span>.</span>':'New arrivals<span>.</span>';
  document.querySelectorAll('.product-grid').forEach(el=>{if(el.id!=='productGrid')el.closest('.section')?.classList.toggle('category-filter-hidden',!!activeCategoryFilter)});
  if(activeCategoryFilter){$('new').scrollIntoView({behavior:'smooth',block:'start'});}
