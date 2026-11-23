@@ -10,7 +10,7 @@ async function checkSession(){
  if(!session){login.hidden=false;app.hidden=true;return}
  const {data:owner,error}=await sb.from('admin_users').select('role,email').eq('user_id',session.user.id).maybeSingle();
  if(error||!owner){await sb.auth.signOut();login.hidden=false;app.hidden=true;msg.textContent='This account is not authorized as an admin.';return}
- login.hidden=true;app.hidden=false;$('adminEmail').textContent=owner.email||session.user.email;await loadProducts();await loadAnalyticsInventory();await loadAnnouncement();await loadBulkSaleStatus();await loadOrders();await loadWebsiteContent();await loadBkashSettings();await loadCoupons();await loadReviews();await loadCustomers();
+ login.hidden=true;app.hidden=false;$('adminEmail').textContent=owner.email||session.user.email;await loadProducts();await loadAnalyticsInventory();await loadAnnouncement();await loadPromoPopup();await loadBulkSaleStatus();await loadOrders();await loadWebsiteContent();await loadBkashSettings();await loadCoupons();await loadReviews();await loadCustomers();
 }
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();msg.textContent='Signing in…';const {error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error){msg.textContent=error.message;return}msg.textContent='';await checkSession()});
 $('logoutBtn').addEventListener('click',async()=>{await sb.auth.signOut();await checkSession()});
@@ -90,6 +90,32 @@ async function saveAnnouncementSettings(){
 }
 $('saveAnnouncement')?.addEventListener('click',saveAnnouncementSettings);
 $('announcementEnabled')?.addEventListener('change',saveAnnouncementSettings);
+
+async function loadPromoPopup(){
+ const {data,error}=await sb.from('store_settings').select('value').eq('key','promotion_popup').maybeSingle();
+ if(error){$('promoMessage').textContent='Could not load popup: '+error.message;return}
+ let c={};try{c=JSON.parse(data?.value||'{}')}catch{}
+ $('promoTitle').value=c.title||'';$('promoText').value=c.text||'';$('promoButton').value=c.button||'';$('promoLink').value=c.link||'';$('promoEnabled').checked=c.enabled===true;
+ if(c.image){$('promoImagePreview').src=c.image;$('promoImagePreview').dataset.url=c.image;$('promoImagePreview').style.display='block'}
+ $('promoMessage').textContent=data?'Saved popup settings loaded.':'No popup configured yet.';
+}
+$('savePromoPopup')?.addEventListener('click',async()=>{
+ const button=$('savePromoPopup'),message=$('promoMessage');button.disabled=true;button.textContent='SAVING…';
+ try{
+  let image=$('promoImagePreview').dataset.url||'';const file=$('promoImageFile').files?.[0];
+  if(file){if(!file.type.startsWith('image/'))throw new Error('Please choose an image file.');if(file.size>5*1024*1024)throw new Error('Image must be 5 MB or smaller.');
+   const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';const path='campaign-'+Date.now()+'.'+ext;
+   const {error:upErr}=await sb.storage.from('promotion-popup').upload(path,file,{upsert:true,contentType:file.type});if(upErr)throw upErr;
+   image=sb.storage.from('promotion-popup').getPublicUrl(path).data.publicUrl;
+  }
+  const cfg={enabled:$('promoEnabled').checked,title:$('promoTitle').value.trim(),text:$('promoText').value.trim(),button:$('promoButton').value.trim(),link:$('promoLink').value.trim(),image};
+  if(cfg.enabled&&!cfg.title&&!cfg.text&&!cfg.image)throw new Error('Add a title, message, or image before enabling the popup.');
+  const {error}=await sb.from('store_settings').upsert({key:'promotion_popup',value:JSON.stringify(cfg)},{onConflict:'key'});if(error)throw error;
+  if(image){$('promoImagePreview').src=image;$('promoImagePreview').dataset.url=image;$('promoImagePreview').style.display='block'}
+  $('promoMessage').textContent=cfg.enabled?'Popup saved and enabled.':'Popup saved and disabled.';
+ }catch(e){message.textContent='Save failed: '+(e.message||e)}finally{button.disabled=false;button.textContent='SAVE POPUP'}
+});
+
 
 async function loadBulkSaleStatus(){
  const {data,error}=await sb.from('store_settings').select('value').eq('key','bulk_discount_percent').maybeSingle();

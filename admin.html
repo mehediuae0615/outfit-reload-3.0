@@ -8,15 +8,6 @@
 .bkash-review-box{margin-top:10px;padding:10px;background:#f8f5f1;border:1px solid #e8e0d8;border-radius:10px;font-size:12px;line-height:1.8}.bkash-review-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}.bkash-review-actions select{min-height:34px;padding:5px 8px;border:1px solid #d8cec4;border-radius:7px;background:#fff}.bkash-state{display:inline-block;padding:2px 8px;border-radius:20px;background:#eee7e1;font-size:11px}.bkash-state-verified{background:#e5f5e9;color:#176b32}.bkash-state-rejected{background:#fde9e7;color:#a12820}.bkash-state-pending{background:#fff3d6;color:#805500}
 .customer-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:16px 0}.customer-toolbar input,.customer-toolbar select{min-height:40px;padding:9px 12px;border:1px solid #ddd3c9;background:#fff;color:#2b211b;border-radius:6px}.customer-toolbar input{flex:1;min-width:190px}.customer-reason{display:block;max-width:320px;white-space:normal;line-height:1.45;color:#80604b;margin-top:5px}.customer-action{display:inline-flex;gap:6px;flex-wrap:wrap}.customer-status{display:inline-block;padding:4px 9px;border-radius:20px;font-size:11px;background:#e5f5e9;color:#176b32}.customer-status.disabled{background:#fde9e7;color:#a12820}
 </style>
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LW8W0FCHBH"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-LW8W0FCHBH');
-    </script>
 </head>
 <body class="admin-body">
 <div id="adminLogin" class="login-screen"><form id="loginForm" class="login-card"><span class="brand-mark">OR</span><p class="eyebrow">OUTFIT RELOAD 3.0</p><h1>Owner sign in</h1><label>Email<input id="loginEmail" type="email" value="mh7112650@gmail.com" required></label><label>Password<input id="loginPassword" type="password" required autocomplete="current-password"></label><button class="btn btn-dark" type="submit">SIGN IN</button><p id="loginMessage" class="helper"></p></form></div>
@@ -41,6 +32,14 @@
 <div class="inline-edit"><input id="announcementInput" maxlength="180" value="WE FOCUS QUALITY, NOT QUANTITY."><button class="btn btn-dark" id="saveAnnouncement" type="button">SAVE ANNOUNCEMENT</button></div>
 <label class="field-label" style="display:flex;align-items:center;gap:10px;margin-top:14px"><input id="announcementEnabled" type="checkbox" checked style="width:auto"> Show announcement bar</label>
 <p class="helper" id="announcementMessage" role="status">Loading announcement settings…</p>
+<div class="cms-group" style="margin-top:22px"><h3 style="margin:0 0 6px">Promotional popup</h3><p class="helper">Show a campaign banner to visitors. Customers can close it with the × button.</p>
+<div class="cms-fields" style="margin-top:14px">
+<label>Popup heading<input id="promoTitle" maxlength="90" placeholder="New collection is here!"></label>
+<label>Button text<input id="promoButton" maxlength="32" placeholder="SHOP NOW"></label>
+<label>Button link<input id="promoLink" type="url" placeholder="https://… or product.html"></label>
+<label>Popup image (upload)<input id="promoImageFile" type="file" accept="image/*"></label>
+<label style="grid-column:1/-1">Popup message<textarea id="promoText" rows="3" maxlength="300" placeholder="Write your offer or announcement…"></textarea></label>
+</div><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px"><img id="promoImagePreview" alt="Popup image preview" style="display:none;width:110px;height:75px;object-fit:cover;border:1px solid #ddd3c9;border-radius:6px"><label style="display:flex;align-items:center;gap:8px;font-weight:700"><input id="promoEnabled" type="checkbox" style="width:20px;height:20px"> Enable promotional popup</label><button class="btn btn-dark" id="savePromoPopup" type="button">SAVE POPUP</button></div><p class="helper" id="promoMessage" role="status">Loading popup settings…</p></div>
 </section>
 <section class="admin-panel" id="bulkSale">
 <div class="panel-heading"><div><p class="eyebrow">PROMOTIONS</p><h2>Bulk discount / Clearance sale</h2><p class="helper">Apply one discount to all active products. Existing individual sale prices and Flash Sale schedules are backed up and restored when the campaign ends.</p></div></div>
