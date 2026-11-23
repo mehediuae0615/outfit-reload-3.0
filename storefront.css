@@ -538,27 +538,20 @@ body:not(.admin-body) #shop-categories .category-card:before{z-index:2}
 body:not(.admin-body) #shop-categories .category-card b{position:relative;z-index:3}
 
 
-/* Mobile category-filtered product grid: always keep a two-column layout. */
-@media (max-width:700px){
-  body:not(.admin-body) #new #productGrid{
-    display:grid !important;
-    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-    align-items:start;
-    gap:18px 10px !important;
-    width:100%;
+/* Category-filtered products: enforce the two-column mobile product grid. */
+@media (max-width: 700px) {
+  body:not(.admin-body) #new #productGrid.category-filtered-grid {
+    display: grid !important;
+    width: 100% !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    column-gap: 12px !important;
+    row-gap: 21px !important;
+    align-items: start !important;
   }
-  body:not(.admin-body) #new #productGrid > .product-card{
-    display:block;
-    width:100%;
-    min-width:0;
+  body:not(.admin-body) #new #productGrid.category-filtered-grid > .product-card {
+    display: block !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
   }
-}
-
-/* Softer rounded product image cards across the storefront. */
-body:not(.admin-body) .product-photo{
-  border-radius:12px;
-  overflow:hidden;
-}
-body:not(.admin-body) .product-photo img{
-  border-radius:inherit;
 }
