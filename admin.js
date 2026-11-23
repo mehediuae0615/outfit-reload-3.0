@@ -10,7 +10,7 @@ async function checkSession(){
  if(!session){login.hidden=false;app.hidden=true;return}
  const {data:owner,error}=await sb.from('admin_users').select('role,email').eq('user_id',session.user.id).maybeSingle();
  if(error||!owner){await sb.auth.signOut();login.hidden=false;app.hidden=true;msg.textContent='This account is not authorized as an admin.';return}
- login.hidden=true;app.hidden=false;$('adminEmail').textContent=owner.email||session.user.email;await loadProducts();await loadAnalyticsInventory();await loadAnnouncement();await loadPromoPopup();await loadBulkSaleStatus();await loadOrders();await loadWebsiteContent();await loadBkashSettings();await loadCoupons();await loadReviews();await loadCustomers();
+ login.hidden=true;app.hidden=false;$('adminEmail').textContent=owner.email||session.user.email;await loadProducts();await loadAnalyticsInventory();await loadAnnouncement();await loadHomepageSlides();await loadPromoPopup();await loadBulkSaleStatus();await loadOrders();await loadWebsiteContent();await loadBkashSettings();await loadCoupons();await loadReviews();await loadCustomers();
 }
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();msg.textContent='Signing in…';const {error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error){msg.textContent=error.message;return}msg.textContent='';await checkSession()});
 $('logoutBtn').addEventListener('click',async()=>{await sb.auth.signOut();await checkSession()});
@@ -153,6 +153,77 @@ $('endBulkSale')?.addEventListener('click',async()=>{
   await loadBulkSaleStatus();await loadProducts();
  }catch(error){message.textContent='Could not end bulk sale: '+(error.message||error)}
  finally{document.querySelectorAll('[data-bulk-percent],#applyCustomBulk,#endBulkSale').forEach(b=>b.disabled=false)}
+});
+
+
+// HOMEPAGE IMAGE SLIDER — up to five images stored in store_settings.
+let homepageSlideValues=[];
+async function loadHomepageSlides(){
+ const host=$('homepageSlideEditor'),message=$('homepageSlidesMessage');
+ if(!host||!message)return;
+ message.textContent='Loading slider settings…';
+ const {data,error}=await sb.from('store_settings').select('value').eq('key','homepage_slides').maybeSingle();
+ if(error){message.textContent='Could not load slider settings: '+error.message;return}
+ try{homepageSlideValues=JSON.parse(data?.value||'[]');if(!Array.isArray(homepageSlideValues))homepageSlideValues=homepageSlideValues.slides||[]}catch{homepageSlideValues=[]}
+ host.innerHTML=Array.from({length:5},(_,i)=>{
+  const item=homepageSlideValues[i]||{};
+  return `<div class="cms-group" style="padding:12px;min-width:0">
+   <strong>Slide ${i+1}</strong>
+   <label class="cms-field" style="margin-top:9px">Image URL<input type="url" data-slide-url="${i}" value="${safe(item.image||'')}" placeholder="https://…"></label>
+   <label class="cms-field" style="margin-top:9px">Upload image<input type="file" data-slide-file="${i}" accept="image/*"></label>
+   <label class="cms-field" style="margin-top:9px">Click destination (optional)<input type="text" data-slide-link="${i}" value="${safe(item.link||'collections.htm')}" placeholder="collections.htm or product.html"></label>
+   <img data-slide-preview="${i}" src="${safe(item.image||'')}" alt="Slide ${i+1} preview" style="display:${item.image?'block':'none'};width:100%;height:105px;object-fit:cover;margin-top:9px;border:1px solid #e8e0d8">
+   <button type="button" class="table-action danger" data-slide-remove="${i}" style="margin-top:8px">REMOVE IMAGE</button>
+  </div>`;
+ }).join('');
+ host.querySelectorAll('[data-slide-url]').forEach(input=>input.addEventListener('input',()=>{
+  const img=host.querySelector(`[data-slide-preview="${input.dataset.slideUrl}"]`);
+  img.src=input.value;img.style.display=input.value?'block':'none';
+ }));
+ host.querySelectorAll('[data-slide-file]').forEach(input=>input.addEventListener('change',()=>{
+  const file=input.files?.[0];if(!file)return;
+  const img=host.querySelector(`[data-slide-preview="${input.dataset.slideFile}"]`);
+  img.src=URL.createObjectURL(file);img.style.display='block';
+ }));
+ host.querySelectorAll('[data-slide-remove]').forEach(button=>button.addEventListener('click',()=>{
+  const n=button.dataset.slideRemove;
+  host.querySelector(`[data-slide-url="${n}"]`).value='';
+  host.querySelector(`[data-slide-file="${n}"]`).value='';
+  const img=host.querySelector(`[data-slide-preview="${n}"]`);img.removeAttribute('src');img.style.display='none';
+ }));
+ message.textContent='Slider settings loaded. Add at least one image, up to five.';
+}
+$('saveHomepageSlides')?.addEventListener('click',async()=>{
+ const button=$('saveHomepageSlides'),message=$('homepageSlidesMessage'),host=$('homepageSlideEditor');
+ button.disabled=true;button.textContent='SAVING…';message.textContent='Uploading images and saving…';
+ try{
+  const items=[];
+  for(let n=0;n<5;n++){
+   let image=host.querySelector(`[data-slide-url="${n}"]`).value.trim();
+   const file=host.querySelector(`[data-slide-file="${n}"]`).files?.[0];
+   if(file){
+    if(!file.type.startsWith('image/'))throw new Error(`Slide ${n+1}: choose an image file.`);
+    if(file.size>7*1024*1024)throw new Error(`Slide ${n+1}: image must be 7 MB or smaller.`);
+    const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+    const path=`homepage-slides/slide-${n+1}-${Date.now()}.${ext}`;
+    const {error:uploadError}=await sb.storage.from('product-images').upload(path,file,{upsert:true,contentType:file.type});
+    if(uploadError)throw uploadError;
+    image=sb.storage.from('product-images').getPublicUrl(path).data.publicUrl;
+   }
+   if(image){
+    let parsed;try{parsed=new URL(image)}catch{throw new Error(`Slide ${n+1}: enter a valid image URL or upload an image.`)}
+    if(!['http:','https:'].includes(parsed.protocol))throw new Error(`Slide ${n+1}: image URL must start with https://`);
+    const link=host.querySelector(`[data-slide-link="${n}"]`).value.trim()||'collections.htm';
+    items.push({image,link,alt:`Outfit Reload featured collection ${items.length+1}`});
+   }
+  }
+  if(!items.length)throw new Error('Upload or add at least one banner image.');
+  const {error}=await sb.from('store_settings').upsert({key:'homepage_slides',value:JSON.stringify(items)},{onConflict:'key'});
+  if(error)throw error;
+  homepageSlideValues=items;message.textContent=`Saved ${items.length} slider image${items.length===1?'':'s'}. Refresh the homepage to view.`;
+  await loadHomepageSlides();
+ }catch(error){message.textContent='Save failed: '+(error.message||error)}
+ finally{button.disabled=false;button.textContent='SAVE SLIDER IMAGES'}
 });
 
 // bKash delivery-charge settings (stored in the existing store_settings table)

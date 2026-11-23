@@ -478,3 +478,35 @@ body:not(.admin-body) .category-card.is-activating:after {
   body:not(.admin-body) .mobile-nav-icon { font-size: 21px; line-height: 1; font-weight: 400; }
   body:not(.admin-body) .mobile-nav-item:active { color: #9b6c45; transform: scale(.96); }
 }
+
+
+/* Homepage image slider + mobile header overflow correction */
+.or-hero-slider{position:relative;width:100%;height:clamp(250px,48vw,620px);min-height:0;overflow:hidden;background:#d9d0c5;isolation:isolate}
+.or-hero-track,.or-hero-slide{position:absolute;inset:0;width:100%;height:100%}
+.or-hero-slide{display:block;opacity:0;visibility:hidden;transition:opacity .8s ease;pointer-events:none}
+.or-hero-slide.is-active{opacity:1;visibility:visible;pointer-events:auto;z-index:1}
+.or-hero-slide img{display:block;width:100%;height:100%;max-width:none;object-fit:cover;object-position:center}
+.or-hero-slide:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,15,12,.22),transparent 65%);pointer-events:none}
+.or-hero-arrow{position:absolute;z-index:3;top:50%;transform:translateY(-50%);width:42px;height:42px;border:1px solid #ffffff80;border-radius:50%;background:#211b174d;color:#fff;font-size:29px;line-height:1;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(8px)}
+.or-hero-prev{left:20px}.or-hero-next{right:20px}
+.or-hero-dots{position:absolute;z-index:3;left:0;right:0;bottom:18px;display:flex;justify-content:center;gap:8px}
+.or-hero-dot{width:7px;height:7px;border:0;border-radius:50%;padding:0;background:#ffffff80;cursor:pointer;transition:width .25s,background .25s}
+.or-hero-dot.is-active{width:23px;border-radius:10px;background:#fff}
+@media(max-width:700px){
+ body:not(.admin-body) .site-header{grid-template-columns:28px minmax(0,1fr) auto;gap:6px;padding:0 10px;width:100%;max-width:100%}
+ body:not(.admin-body) .brand{min-width:0;max-width:100%;font-size:9px;letter-spacing:.8px;gap:5px;overflow:hidden}
+ body:not(.admin-body) .brand>span:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis}
+ body:not(.admin-body) .brand-mark{flex:0 0 32px;width:32px;height:32px}
+ body:not(.admin-body) .header-actions{min-width:0;gap:5px;justify-self:end}
+ body:not(.admin-body) .header-user{min-width:34px;width:34px}
+ body:not(.admin-body) .header-heart{width:32px;min-width:32px;padding:3px;font-size:20px}
+ body:not(.admin-body) .bag-trigger{min-width:67px;padding:6px 7px;gap:4px}
+ body:not(.admin-body) .bag-label{font-size:7px}
+ .or-hero-slider{height:58vw;min-height:205px;max-height:390px}
+ .or-hero-arrow{width:32px;height:32px;font-size:23px}
+ .or-hero-prev{left:10px}.or-hero-next{right:10px}
+ .or-hero-dots{bottom:12px;gap:6px}
+ .or-hero-dot{width:6px;height:6px}
+ .or-hero-dot.is-active{width:18px}
+}
+@media(prefers-reduced-motion:reduce){.or-hero-slide,.or-hero-dot{transition:none}}
