@@ -10,7 +10,7 @@ async function checkSession(){
  if(!session){login.hidden=false;app.hidden=true;return}
  const {data:owner,error}=await sb.from('admin_users').select('role,email').eq('user_id',session.user.id).maybeSingle();
  if(error||!owner){await sb.auth.signOut();login.hidden=false;app.hidden=true;msg.textContent='This account is not authorized as an admin.';return}
- login.hidden=true;app.hidden=false;$('adminEmail').textContent=owner.email||session.user.email;await loadProducts();await loadAnalyticsInventory();await loadAnnouncement();await loadHomepageSlides();await loadPromoPopup();await loadBulkSaleStatus();await loadOrders();await loadWebsiteContent();await loadBkashSettings();await loadCoupons();await loadReviews();await loadCustomers();
+ login.hidden=true;app.hidden=false;$('adminEmail').textContent=owner.email||session.user.email;await loadProducts();await loadAnalyticsInventory();await loadAnnouncement();await loadHomepageSlides();await loadHomepageDisplaySettings();await loadPromoPopup();await loadBulkSaleStatus();await loadOrders();await loadWebsiteContent();await loadBkashSettings();await loadCoupons();await loadReviews();await loadCustomers();
 }
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();msg.textContent='Signing in…';const {error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error){msg.textContent=error.message;return}msg.textContent='';await checkSession()});
 $('logoutBtn').addEventListener('click',async()=>{await sb.auth.signOut();await checkSession()});
@@ -224,6 +224,86 @@ $('saveHomepageSlides')?.addEventListener('click',async()=>{
   await loadHomepageSlides();
  }catch(error){message.textContent='Save failed: '+(error.message||error)}
  finally{button.disabled=false;button.textContent='SAVE SLIDER IMAGES'}
+});
+
+// HOMEPAGE SLIDER TIMING + CATEGORY CARD CUSTOMIZATION
+const defaultHomeCategories=[
+ {key:'Shoes',name:'SHOE',image:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85',visible:true},
+ {key:'Watch',name:'WATCH',image:'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=900&q=85',visible:true},
+ {key:'Sweatshirt',name:'JACKET',image:'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=900&q=85',visible:true},
+ {key:'T-shirt',name:'T-SHIRT',image:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85',visible:true},
+ {key:'Shirts',name:'SHIRT',image:'https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=900&q=85',visible:true},
+ {key:'Pants',name:'PANT',image:'https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=900&q=85',visible:true}
+];
+let homepageCategories=defaultHomeCategories.map(x=>({...x}));
+let heroOptions={interval:5000,animation:'fade',duration:850};
+async function readStoreSetting(key){
+ const {data,error}=await sb.from('store_settings').select('value').eq('key',key).maybeSingle();
+ if(error)throw error;return data?.value??null;
+}
+async function writeStoreSetting(key,value){
+ const {error}=await sb.from('store_settings').upsert({key,value:JSON.stringify(value)},{onConflict:'key'});
+ if(error)throw error;
+}
+async function loadHomepageDisplaySettings(){
+ try{
+  const [heroRaw,catRaw]=await Promise.all([readStoreSetting('homepage_slider_options'),readStoreSetting('homepage_categories')]);
+  if(heroRaw){try{heroOptions={...heroOptions,...JSON.parse(heroRaw)}}catch{}}
+  if(catRaw){try{const saved=JSON.parse(catRaw);const list=Array.isArray(saved)?saved:(saved.items||[]);if(list.length)homepageCategories=defaultHomeCategories.map(base=>({...base,...(list.find(x=>x.key===base.key)||{})}));if(!Array.isArray(saved)&&saved.layout)homepageCategories.layout=saved.layout}catch{}}
+  $('heroInterval').value=String(heroOptions.interval||4800);
+  $('heroAnimation').value=heroOptions.animation||'fade';
+  $('heroDuration').value=String(heroOptions.duration||800);
+  const layout=homepageCategories.layout||{};
+  $('categoryDesktopCols').value=String(layout.desktopCols||4);
+  $('categoryMobileCols').value=String(layout.mobileCols||2);
+  $('categoryShape').value=String(layout.shape||.82);
+  $('categoryGap').value=String(layout.gap||16);
+  renderHomepageCategoryEditor();
+ }catch(error){$('homepageCategoriesMessage').textContent='Could not load homepage settings: '+(error.message||error)}
+}
+function renderHomepageCategoryEditor(){
+ const host=$('homepageCategoryEditor');if(!host)return;
+ host.innerHTML=homepageCategories.map((item,i)=>`<div class="cms-group" style="padding:12px;min-width:0">
+  <strong>${safe(item.key)}</strong>
+  <label class="cms-field" style="margin-top:9px">Display name<input type="text" maxlength="28" data-cat-name="${i}" value="${safe(item.name||'')}" placeholder="Category name"></label>
+  <label class="cms-field" style="margin-top:9px">Image URL<input type="url" data-cat-url="${i}" value="${safe(item.image||'')}" placeholder="https://…"></label>
+  <label class="cms-field" style="margin-top:9px">Upload image<input type="file" data-cat-file="${i}" accept="image/*"></label>
+  <img data-cat-preview="${i}" src="${safe(item.image||'')}" alt="${safe(item.name||item.key)} preview" style="display:${item.image?'block':'none'};width:100%;height:105px;object-fit:cover;margin-top:9px;border:1px solid #e8e0d8">
+  <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px"><input type="checkbox" data-cat-visible="${i}" ${item.visible!==false?'checked':''}> Show this category</label>
+ </div>`).join('');
+ host.querySelectorAll('[data-cat-url]').forEach(input=>input.addEventListener('input',()=>{const img=host.querySelector(`[data-cat-preview="${input.dataset.catUrl}"]`);img.src=input.value;img.style.display=input.value?'block':'none'}));
+ host.querySelectorAll('[data-cat-file]').forEach(input=>input.addEventListener('change',()=>{const file=input.files?.[0];if(!file)return;const img=host.querySelector(`[data-cat-preview="${input.dataset.catFile}"]`);img.src=URL.createObjectURL(file);img.style.display='block'}));
+}
+$('saveHeroOptions')?.addEventListener('click',async()=>{
+ const b=$('saveHeroOptions'),m=$('heroOptionsMessage');b.disabled=true;m.textContent='Saving…';
+ try{heroOptions={interval:Number($('heroInterval').value),animation:$('heroAnimation').value,duration:Number($('heroDuration').value)};await writeStoreSetting('homepage_slider_options',heroOptions);m.textContent='Slider settings saved.'}
+ catch(e){m.textContent='Save failed: '+(e.message||e)}finally{b.disabled=false}
+});
+$('saveHomepageCategories')?.addEventListener('click',async()=>{
+ const b=$('saveHomepageCategories'),m=$('homepageCategoriesMessage'),host=$('homepageCategoryEditor');b.disabled=true;m.textContent='Saving categories…';
+ try{
+  const updated=[];
+  for(let i=0;i<homepageCategories.length;i++){
+   const item={...homepageCategories[i]};
+   item.name=host.querySelector(`[data-cat-name="${i}"]`).value.trim()||item.key.toUpperCase();
+   item.image=host.querySelector(`[data-cat-url="${i}"]`).value.trim();
+   item.visible=host.querySelector(`[data-cat-visible="${i}"]`).checked;
+   const file=host.querySelector(`[data-cat-file="${i}"]`).files?.[0];
+   if(file){
+    if(!file.type.startsWith('image/'))throw new Error(`${item.key}: choose an image file.`);
+    if(file.size>7*1024*1024)throw new Error(`${item.key}: image must be 7 MB or smaller.`);
+    const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+    const path=`category-images/${item.key.toLowerCase().replace(/[^a-z0-9]+/g,'-')}-${Date.now()}.${ext}`;
+    const {error}=await sb.storage.from('product-images').upload(path,file,{upsert:false,contentType:file.type});
+    if(error)throw error;
+    item.image=sb.storage.from('product-images').getPublicUrl(path).data.publicUrl;
+   }
+   updated.push(item);
+  }
+  updated.layout={desktopCols:Number($('categoryDesktopCols').value),mobileCols:Number($('categoryMobileCols').value),shape:Number($('categoryShape').value),gap:Number($('categoryGap').value)};
+  await writeStoreSetting('homepage_categories',{items:updated,layout:updated.layout});
+  homepageCategories=updated; m.textContent='Category settings saved. Refresh homepage to view.';
+ }catch(e){m.textContent='Save failed: '+(e.message||e)}finally{b.disabled=false}
 });
 
 // bKash delivery-charge settings (stored in the existing store_settings table)
