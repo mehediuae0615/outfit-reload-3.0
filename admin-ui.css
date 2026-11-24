@@ -145,3 +145,18 @@ body.admin-body .sidebar-bottom{
   body.admin-body .admin-user{min-width:0}
   body.admin-body .analytics-bar-label{font-size:7px}
 }
+
+
+/* Persistent mobile shortcut: open the sidebar from any page scroll position. */
+body.admin-body .sidebar-quick-menu{display:none}
+@media(max-width:800px){
+ body.admin-body .sidebar-quick-menu{
+  display:grid;place-items:center;position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));
+  z-index:1200;width:54px;height:54px;border:1px solid #dfff00;border-radius:18px;
+  background:#151712;color:#fff200;box-shadow:0 8px 26px #10130c35;
+  font:900 32px/1 system-ui,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;
+ }
+ body.admin-body .sidebar-quick-menu span{display:block;transform:translateY(-1px)}
+ body.admin-body .sidebar-quick-menu:active{transform:scale(.94)}
+ body.admin-body .sidebar.open~.sidebar-quick-menu{background:#fff200;color:#171914;border-color:#171914}
+}

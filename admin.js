@@ -392,17 +392,17 @@ $('saveWebsiteContent')?.addEventListener('click',async()=>{
  }catch(err){status.textContent='Save failed: '+(err.message||err);alert('Could not save website content: '+(err.message||err))}finally{btn.disabled=false;btn.textContent='SAVE ALL WEBSITE CONTENT'}
 });
 
-const adminSidebar=$('sidebar');
-const adminMenuButton=$('adminMenu');
-const closeAdminSidebar=()=>{adminSidebar.classList.remove('open');adminMenuButton.setAttribute('aria-expanded','false')};
-adminMenuButton.setAttribute('aria-controls','sidebar');
-adminMenuButton.setAttribute('aria-expanded','false');
-adminMenuButton.addEventListener('click',e=>{e.stopPropagation();const isOpen=adminSidebar.classList.toggle('open');adminMenuButton.setAttribute('aria-expanded',String(isOpen))});
-// Close after choosing a section on mobile, or tapping anywhere outside the drawer.
-adminSidebar.querySelectorAll('.side-link').forEach(link=>link.addEventListener('click',()=>{if(window.matchMedia('(max-width: 800px)').matches)closeAdminSidebar()}));
-document.addEventListener('click',e=>{if(window.matchMedia('(max-width: 800px)').matches&&adminSidebar.classList.contains('open')&&!adminSidebar.contains(e.target)&&!adminMenuButton.contains(e.target))closeAdminSidebar()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAdminSidebar()});
-window.addEventListener('resize',()=>{if(!window.matchMedia('(max-width: 800px)').matches)closeAdminSidebar()});
+const sidebar=$('sidebar');
+const quickMenu=$('sidebarQuickMenu');
+function setSidebarOpen(open){
+ sidebar.classList.toggle('open',open);
+ quickMenu.setAttribute('aria-expanded',String(open));
+ quickMenu.setAttribute('aria-label',open?'Close sidebar menu':'Open sidebar menu');
+}
+$('adminMenu').addEventListener('click',()=>setSidebarOpen(!sidebar.classList.contains('open')));
+quickMenu.addEventListener('click',()=>setSidebarOpen(!sidebar.classList.contains('open')));
+sidebar.querySelectorAll('.side-link').forEach(link=>link.addEventListener('click',()=>setSidebarOpen(false)));
+document.addEventListener('keydown',event=>{if(event.key==='Escape')setSidebarOpen(false)});
 checkSession();
 
 
@@ -532,8 +532,7 @@ function renderAnalytics(){
  const buckets=[];for(let i=days-1;i>=0;i--){const d=new Date(now);d.setHours(0,0,0,0);d.setDate(d.getDate()-i);buckets.push({date:d,label:days===7?d.toLocaleDateString('en',{weekday:'short'}):d.toLocaleDateString('en',{day:'numeric',month:'short'}),value:0})}
  periodOrders.forEach(o=>{const d=new Date(o.created_at);d.setHours(0,0,0,0);const b=buckets.find(x=>x.date.getTime()===d.getTime());if(b)b.value+=Number(o.total||0)});
  const max=Math.max(...buckets.map(b=>b.value),1);$('analyticsChartCaption').textContent=`Daily revenue · ${days} days`;
- const labelStep=days<=7?1:Math.max(1,Math.ceil(buckets.length/6));
- $('analyticsChart').innerHTML=buckets.map((b,i)=>{const showLabel=i%labelStep===0||i===buckets.length-1;return `<div class="analytics-bar-col" title="${dateLabel(b.date)} · ${money(b.value)}"><span class="analytics-bar-value">${showLabel&&b.value?Math.round(b.value).toLocaleString('en-BD'):''}</span><div class="analytics-bar" title="${dateLabel(b.date)} · ${money(b.value)}" style="height:${Math.max(2,b.value/max*72)}%"></div><span class="analytics-bar-label ${showLabel?'':'is-hidden'}">${safe(b.label)}</span></div>`}).join('');
+ $('analyticsChart').innerHTML=buckets.map(b=>`<div class="analytics-bar-col"><span class="analytics-bar-value">${b.value?Math.round(b.value).toLocaleString('en-BD'):''}</span><div class="analytics-bar" title="${dateLabel(b.date)} · ${money(b.value)}" style="height:${Math.max(2,b.value/max*72)}%"></div><span class="analytics-bar-label">${safe(b.label)}</span></div>`).join('');
  const best={};cachedOrders.filter(o=>o.status!=='cancelled').forEach(o=>(o.order_items||[]).forEach(i=>{const name=i.product_name||'Unknown product';best[name]=(best[name]||0)+Number(i.quantity||0)}));
  const bestRows=Object.entries(best).sort((a,b)=>b[1]-a[1]).slice(0,6),bestMax=Math.max(...bestRows.map(x=>x[1]),1);
  $('analyticsBestSellers').innerHTML=bestRows.map(([name,qty])=>`<div><div class="analytics-list-row"><span>${safe(name)}</span><b>${qty} sold</b></div><div class="analytics-track"><span style="width:${qty/bestMax*100}%"></span></div></div>`).join('')||'<p class="helper">No sales data yet.</p>';
