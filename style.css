@@ -363,3 +363,25 @@ body:not(.admin-body) .site-header {
     margin: 0 auto !important;
   }
 }
+
+
+/* Category-filtered product grid: responsive columns */
+body:not(.admin-body) #productGrid.category-filtered-grid{
+  display:grid !important;
+  width:100% !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:22px !important;
+}
+@media (min-width:701px) and (max-width:900px){
+  body:not(.admin-body) #productGrid.category-filtered-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:15px !important;
+  }
+}
+@media (max-width:700px){
+  body:not(.admin-body) #productGrid.category-filtered-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    column-gap:12px !important;
+    row-gap:21px !important;
+  }
+}

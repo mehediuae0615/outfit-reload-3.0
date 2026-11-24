@@ -186,14 +186,8 @@ function applyCategoryFilter(category){
  const wanted=aliases[normalize(category)]||[normalize(category)];
  const filtered=productsCache.filter(p=>{const c=normalize(p.category?.name||p.category||'');return wanted.some(w=>c===w||c.includes(w)||normalize(p.name).includes(w));});
  grid.innerHTML=filtered.length?filtered.map(card).join():'<p class="helper">No products found in this category yet.</p>';
- // Category results must keep the same two-column mobile layout as New Arrivals.
- // Set the layout directly on the actual filtered grid so other page styles cannot collapse it.
+ // Category results use the same responsive product grid as the storefront.
  grid.classList.add('category-filtered-grid');
- grid.style.setProperty('display','grid','important');
- grid.style.setProperty('width','100%','important');
- grid.style.setProperty('grid-template-columns','repeat(2,minmax(0,1fr))','important');
- grid.style.setProperty('column-gap','12px','important');
- grid.style.setProperty('row-gap','21px','important');
  document.querySelectorAll('.product-grid [data-product]').forEach(el=>{const open=()=>openProduct(el.dataset.product);el.addEventListener('click',open);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}})});document.querySelectorAll('[data-wishlist]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();toggleWishlist(b.dataset.wishlist)}));
  const heading=document.querySelector('#new .section-heading h2');if(heading)heading.innerHTML=activeCategoryFilter?escapeHtml(category)+'<span>.</span>':'New arrivals<span>.</span>';
  document.querySelectorAll('.product-grid').forEach(el=>{if(el.id!=='productGrid')el.closest('.section')?.classList.toggle('category-filter-hidden',!!activeCategoryFilter)});
