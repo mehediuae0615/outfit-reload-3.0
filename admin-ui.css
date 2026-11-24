@@ -94,44 +94,54 @@ body.admin-body a:focus-visible,body.admin-body button:focus-visible{outline:3px
 @media(prefers-reduced-motion:reduce){body.admin-body *,body.admin-body *:before,body.admin-body *:after{transition:none!important;scroll-behavior:auto!important}}
 
 
-/* Keep the sidebar and its bottom utility area available while the page scrolls. */
-body.admin-body .admin-shell{align-items:start}
+/* Sidebar: keep the utility/footer area reachable during long scrolls. */
+body.admin-body .admin-shell{align-items:stretch;min-width:0;width:100%;max-width:100%}
 body.admin-body .sidebar{
-  position:sticky;
-  top:0;
-  align-self:start;
-  height:100vh;
-  height:100dvh;
-  min-height:0;
-  overflow-y:auto;
-  overscroll-behavior:contain;
-  display:flex;
-  flex-direction:column;
-  scrollbar-width:thin;
-  scrollbar-color:#596044 transparent;
+  position:sticky;top:0;align-self:start;height:100vh;height:100dvh;min-height:0;
+  overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;
+  scrollbar-width:thin;scrollbar-color:#596044 transparent;
 }
 body.admin-body .sidebar-bottom{
-  position:sticky;
-  bottom:0;
-  z-index:5;
-  margin-top:auto;
-  flex-shrink:0;
-  background:#1c2017;
-  box-shadow:0 -10px 18px #151712;
+  position:sticky;bottom:0;z-index:6;margin-top:auto;flex:0 0 auto;
+  background:#151712;box-shadow:0 -10px 18px #10130c;
 }
+
+/* Prevent the admin dashboard from becoming a narrow column on mobile. */
 @media(max-width:800px){
+  html,body.admin-body{width:100%;max-width:100%;min-width:0;overflow-x:hidden}
+  body.admin-body .admin-shell{display:grid;grid-template-columns:minmax(0,1fr);width:100%;max-width:100%;min-width:0}
+  body.admin-body .admin-main{display:block;width:100%;max-width:none;min-width:0;margin:0;padding:17px 13px 40px;box-sizing:border-box}
+  body.admin-body .admin-main>*{min-width:0;max-width:100%}
   body.admin-body .sidebar{
-    position:fixed;
-    top:0;
-    bottom:0;
-    left:-280px;
-    height:100vh;
-    height:100dvh;
-    max-height:100dvh;
-    overflow-y:auto;
-    z-index:1000;
-    transition:left .24s ease;
+    position:fixed;top:0;bottom:0;left:-280px;width:265px;max-width:85vw;
+    height:100vh;height:100dvh;max-height:100dvh;overflow-y:auto;z-index:1000;
+    transition:left .24s ease;align-self:auto;
   }
-  body.admin-body .sidebar.open{left:0}
-  body.admin-body .sidebar-bottom{position:sticky;bottom:0}
+  body.admin-body .sidebar.open{left:0;box-shadow:15px 0 45px #10130c70}
+  body.admin-body .sidebar-bottom{position:sticky;bottom:0;z-index:6;margin-top:auto;background:#151712}
+  body.admin-body #analytics .panel-heading{display:flex;flex-direction:column;align-items:stretch;gap:12px}
+  body.admin-body #analytics .analytics-toolbar{display:grid;grid-template-columns:minmax(0,1fr);justify-content:stretch;align-items:stretch;width:100%;gap:8px}
+  body.admin-body #analytics .analytics-toolbar label{margin:0}
+  body.admin-body #analytics .analytics-toolbar select{width:100%;max-width:100%;min-width:0}
+  body.admin-body #analytics .analytics-toolbar button{justify-self:start}
+  body.admin-body .analytics-grid{grid-template-columns:minmax(0,1fr);min-width:0;width:100%}
+  body.admin-body .analytics-card{width:100%;min-width:0;max-width:100%;overflow:hidden;box-sizing:border-box}
+  body.admin-body .analytics-bars{display:flex;width:100%;max-width:100%;min-width:0;gap:2px;overflow:hidden;box-sizing:border-box}
+  body.admin-body .analytics-bar-col{flex:1 1 0;min-width:0;overflow:visible;gap:5px}
+  body.admin-body .analytics-bar{width:min(100%,18px);max-width:100%}
+  body.admin-body .analytics-bar-label{font-size:8px;line-height:1;white-space:nowrap;max-width:100%;overflow:visible}
+  /* On 30-day charts, show only spaced date/value ticks instead of overlapping every day. */
+  body.admin-body .analytics-bar-col .analytics-bar-label,
+  body.admin-body .analytics-bar-col .analytics-bar-value{visibility:hidden}
+  body.admin-body .analytics-bar-col:nth-child(5n+1) .analytics-bar-label,
+  body.admin-body .analytics-bar-col:nth-child(5n+1) .analytics-bar-value,
+  body.admin-body .analytics-bar-col:last-child .analytics-bar-label,
+  body.admin-body .analytics-bar-col:last-child .analytics-bar-value{visibility:visible}
+  body.admin-body .analytics-bar-value{font-size:8px;line-height:1;white-space:nowrap}
+  body.admin-body .table-wrap{width:100%;max-width:100%;overflow-x:auto}
+}
+@media(max-width:390px){
+  body.admin-body .admin-top{width:100%;min-width:0}
+  body.admin-body .admin-user{min-width:0}
+  body.admin-body .analytics-bar-label{font-size:7px}
 }
