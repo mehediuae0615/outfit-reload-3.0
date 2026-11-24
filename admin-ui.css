@@ -1,74 +1,83 @@
-/* Outfit Reload 3.0 — Admin UI refresh. Scoped to admin only. */
-body.admin-body{--admin-ink:#211b17;--admin-brown:#654832;--admin-muted:#81766c;--admin-line:#e9e2d9;--admin-paper:#f7f5f1;background:#f5f3ef;color:var(--admin-ink)}
-body.admin-body .admin-shell{grid-template-columns:258px minmax(0,1fr);background:var(--admin-paper)}
-body.admin-body .sidebar{background:linear-gradient(180deg,#28211c 0%,#35271f 100%);padding:27px 17px 20px;border-right:1px solid #49372b;box-shadow:8px 0 30px #25180d0a}
-body.admin-body .admin-brand{margin:0 0 38px 7px;gap:12px;font-size:11px;letter-spacing:1.6px}
-body.admin-body .admin-brand .brand-mark{width:42px;height:42px;border:1px solid #b99a7c;border-radius:11px;background:#ffffff08;color:#f3e7d8;font-size:16px}
-body.admin-body .side-label{margin:23px 11px 10px;color:#b7a596;font-size:9px;font-weight:700;letter-spacing:1.6px}
-body.admin-body .side-link{display:flex;align-items:center;min-height:43px;padding:11px 13px;margin:3px 0;border:1px solid transparent;border-radius:9px;color:#e2d8ce;font-size:12px;font-weight:500;transition:background .18s,border-color .18s,transform .18s}
-body.admin-body .side-link:hover{background:#ffffff0d;border-color:#ffffff12;color:#fff;transform:translateX(2px)}
-body.admin-body .side-link.active{background:linear-gradient(100deg,#806044,#654832);border-color:#a47d5b;color:#fff;box-shadow:0 5px 14px #160e092e}
-body.admin-body .sidebar-bottom{padding:14px 12px;border:1px solid #ffffff16;border-radius:10px;background:#ffffff08;color:#d3c5b8;font-size:10px}
-body.admin-body .sidebar-bottom a{font-weight:700;color:#fff}
-body.admin-body .admin-main{max-width:1600px;padding:34px clamp(18px,3.2vw,52px) 60px}
+/* Outfit Reload 3.0 — Premium Admin Dashboard UI
+   UI-only stylesheet. Existing HTML, JavaScript, Supabase and features remain untouched. */
+body.admin-body{
+  --admin-ink:#171914;--admin-muted:#72766d;--admin-line:#e7e9df;--admin-paper:#f6f7f2;
+  --admin-lemon:#fff200;--admin-lime:#dfff00;--admin-chartreuse:#b7ff00;--admin-green:#c5e8bd;
+  background:var(--admin-paper);color:var(--admin-ink);font-family:Inter,'DM Sans',system-ui,sans-serif;
+}
+body.admin-body .admin-shell{grid-template-columns:258px minmax(0,1fr);background:var(--admin-paper);min-height:100vh}
+body.admin-body .sidebar{background:#151712;padding:27px 17px 20px;border-right:1px solid #272b20;box-shadow:8px 0 30px #10130c12;color:#f7f8f2}
+body.admin-body .admin-brand{margin:0 0 38px 7px;gap:12px;font-size:11px;letter-spacing:1.6px;color:#fff;font-weight:800}
+body.admin-body .admin-brand .brand-mark{width:42px;height:42px;border:1px solid var(--admin-lemon);border-radius:12px;background:var(--admin-lemon);color:#171914;font-size:16px;font-weight:900;box-shadow:0 0 22px #fff20024}
+body.admin-body .side-label{margin:23px 11px 10px;color:#a8ad9d;font-size:9px;font-weight:800;letter-spacing:1.7px}
+body.admin-body .side-link{display:flex;align-items:center;min-height:44px;padding:11px 13px;margin:3px 0;border:1px solid transparent;border-radius:10px;color:#dce0d3;font-size:12px;font-weight:600;transition:background .18s,border-color .18s,transform .18s,color .18s}
+body.admin-body .side-link:hover{background:#ffffff0d;border-color:#ffffff16;color:#fff;transform:translateX(2px)}
+body.admin-body .side-link.active{background:var(--admin-lemon);border-color:var(--admin-lemon);color:#171914;box-shadow:0 6px 18px #fff20020;font-weight:800}
+body.admin-body .sidebar-bottom{padding:14px 12px;border:1px solid #ffffff1a;border-radius:11px;background:#ffffff09;color:#d5dacb;font-size:10px}
+body.admin-body .sidebar-bottom a{font-weight:800;color:var(--admin-lemon)}
+body.admin-body .admin-main{max-width:1680px;padding:34px clamp(18px,3.2vw,52px) 60px}
 body.admin-body .admin-top{position:relative;min-height:74px;margin-bottom:26px;padding:0 0 20px;border-bottom:1px solid var(--admin-line)}
-body.admin-body .admin-top .eyebrow{font-size:9px;letter-spacing:1.8px;color:#9a7655;margin-bottom:7px}
-body.admin-body .admin-top h1{font-family:'DM Sans',sans-serif;font-size:27px;font-weight:700;letter-spacing:-.8px;color:#2a211b}
-body.admin-body .admin-user{gap:11px;font-size:11px;line-height:1.5}
-body.admin-body .admin-user .avatar{width:39px;height:39px;border:1px solid #e3d6c8;background:#eee5da;color:#684b35;font-weight:700}
-body.admin-body .admin-user .btn{min-height:36px;padding:10px 13px;border-radius:8px;font-size:9px;letter-spacing:1px}
+body.admin-body .admin-top .eyebrow{font-size:9px;letter-spacing:1.8px;color:#7d861b;margin-bottom:7px;font-weight:800}
+body.admin-body .admin-top h1{font-family:'DM Sans',sans-serif;font-size:28px;font-weight:800;letter-spacing:-.9px;color:#171914}
+body.admin-body .admin-user{gap:11px;font-size:11px;line-height:1.5;color:#34382e}
+body.admin-body .admin-user .avatar{width:39px;height:39px;border:1px solid #dce5bd;background:var(--admin-green);color:#24351d;font-weight:800}
+body.admin-body .admin-user .btn{min-height:36px;padding:10px 13px;border-radius:9px;font-size:9px;letter-spacing:1px}
 body.admin-body .stats{gap:15px;margin-bottom:22px}
-body.admin-body .stat-card{position:relative;overflow:hidden;min-height:125px;padding:19px 20px;border:1px solid var(--admin-line);border-radius:13px;background:linear-gradient(145deg,#fff 0%,#fcfbf9 100%);box-shadow:0 5px 18px #30211608;transition:transform .2s,box-shadow .2s}
-body.admin-body .stat-card:hover{transform:translateY(-2px);box-shadow:0 10px 24px #30211610}
-body.admin-body .stat-card:after{content:"";position:absolute;right:-20px;top:-25px;width:90px;height:90px;border-radius:50%;background:#9a765510}
-body.admin-body .stat-card span{font-size:11px;font-weight:600;color:#74685e}
-body.admin-body .stat-card strong{position:relative;z-index:1;margin:13px 0 5px;font:700 28px 'DM Sans',sans-serif;letter-spacing:-.8px;color:#30241d}
-body.admin-body .stat-card small{font-size:10px;color:#988d82}
-body.admin-body .admin-panel{margin-bottom:19px;padding:23px;border:1px solid var(--admin-line);border-radius:13px;background:#fff;box-shadow:0 5px 20px #30211607;scroll-margin-top:18px}
+body.admin-body .stat-card{position:relative;overflow:hidden;min-height:125px;padding:19px 20px;border:1px solid var(--admin-line);border-radius:15px;background:#fff;box-shadow:0 5px 18px #252a1808;transition:transform .2s,box-shadow .2s}
+body.admin-body .stat-card:hover{transform:translateY(-2px);box-shadow:0 12px 26px #252a1812}
+body.admin-body .stat-card:after{content:"";position:absolute;right:-23px;top:-29px;width:100px;height:100px;border-radius:50%;background:var(--admin-lime);opacity:.22}
+body.admin-body .stat-card span{font-size:11px;font-weight:700;color:#73786c}
+body.admin-body .stat-card strong{position:relative;z-index:1;margin:13px 0 5px;font:800 29px 'DM Sans',sans-serif;letter-spacing:-.9px;color:#171914}
+body.admin-body .stat-card small{font-size:10px;color:#858a7d}
+body.admin-body .admin-panel{margin-bottom:19px;padding:23px;border:1px solid var(--admin-line);border-radius:15px;background:#fff;box-shadow:0 5px 20px #252a1807;scroll-margin-top:18px}
 body.admin-body .panel-heading{gap:15px;margin-bottom:20px}
-body.admin-body .panel-heading .eyebrow{font-size:9px;letter-spacing:1.6px;color:#a17d5c}
-body.admin-body .panel-heading h2{font:700 21px 'DM Sans',sans-serif;letter-spacing:-.45px;color:#2c231d}
-body.admin-body .panel-heading .helper{margin-top:6px;max-width:650px}
-body.admin-body .btn{border-radius:8px;transition:transform .18s,background .18s,box-shadow .18s}
+body.admin-body .panel-heading .eyebrow{font-size:9px;letter-spacing:1.6px;color:#818b14;font-weight:800}
+body.admin-body .panel-heading h2{font:800 21px 'DM Sans',sans-serif;letter-spacing:-.5px;color:#202319}
+body.admin-body .panel-heading .helper{margin-top:6px;max-width:650px;color:#7b8075}
+body.admin-body .btn{border-radius:9px;transition:transform .18s,background .18s,box-shadow .18s}
 body.admin-body .btn:hover{transform:translateY(-1px)}
-body.admin-body .btn-dark{background:#302219;box-shadow:0 4px 10px #30221918}
-body.admin-body .btn-dark:hover{background:#725239;box-shadow:0 6px 15px #30221920}
-body.admin-body .btn-light{border:1px solid #e7dfd5;border-radius:8px;background:#faf8f5;color:#49392d}
-body.admin-body input:not([type=checkbox]):not([type=radio]),body.admin-body select,body.admin-body textarea{border-radius:8px!important;border-color:#e4ddd4!important;outline:none;transition:border-color .15s,box-shadow .15s}
-body.admin-body input:focus,body.admin-body select:focus,body.admin-body textarea:focus{border-color:#9a7655!important;box-shadow:0 0 0 3px #9a76551c!important}
-body.admin-body .table-wrap{border:1px solid #eee8e1;border-radius:10px;background:#fff}
+body.admin-body .btn-dark{background:#171914;color:#fff;border:1px solid #171914;box-shadow:0 4px 10px #17191418}
+body.admin-body .btn-dark:hover{background:#303629;box-shadow:0 6px 15px #17191420}
+body.admin-body .btn-light{border:1px solid #e3e6d9;border-radius:9px;background:#f8f9f4;color:#30352a}
+body.admin-body input:not([type=checkbox]):not([type=radio]),body.admin-body select,body.admin-body textarea{border-radius:9px!important;border-color:#e1e5d8!important;outline:none;transition:border-color .15s,box-shadow .15s;background-color:#fff}
+body.admin-body input:focus,body.admin-body select:focus,body.admin-body textarea:focus{border-color:#a9c900!important;box-shadow:0 0 0 3px #dfff0038!important}
+body.admin-body .table-wrap{border:1px solid #e7eadd;border-radius:12px;background:#fff;overflow-x:auto}
 body.admin-body table{font-size:11px}
-body.admin-body th{padding:13px 12px;background:#faf8f5;color:#786d63;font-size:9px;letter-spacing:1px;white-space:nowrap}
-body.admin-body td{padding:13px 12px;color:#453a32;font-size:11px}
-body.admin-body tbody tr:hover{background:#fcfaf7}
-body.admin-body td,body.admin-body th{border-bottom:1px solid #f0ebe5}
-body.admin-body .pill{border-radius:20px;background:#f1e9df;color:#72543c;font-weight:700}
-body.admin-body .analytics-card,body.admin-body .cms-group,body.admin-body .cms-page-group{border:1px solid #ece5dc;border-radius:11px;box-shadow:0 3px 12px #30211605}
-body.admin-body .analytics-kpi{border:1px solid #eee7df;border-radius:10px;background:#faf8f5}
-body.admin-body .analytics-kpi strong{font-family:'DM Sans',sans-serif;font-size:22px;color:#30241d}
-body.admin-body .customer-toolbar input,body.admin-body .customer-toolbar select{border-radius:8px}
-body.admin-body .modal{border:1px solid #e9e0d5;border-radius:16px;box-shadow:0 25px 80px #130d0870}
-body.admin-body .login-screen{background:radial-gradient(circle at 15% 10%,#eee4d8 0,transparent 35%),linear-gradient(135deg,#f7f4ef,#ece5dc)}
-body.admin-body .login-card{border:1px solid #e8dfd4;border-radius:18px;box-shadow:0 22px 70px #30211616}
-body.admin-body .login-card .brand-mark{border-radius:10px}
+body.admin-body th{padding:13px 12px;background:#f5f7ed;color:#69705d;font-size:9px;letter-spacing:1px;white-space:nowrap}
+body.admin-body td{padding:13px 12px;color:#414638;font-size:11px}
+body.admin-body tbody tr:hover{background:#fbfdec}
+body.admin-body td,body.admin-body th{border-bottom:1px solid #edf0e5}
+body.admin-body .pill{border-radius:20px;background:var(--admin-green);color:#28502b;font-weight:800}
+body.admin-body .analytics-card,body.admin-body .cms-group,body.admin-body .cms-page-group{border:1px solid #e7eadd;border-radius:13px;box-shadow:0 3px 12px #252a1805;background:#fff}
+body.admin-body .analytics-kpi{border:1px solid #e8ecdE;border-radius:11px;background:#f8faef}
+body.admin-body .analytics-kpi strong{font-family:'DM Sans',sans-serif;font-size:22px;color:#202319}
+body.admin-body .customer-toolbar input,body.admin-body .customer-toolbar select{border-radius:9px}
+body.admin-body .modal{border:1px solid #e7eadd;border-radius:17px;box-shadow:0 25px 80px #10130c70}
+body.admin-body .login-screen{background:radial-gradient(circle at 15% 10%,#f0f6c9 0,transparent 35%),linear-gradient(135deg,#f8f9f3,#edf1e4)}
+body.admin-body .login-card{border:1px solid #e5e9d9;border-radius:19px;box-shadow:0 22px 70px #252a1816;background:#fff}
+body.admin-body .login-card .brand-mark{border-radius:11px;background:var(--admin-lemon);color:#171914}
+body.admin-body .status-dot{background:#8bd77a;box-shadow:0 0 0 4px #8bd77a20}
+/* Consistent status and accent treatments */
+body.admin-body .btn:not(.btn-dark):hover{border-color:#c2d900}
+body.admin-body a:focus-visible,body.admin-body button:focus-visible{outline:3px solid #dfff00;outline-offset:2px}
 @media(max-width:800px){
  body.admin-body .admin-shell{grid-template-columns:minmax(0,1fr)}
  body.admin-body .sidebar{left:-280px;width:265px;max-width:85vw;padding-top:22px}
- body.admin-body .sidebar.open{left:0;box-shadow:15px 0 45px #160e0950}
+ body.admin-body .sidebar.open{left:0;box-shadow:15px 0 45px #10130c70}
  body.admin-body .admin-main{padding:17px 13px 40px}
  body.admin-body .admin-top{min-height:65px;gap:8px;padding-bottom:15px;margin-bottom:17px}
  body.admin-body .admin-top h1{font-size:22px}
  body.admin-body .admin-top .eyebrow{font-size:8px;letter-spacing:1.2px}
- body.admin-body .admin-menu{width:36px;height:36px;display:grid;place-items:center;border:1px solid #e5ddd3;border-radius:9px;background:#fff;color:#3b2c21;font-size:18px}
+ body.admin-body .admin-menu{width:38px;height:38px;display:grid;place-items:center;border:1px solid #e1e5d8;border-radius:10px;background:#fff;color:#171914;font-size:18px}
  body.admin-body .admin-user{gap:7px}
  body.admin-body .admin-user .avatar{width:34px;height:34px}
  body.admin-body .admin-user .btn{padding:9px 10px;font-size:8px}
  body.admin-body .stats{gap:9px;margin-bottom:14px}
- body.admin-body .stat-card{min-height:106px;padding:14px;border-radius:11px}
+ body.admin-body .stat-card{min-height:106px;padding:14px;border-radius:12px}
  body.admin-body .stat-card strong{font-size:23px;margin:10px 0 4px}
  body.admin-body .stat-card span{font-size:10px}
  body.admin-body .stat-card small{font-size:9px}
- body.admin-body .admin-panel{padding:16px 13px;margin-bottom:13px;border-radius:11px}
+ body.admin-body .admin-panel{padding:16px 13px;margin-bottom:13px;border-radius:12px}
  body.admin-body .panel-heading{align-items:flex-start;gap:10px;margin-bottom:15px}
  body.admin-body .panel-heading h2{font-size:18px}
  body.admin-body .panel-heading .btn{padding:11px 10px;font-size:8px;white-space:nowrap}
@@ -85,15 +94,44 @@ body.admin-body .login-card .brand-mark{border-radius:10px}
 @media(prefers-reduced-motion:reduce){body.admin-body *,body.admin-body *:before,body.admin-body *:after{transition:none!important;scroll-behavior:auto!important}}
 
 
-/* Mobile admin navigation + readable analytics chart */
+/* Keep the sidebar and its bottom utility area available while the page scrolls. */
+body.admin-body .admin-shell{align-items:start}
+body.admin-body .sidebar{
+  position:sticky;
+  top:0;
+  align-self:start;
+  height:100vh;
+  height:100dvh;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  display:flex;
+  flex-direction:column;
+  scrollbar-width:thin;
+  scrollbar-color:#596044 transparent;
+}
+body.admin-body .sidebar-bottom{
+  position:sticky;
+  bottom:0;
+  z-index:5;
+  margin-top:auto;
+  flex-shrink:0;
+  background:#1c2017;
+  box-shadow:0 -10px 18px #151712;
+}
 @media(max-width:800px){
- body.admin-body .sidebar{z-index:1200;position:fixed;top:0;bottom:0;height:100dvh;overflow-y:auto;overscroll-behavior:contain;transition:left .24s ease}
- body.admin-body .sidebar.open{left:0}
- body.admin-body .admin-main{min-width:0}
- body.admin-body .analytics-card{min-width:0;overflow:hidden}
- body.admin-body .analytics-bars{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:3px;overflow:hidden;min-width:0}
- body.admin-body .analytics-bar-col{min-width:0;overflow:visible}
- body.admin-body .analytics-bar-label{font-size:9px;line-height:1.1;white-space:nowrap}
- body.admin-body .analytics-bar-label.is-hidden{visibility:hidden}
- body.admin-body .analytics-bar-value{font-size:8px;line-height:1;min-height:9px;max-width:100%;overflow:hidden;text-overflow:clip}
+  body.admin-body .sidebar{
+    position:fixed;
+    top:0;
+    bottom:0;
+    left:-280px;
+    height:100vh;
+    height:100dvh;
+    max-height:100dvh;
+    overflow-y:auto;
+    z-index:1000;
+    transition:left .24s ease;
+  }
+  body.admin-body .sidebar.open{left:0}
+  body.admin-body .sidebar-bottom{position:sticky;bottom:0}
 }
