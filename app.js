@@ -185,10 +185,8 @@ function applyCategoryFilter(category){
  const aliases={shoe:['shoe','shoes','footwear'],watch:['watch','watches','accessories'],sweatshirt:['sweatshirt','sweepshirt','sweatshirts','hoodie'],tshirt:['tshirt','tshirts','tee','tees'],shirts:['shirt','shirts'],pants:['pant','pants','jeans','trousers']};
  const wanted=aliases[normalize(category)]||[normalize(category)];
  const filtered=productsCache.filter(p=>{const c=normalize(p.category?.name||p.category||'');return wanted.some(w=>c===w||c.includes(w)||normalize(p.name).includes(w));});
- grid.innerHTML=filtered.length?filtered.map(card).join():'<p class="helper">No products found in this category yet.</p>';
- // Category results use the same responsive product grid as the storefront.
- grid.classList.add('category-filtered-grid');
- document.querySelectorAll('.product-grid [data-product]').forEach(el=>{const open=()=>openProduct(el.dataset.product);el.addEventListener('click',open);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}})});document.querySelectorAll('[data-wishlist]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();toggleWishlist(b.dataset.wishlist)}));
+ grid.innerHTML=filtered.length?filtered.map(card).join(''):'<p class="helper">No products found in this category yet.</p>';
+ grid.querySelectorAll('[data-product]').forEach(el=>{if(el.dataset.productBound)return;el.dataset.productBound='1';const open=()=>openProduct(el.dataset.product);el.addEventListener('click',e=>{if(e.target.closest('[data-wishlist]'))return;open()});el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}})});grid.querySelectorAll('[data-wishlist]').forEach(b=>{if(b.dataset.wishBound)return;b.dataset.wishBound='1';b.addEventListener('click',e=>{e.stopPropagation();toggleWishlist(b.dataset.wishlist)})});
  const heading=document.querySelector('#new .section-heading h2');if(heading)heading.innerHTML=activeCategoryFilter?escapeHtml(category)+'<span>.</span>':'New arrivals<span>.</span>';
  document.querySelectorAll('.product-grid').forEach(el=>{if(el.id!=='productGrid')el.closest('.section')?.classList.toggle('category-filter-hidden',!!activeCategoryFilter)});
  if(activeCategoryFilter){$('new').scrollIntoView({behavior:'smooth',block:'start'});}

@@ -538,20 +538,26 @@ body:not(.admin-body) #shop-categories .category-card:before{z-index:2}
 body:not(.admin-body) #shop-categories .category-card b{position:relative;z-index:3}
 
 
-/* Category-filtered products: enforce the two-column mobile product grid. */
+/* FINAL CATEGORY FILTER GRID FIX — keep product cards in two columns on phones */
 @media (max-width: 700px) {
-  body:not(.admin-body) #new #productGrid.category-filtered-grid {
+  body:not(.admin-body) #new #productGrid.product-grid {
     display: grid !important;
-    width: 100% !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-auto-flow: row !important;
+    align-items: start !important;
+    justify-items: stretch !important;
     column-gap: 12px !important;
     row-gap: 21px !important;
-    align-items: start !important;
+    width: 100% !important;
   }
-  body:not(.admin-body) #new #productGrid.category-filtered-grid > .product-card {
+  body:not(.admin-body) #new #productGrid.product-grid > .product-card {
     display: block !important;
-    width: auto !important;
+    grid-column: auto !important;
+    width: 100% !important;
     min-width: 0 !important;
     max-width: none !important;
+  }
+  body:not(.admin-body) #new #productGrid.product-grid > .helper {
+    grid-column: 1 / -1 !important;
   }
 }
